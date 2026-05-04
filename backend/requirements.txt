@@ -10,3 +10,4 @@ pydantic-settings
 python-dotenv
 gunicorn
 psycopg2-binary
+supabase

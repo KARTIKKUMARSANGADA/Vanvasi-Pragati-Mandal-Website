@@ -1,12 +1,8 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.api.routes import auth, projects, gallery, contact
-from app.middleware.cors import setup_cors
-from app.db.database import Base, engine
-from app.db.session import SessionLocal
-from app.db import models
 from app.core.config import settings
-from app.core import security
 import os
 import bcrypt
 
@@ -14,15 +10,18 @@ import bcrypt
 if not hasattr(bcrypt, "__about__"):
     bcrypt.__about__ = type("About", (object,), {"__version__": bcrypt.__version__})
 
-# Create tables
-Base.metadata.create_all(bind=engine)
-
 app = FastAPI(title=settings.PROJECT_NAME)
 
-# Middleware
-setup_cors(app)
+# CORS Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Adjust this for production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# Static Files
+# Static Files (Local fallback if needed, though we use Supabase Storage)
 UPLOAD_DIR = os.path.join(os.getcwd(), "app/uploads")
 if not os.path.exists(UPLOAD_DIR):
     os.makedirs(UPLOAD_DIR)
@@ -37,18 +36,8 @@ app.include_router(contact.router, prefix="/api/contact", tags=["Contact"])
 
 @app.get("/")
 def root():
-    return {"message": "NGO Website API is running"}
+    return {"message": "NGO Website FastAPI (Supabase) is running"}
 
-@app.on_event("startup")
-def seed_admin():
-    db = SessionLocal()
-    try:
-        admin_exists = db.query(models.Admin).filter(models.Admin.username == settings.ADMIN_USERNAME).first()
-        if not admin_exists:
-            hashed_password = security.get_password_hash(settings.ADMIN_PASSWORD)
-            admin = models.Admin(username=settings.ADMIN_USERNAME, password=hashed_password)
-            db.add(admin)
-            db.commit()
-            print(f"Admin user {settings.ADMIN_USERNAME} created.")
-    finally:
-        db.close()
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
