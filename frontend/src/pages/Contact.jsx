@@ -23,14 +23,20 @@ const Contact = () => {
 
     setStatus('sending');
     try {
-      await api.post('/contact/', formData);
+      console.log("Sending Contact Form Data:", formData);
+      const response = await api.post('/contact/', formData);
+      console.log("Contact API Response:", response.data);
       setStatus('success');
       setFormData({ name: '', email: '', phone: '', message: '' });
       setTimeout(() => setStatus(null), 3000);
     } catch (error) {
-      console.error("Failed to send message:", error);
+      console.error("Failed to send message. Details:", JSON.stringify(error.response?.data || error.message));
       setStatus('error');
-      alert("Failed to send message. Please try again later.");
+      if (error.response?.status === 422) {
+          alert(`Validation Error: ${JSON.stringify(error.response.data.detail)}`);
+      } else {
+          alert("Failed to send message. Please try again later.");
+      }
       setTimeout(() => setStatus(null), 3000);
     }
   };

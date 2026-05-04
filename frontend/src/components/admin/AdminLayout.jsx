@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Layout, ImageIcon, Briefcase, LogOut, Menu, X, MessageSquare } from 'lucide-react';
 
+import ErrorBoundary from '../common/ErrorBoundary';
+
 const AdminLayout = ({ children, title }) => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -70,7 +72,9 @@ const AdminLayout = ({ children, title }) => {
                         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">{title}</h1>
                     </div>
                 )}
-                {children}
+                <ErrorBoundary>
+                    {children}
+                </ErrorBoundary>
             </div>
         </div>
     );

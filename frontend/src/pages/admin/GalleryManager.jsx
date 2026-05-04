@@ -178,10 +178,16 @@ const GalleryManager = () => {
 
     const fetchImages = async () => {
         try {
-            const { data } = await api.get('/gallery');
-            setImages(data);
+            const response = await api.get('/gallery');
+            console.log('GET /gallery response:', response.data);
+            if (Array.isArray(response.data)) {
+                setImages(response.data);
+            } else {
+                console.error('Expected array for gallery but got:', response.data);
+                setImages([]);
+            }
         } catch (err) {
-            console.error('Failed to fetch gallery', err);
+            console.error('Failed to fetch gallery. Details:', JSON.stringify(err.response?.data || err.message));
             showToast('Failed to load gallery', 'error');
         } finally {
             setLoading(false);
@@ -362,12 +368,12 @@ const GalleryManager = () => {
                                         </div>
                                         
                                         <div className="translate-y-[10px] opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-75">
-                                            <p className="text-white font-medium truncate text-sm mb-1">{img.image_url.split('/').pop()}</p>
+                                            <p className="text-white font-medium truncate text-sm mb-1">{String(img.image_url || '').split('/').pop()}</p>
                                             <div className="flex items-center gap-2 text-white/70 text-xs">
                                                 <Calendar size={12} />
-                                                <span>{new Date(img.created_at).toLocaleDateString()}</span>
+                                                <span>{new Date(img.created_at || Date.now()).toLocaleDateString()}</span>
                                                 {img.category && (
-                                                    <span className="bg-white/20 px-2 py-0.5 rounded text-[10px] ml-auto">{img.category}</span>
+                                                    <span className="bg-white/20 px-2 py-0.5 rounded text-[10px] ml-auto">{String(img.category)}</span>
                                                 )}
                                             </div>
                                         </div>

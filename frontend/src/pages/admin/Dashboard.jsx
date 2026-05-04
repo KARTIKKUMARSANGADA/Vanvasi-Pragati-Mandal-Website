@@ -16,13 +16,19 @@ const Dashboard = () => {
                     api.get('/projects/'),
                     api.get('/gallery/')
                 ]);
-                setProjects(projRes.data.slice(0, 5)); // Only show top 5 recent projects
+                console.log('Dashboard Projects:', projRes.data);
+                console.log('Dashboard Gallery:', galleryRes.data);
+                
+                const projectsData = Array.isArray(projRes.data) ? projRes.data : [];
+                const galleryData = Array.isArray(galleryRes.data) ? galleryRes.data : [];
+
+                setProjects(projectsData.slice(0, 5)); 
                 setStats({
-                    projects: projRes.data.length,
-                    images: galleryRes.data.length
+                    projects: projectsData.length,
+                    images: galleryData.length
                 });
             } catch (err) {
-                console.error('Failed to fetch dashboard data', err);
+                console.error('Failed to fetch dashboard data. Details:', JSON.stringify(err.response?.data || err.message));
             } finally {
                 setLoading(false);
             }
@@ -102,12 +108,12 @@ const Dashboard = () => {
                                     projects.map(project => (
                                         <tr key={project.id} className="hover:bg-slate-50 transition-colors group cursor-default">
                                             <td className="px-6 py-4 font-bold text-slate-900 group-hover:text-primary transition-colors">
-                                                {project.title}
+                                                {String(project.title || 'Untitled')}
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                <span className="px-3 py-1 bg-green-50 text-primary text-xs font-bold rounded-full">{project.category}</span>
+                                                <span className="px-3 py-1 bg-green-50 text-primary text-xs font-bold rounded-full">{String(project.category || 'N/A')}</span>
                                             </td>
-                                            <td className="px-6 py-4 text-slate-500 font-medium text-right">{project.date}</td>
+                                            <td className="px-6 py-4 text-slate-500 font-medium text-right">{String(project.date || 'N/A')}</td>
                                         </tr>
                                     ))
                                 )}

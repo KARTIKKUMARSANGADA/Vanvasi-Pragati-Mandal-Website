@@ -10,10 +10,16 @@ const AdminContacts = () => {
 
   const fetchMessages = async () => {
     try {
-      const { data } = await api.get('/contact/');
-      setMessages(data);
+      const response = await api.get('/contact/');
+      console.log('GET /contact/ response:', response.data);
+      if (Array.isArray(response.data)) {
+        setMessages(response.data);
+      } else {
+        console.error('Expected array for messages but got:', response.data);
+        setMessages([]);
+      }
     } catch (error) {
-      console.error('Failed to fetch messages', error);
+      console.error('Failed to fetch messages. Details:', JSON.stringify(error.response?.data || error.message));
     } finally {
       setLoading(false);
     }
@@ -68,14 +74,14 @@ const AdminContacts = () => {
                 ) : (
                   messages.map((msg) => (
                     <tr key={msg.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="p-4 px-6 font-semibold text-slate-900">{msg.name}</td>
+                      <td className="p-4 px-6 font-semibold text-slate-900">{String(msg.name || 'Anonymous')}</td>
                       <td className="p-4 px-6">
                         <div className="flex flex-col gap-1 text-sm">
-                          <span className="flex items-center gap-2"><Mail size={14} className="text-slate-400"/> {msg.email}</span>
-                          <span className="flex items-center gap-2"><Phone size={14} className="text-slate-400"/> {msg.phone}</span>
+                          <span className="flex items-center gap-2"><Mail size={14} className="text-slate-400"/> {String(msg.email || 'No Email')}</span>
+                          <span className="flex items-center gap-2"><Phone size={14} className="text-slate-400"/> {String(msg.phone || 'No Phone')}</span>
                         </div>
                       </td>
-                      <td className="p-4 px-6 text-sm text-slate-500">{formatDate(msg.created_at)}</td>
+                      <td className="p-4 px-6 text-sm text-slate-500">{formatDate(msg.created_at || new Date())}</td>
                       <td className="p-4 px-6 text-right">
                         <div className="flex justify-end gap-2">
                           <button
