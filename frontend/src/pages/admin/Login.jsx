@@ -22,11 +22,35 @@ const Login = () => {
         setLoading(true);
         setError('');
         try {
-            const { data } = await api.post('/auth/login', { username: email, password });
-            localStorage.setItem('adminInfo', JSON.stringify(data));
+            // FastAPI OAuth2PasswordRequestForm expects form-urlencoded data
+            const formData = new URLSearchParams();
+            formData.append('username', email);
+            formData.append('password', password);
+
+            const response = await api.post('/auth/login', formData, {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            });
+            
+            console.log('Login success:', response.data);
+            localStorage.setItem('adminInfo', JSON.stringify(response.data));
             navigate('/admin/dashboard');
         } catch (err) {
-            setError(err.response?.data?.detail || 'Invalid email or password');
+            console.error('Login error:', err.response?.data || err.message);
+            
+            // Extract error message safely to avoid rendering objects in JSX
+            let errorMsg = 'Invalid email or password';
+            if (err.response?.data?.detail) {
+                if (typeof err.response.data.detail === 'string') {
+                    errorMsg = err.response.data.detail;
+                } else if (Array.isArray(err.response.data.detail)) {
+                    errorMsg = err.response.data.detail[0]?.msg || JSON.stringify(err.response.data.detail);
+                } else {
+                    errorMsg = JSON.stringify(err.response.data.detail);
+                }
+            }
+            setError(errorMsg);
         } finally {
             setLoading(false);
         }
