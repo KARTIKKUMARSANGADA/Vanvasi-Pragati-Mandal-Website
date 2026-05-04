@@ -123,7 +123,13 @@ const AdminProjects = () => {
                                     <tr key={project.id} className="hover:bg-slate-50 transition-colors">
                                         <td className="px-4 sm:px-6 py-4 font-bold text-slate-900">{project.title}</td>
                                         <td className="px-4 sm:px-6 py-4 text-center">
-                                            <span className="px-3 py-1 bg-green-50 text-primary text-xs font-bold rounded-full">{project.category}</span>
+                                            <div className="flex flex-wrap justify-center gap-1">
+                                                {String(project.category || 'N/A').split(',').map((cat, i) => (
+                                                    <span key={i} className="px-2 py-0.5 bg-green-50 text-primary text-[10px] font-bold rounded-full border border-green-100 uppercase tracking-tight">
+                                                        {cat.trim()}
+                                                    </span>
+                                                ))}
+                                            </div>
                                         </td>
                                         <td className="px-4 sm:px-6 py-4 text-slate-500 font-medium text-right">{project.date}</td>
                                         <td className="px-4 sm:px-6 py-4">

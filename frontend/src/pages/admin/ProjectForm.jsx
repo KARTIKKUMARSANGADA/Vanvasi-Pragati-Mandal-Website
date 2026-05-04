@@ -86,6 +86,8 @@ const ProjectForm = () => {
                 formData[key].forEach(point => {
                     if (point.trim()) data.append('impact_points', point.trim());
                 });
+            } else if (key === 'category') {
+                data.append(key, formData[key].trim());
             } else {
                 data.append(key, formData[key]);
             }
@@ -150,18 +152,15 @@ const ProjectForm = () => {
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">Category</label>
-                                <select
+                                <input
+                                    type="text"
                                     name="category"
+                                    required
                                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary focus:outline-none"
                                     value={formData.category}
                                     onChange={handleChange}
-                                >
-                                    <option>Education</option>
-                                    <option>Health</option>
-                                    <option>Government Work</option>
-                                    <option>Infrastructure</option>
-                                    <option>Social</option>
-                                </select>
+                                    placeholder="e.g. Education, Health"
+                                />
                             </div>
                         </div>
 

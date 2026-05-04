@@ -111,7 +111,13 @@ const Dashboard = () => {
                                                 {String(project.title || 'Untitled')}
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                <span className="px-3 py-1 bg-green-50 text-primary text-xs font-bold rounded-full">{String(project.category || 'N/A')}</span>
+                                                <div className="flex flex-wrap justify-center gap-1">
+                                                    {String(project.category || 'N/A').split(',').map((cat, i) => (
+                                                        <span key={i} className="px-2 py-0.5 bg-green-50 text-primary text-[10px] font-bold rounded-full border border-green-100">
+                                                            {cat.trim()}
+                                                        </span>
+                                                    ))}
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4 text-slate-500 font-medium text-right">{String(project.date || 'N/A')}</td>
                                         </tr>

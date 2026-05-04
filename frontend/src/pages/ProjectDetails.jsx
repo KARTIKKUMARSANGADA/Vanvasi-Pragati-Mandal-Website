@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Calendar, MapPin, ArrowLeft, CheckCircle2, Info } from 'lucide-react';
 import api from '../api/axios';
+import ImageGallery from '../components/ImageGallery';
 
 const ProjectDetails = () => {
   const { id } = useParams();
@@ -45,7 +46,7 @@ const ProjectDetails = () => {
       {/* Hero Section */}
       <div className="relative h-[50vh] md:h-[60vh] overflow-hidden">
         <img 
-          src={project.images[0] ? `${project.images[0].image_url}` : 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80'} 
+          src={project.main_image_url || project.images?.[0]?.image_url || 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80'} 
           alt={project.title} 
           className="w-full h-full object-cover"
         />
@@ -63,8 +64,12 @@ const ProjectDetails = () => {
               >
                 <ArrowLeft size={18} /> Back to Projects
               </Link>
-              <div className="inline-block bg-primary text-white text-sm font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4 shadow-lg shadow-green-500/30">
-                {String(project.category || 'N/A')}
+              <div className="flex flex-wrap gap-2 mb-4">
+                {String(project.category || 'General').split(',').map((cat, i) => (
+                  <span key={i} className="bg-primary text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg shadow-green-500/30">
+                    {cat.trim()}
+                  </span>
+                ))}
               </div>
               <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-4 tracking-tight drop-shadow-md">
                 {String(project.title || 'Untitled Project')}
@@ -111,13 +116,7 @@ const ProjectDetails = () => {
               className="bg-white p-8 md:p-10 rounded-3xl shadow-xl border border-slate-100"
             >
               <h2 className="text-2xl font-bold text-slate-900 mb-8">Image Gallery</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {project.images.map((img, idx) => (
-                  <div key={idx} className="h-48 rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-                    <img src={`${img.image_url}`} alt={`Gallery ${idx}`} className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
-                  </div>
-                ))}
-              </div>
+              <ImageGallery images={project.images} />
             </motion.div>
           </div>
 

@@ -21,6 +21,7 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
     const [existingImages, setExistingImages] = useState([]);
     const [deletedImages, setDeletedImages] = useState([]);
     const [gallerySelections, setGallerySelections] = useState({ existing: [], new: [] });
+    const [mainImageSelection, setMainImageSelection] = useState({ type: null, identifier: null });
 
     useEffect(() => {
         if (isOpen) {
@@ -35,12 +36,15 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
                     impact_points: project.impact_points || [],
                 });
                 setExistingImages(project.images ? project.images.map(img => img.image_url) : []);
-                const existingGalleryUrls = project.images ? project.images.filter(img => img.is_gallery).map(img => img.image_url) : [];
-                setGallerySelections({ existing: existingGalleryUrls, new: [] });
+                const existingMain = project.images ? project.images.find(img => img.is_main) : null;
+                setMainImageSelection({ 
+                    type: existingMain ? 'existing' : null, 
+                    identifier: existingMain ? existingMain.image_url : null 
+                });
             } else {
                 setFormData({
                     title: '',
-                    category: 'Education',
+                    category: '',
                     description: '',
                     full_description: '',
                     location: '',
@@ -49,6 +53,7 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
                 });
                 setExistingImages([]);
                 setGallerySelections({ existing: [], new: [] });
+                setMainImageSelection({ type: null, identifier: null });
             }
             setImages([]);
             setPreviewImages([]);
@@ -97,6 +102,10 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
         }));
     };
 
+    const handleMainImageToggle = (type, identifier) => {
+        setMainImageSelection({ type, identifier });
+    };
+
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
         if (totalImages + files.length > MAX_IMAGES) {
@@ -117,6 +126,9 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
                 ...prev,
                 existing: prev.existing.filter(imgUrl => imgUrl !== url)
             }));
+            if (mainImageSelection.identifier === url) {
+                setMainImageSelection({ type: null, identifier: null });
+            }
         }
     };
 
@@ -133,6 +145,14 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
                 ...prev,
                 new: prev.new.filter(i => i !== index).map(i => i > index ? i - 1 : i)
             }));
+
+            if (mainImageSelection.type === 'new') {
+                if (mainImageSelection.identifier === index) {
+                    setMainImageSelection({ type: null, identifier: null });
+                } else if (mainImageSelection.identifier > index) {
+                    setMainImageSelection(prev => ({ ...prev, identifier: prev.identifier - 1 }));
+                }
+            }
         }
     };
 
@@ -146,6 +166,8 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
                 formData[key].forEach(point => {
                     if (point.trim()) data.append('impact_points', point.trim());
                 });
+            } else if (key === 'category') {
+                data.append(key, formData[key].trim());
             } else {
                 data.append(key, formData[key]);
             }
@@ -166,6 +188,12 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
         gallerySelections.new.forEach(idx => {
             data.append('gallery_new_indices', idx);
         });
+
+        if (mainImageSelection.type === 'existing') {
+            data.append('main_image_url', mainImageSelection.identifier);
+        } else if (mainImageSelection.type === 'new') {
+            data.append('main_image_index', mainImageSelection.identifier);
+        }
 
         try {
             if (isEdit) {
@@ -225,13 +253,7 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">Category</label>
-                                <select name="category" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary focus:outline-none transition-all" value={formData.category} onChange={handleChange}>
-                                    <option>Education</option>
-                                    <option>Health</option>
-                                    <option>Government Work</option>
-                                    <option>Infrastructure</option>
-                                    <option>Social</option>
-                                </select>
+                                <input type="text" name="category" required className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary focus:outline-none transition-all" value={formData.category} onChange={handleChange} placeholder="e.g. Health, Education" />
                             </div>
                         </div>
 
@@ -309,16 +331,24 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
                                     {/* Existing Images */}
                                     {existingImages.map((src, idx) => {
                                         const isSelected = gallerySelections.existing.includes(src);
+                                        const isMain = mainImageSelection.type === 'existing' && mainImageSelection.identifier === src;
                                         return (
-                                            <div key={`exist-${idx}`} className={`group flex flex-col relative rounded-xl overflow-hidden transition-all border-2 bg-white ${isSelected ? 'border-primary shadow-md shadow-green-200' : 'border-slate-200 shadow-sm'}`}>
+                                            <div key={`exist-${idx}`} className={`group flex flex-col relative rounded-xl overflow-hidden transition-all border-2 bg-white ${isMain ? 'border-amber-400 ring-2 ring-amber-100 shadow-lg shadow-amber-200/40' : isSelected ? 'border-primary shadow-md shadow-green-200' : 'border-slate-200 shadow-sm'}`}>
                                                 <div className="relative aspect-video overflow-hidden shrink-0">
-                                                    {isSelected && (
-                                                        <div className="absolute top-2 right-2 z-10 bg-primary text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-sm">
-                                                            Gallery Image
-                                                        </div>
-                                                    )}
+                                                    <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
+                                                        {isMain && (
+                                                            <div className="bg-amber-400 text-white text-[10px] font-extrabold px-2 py-1 rounded-md shadow-sm uppercase tracking-tight">Main Image</div>
+                                                        )}
+                                                        {isSelected && (
+                                                            <div className="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-sm uppercase tracking-tight">Gallery</div>
+                                                        )}
+                                                    </div>
+                                                    
                                                     <img src={`${src}`} alt="Existing" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                        <button type="button" onClick={() => handleMainImageToggle('existing', src)} className={`p-2 rounded-full transition-all shadow-lg transform hover:scale-110 ${isMain ? 'bg-amber-400 text-white' : 'bg-white text-amber-500 hover:bg-amber-50'}`} title="Set as Main Image">
+                                                            <Save size={18} />
+                                                        </button>
                                                         <button type="button" onClick={() => removeExistingImage(src)} className="p-2 bg-white text-red-500 rounded-full hover:bg-red-50 transition-all shadow-lg transform hover:scale-110" title="Delete Image">
                                                             <Trash2 size={18} />
                                                         </button>
@@ -342,17 +372,25 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
                                     {/* New Images */}
                                     {previewImages.map((src, idx) => {
                                         const isSelected = gallerySelections.new.includes(idx);
+                                        const isMain = mainImageSelection.type === 'new' && mainImageSelection.identifier === idx;
                                         return (
-                                            <div key={`new-${idx}`} className={`group flex flex-col relative rounded-xl overflow-hidden transition-all border-2 bg-white ${isSelected ? 'border-primary shadow-md shadow-green-200' : 'border-slate-200 shadow-sm'}`}>
+                                            <div key={`new-${idx}`} className={`group flex flex-col relative rounded-xl overflow-hidden transition-all border-2 bg-white ${isMain ? 'border-amber-400 ring-2 ring-amber-100 shadow-lg shadow-amber-200/40' : isSelected ? 'border-primary shadow-md shadow-green-200' : 'border-slate-200 shadow-sm'}`}>
                                                 <div className="relative aspect-video overflow-hidden shrink-0">
-                                                    <div className="absolute top-2 left-2 z-10 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-sm">NEW</div>
-                                                    {isSelected && (
-                                                        <div className="absolute top-2 right-2 z-10 bg-primary text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-sm">
-                                                            Gallery Image
-                                                        </div>
-                                                    )}
+                                                    <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
+                                                        <div className="bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-sm uppercase tracking-tight w-fit">NEW</div>
+                                                        {isMain && (
+                                                            <div className="bg-amber-400 text-white text-[10px] font-extrabold px-2 py-1 rounded-md shadow-sm uppercase tracking-tight w-fit">Main Image</div>
+                                                        )}
+                                                        {isSelected && (
+                                                            <div className="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-sm uppercase tracking-tight w-fit">Gallery</div>
+                                                        )}
+                                                    </div>
+                                                    
                                                     <img src={src} alt="Preview" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                        <button type="button" onClick={() => handleMainImageToggle('new', idx)} className={`p-2 rounded-full transition-all shadow-lg transform hover:scale-110 ${isMain ? 'bg-amber-400 text-white' : 'bg-white text-amber-500 hover:bg-amber-50'}`} title="Set as Main Image">
+                                                            <Save size={18} />
+                                                        </button>
                                                         <button type="button" onClick={() => removeNewImage(idx)} className="p-2 bg-white text-red-500 rounded-full hover:bg-red-50 transition-all shadow-lg transform hover:scale-110" title="Delete Image">
                                                             <Trash2 size={18} />
                                                         </button>

@@ -189,7 +189,7 @@ const Home = () => {
                       {project.category}
                     </div>
                     <img 
-                      src={project.images && project.images.length > 0 ? `${project.images[0].image_url}` : 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80'} 
+                      src={project.main_image_url || (project.images && project.images.length > 0 ? `${project.images[0].image_url}` : 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80')} 
                       alt={project.title} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />

@@ -34,12 +34,19 @@ const Projects = () => {
     fetchProjects();
   }, []);
 
+  // ✅ Fix: Dynamically extract unique categories from projects
+  const categories = ['All', ...new Set(projects.flatMap(p => 
+    String(p.category || '').split(',').map(c => c.trim())
+  ).filter(Boolean))];
+
   const filteredProjects = projects?.filter(project => {
     if (!project || typeof project !== 'object') return false;
     
     const title = String(project.title || '');
     const description = String(project.description || '');
-    const matchesFilter = filter === 'All' || project.category === filter;
+    const projectCategories = String(project.category || '').split(',').map(c => c.trim());
+    
+    const matchesFilter = filter === 'All' || projectCategories.includes(filter);
     const matchesSearch = title.toLowerCase().includes(search.toLowerCase()) || 
                           description.toLowerCase().includes(search.toLowerCase());
     return matchesFilter && matchesSearch;
@@ -97,24 +104,30 @@ const Projects = () => {
           <div className="text-center py-20">Loading projects...</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProjects.map((project, index) => (
-              <motion.div
-                key={project.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="bg-white rounded-2xl overflow-hidden shadow-lg border border-slate-100 flex flex-col group"
-              >
-                <div className="relative h-56 overflow-hidden">
-                  <div className="absolute top-4 left-4 z-10 bg-white/95 backdrop-blur text-primary text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide shadow-sm">
-                    {project.category}
+            {filteredProjects.map((project, index) => {
+              console.log('Rendering project:', project);
+              return (
+                <motion.div
+                  key={project.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  className="bg-white rounded-2xl overflow-hidden shadow-lg border border-slate-100 flex flex-col group"
+                >
+                  <div className="relative h-56 overflow-hidden">
+                    <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
+                      {String(project.category || 'General').split(',').map((cat, i) => (
+                        <span key={i} className="px-3 py-1 bg-white/90 backdrop-blur-sm text-primary text-xs font-bold rounded-full shadow-sm">
+                          {cat.trim()}
+                        </span>
+                      ))}
+                    </div>
+                    <img 
+                      src={project.main_image_url || project.images?.[0]?.image_url || 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80'} 
+                      alt={project.title} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
+                    />
                   </div>
-                  <img 
-                    src={project.images[0] ? `${project.images[0].image_url}` : 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80'} 
-                    alt={project.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
-                  />
-                </div>
                 
                 <div className="p-6 flex-grow flex flex-col">
                   <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-primary transition-colors">
@@ -140,8 +153,9 @@ const Projects = () => {
                     </Link>
                   </div>
                 </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
         )}
 
