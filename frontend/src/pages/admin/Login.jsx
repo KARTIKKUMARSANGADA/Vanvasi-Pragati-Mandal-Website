@@ -22,32 +22,28 @@ const Login = () => {
         setLoading(true);
         setError('');
         try {
-            // FastAPI OAuth2PasswordRequestForm expects form-urlencoded data
-            const formData = new URLSearchParams();
-            formData.append('username', email);
-            formData.append('password', password);
-
-            const response = await api.post('/auth/login', formData, {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
+            // ✅ Send as JSON to match updated backend
+            const response = await api.post('/auth/login', { 
+                username: email, 
+                password 
             });
             
-            console.log('Login success:', response.data);
+            console.log('Login successful:', response.data);
             localStorage.setItem('adminInfo', JSON.stringify(response.data));
             navigate('/admin/dashboard');
         } catch (err) {
-            console.error('Login error:', err.response?.data || err.message);
+            console.error('Login error details:', err.response?.data || err.message);
             
-            // Extract error message safely to avoid rendering objects in JSX
+            // ✅ Safety check: prevent rendering objects to avoid Error #31
             let errorMsg = 'Invalid email or password';
             if (err.response?.data?.detail) {
-                if (typeof err.response.data.detail === 'string') {
-                    errorMsg = err.response.data.detail;
-                } else if (Array.isArray(err.response.data.detail)) {
-                    errorMsg = err.response.data.detail[0]?.msg || JSON.stringify(err.response.data.detail);
+                const detail = err.response.data.detail;
+                if (typeof detail === 'string') {
+                    errorMsg = detail;
+                } else if (Array.isArray(detail)) {
+                    errorMsg = detail[0]?.msg || JSON.stringify(detail);
                 } else {
-                    errorMsg = JSON.stringify(err.response.data.detail);
+                    errorMsg = JSON.stringify(detail);
                 }
             }
             setError(errorMsg);
