@@ -13,10 +13,20 @@ const Projects = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const { data } = await api.get('/projects/');
-        setProjects(data);
+        const response = await api.get('/projects/');
+        console.log('GET /projects/ response:', response.data);
+        
+        if (Array.isArray(response.data)) {
+          setProjects(response.data);
+        } else {
+          console.error('Expected array but got:', response.data);
+          setProjects([]);
+        }
       } catch (err) {
-        console.error('Failed to fetch projects', err);
+        console.error('Failed to fetch projects. Error details:', JSON.stringify(err.response?.data || err.message));
+        if (err.response?.status === 422) {
+          console.warn('API Validation Error (422):', err.response.data);
+        }
       } finally {
         setLoading(false);
       }
@@ -24,14 +34,16 @@ const Projects = () => {
     fetchProjects();
   }, []);
 
-  const categories = ['All', 'Education', 'Health', 'Government Work', 'Infrastructure', 'Social'];
-
-  const filteredProjects = projects.filter(project => {
+  const filteredProjects = projects?.filter(project => {
+    if (!project || typeof project !== 'object') return false;
+    
+    const title = String(project.title || '');
+    const description = String(project.description || '');
     const matchesFilter = filter === 'All' || project.category === filter;
-    const matchesSearch = project.title.toLowerCase().includes(search.toLowerCase()) || 
-                          project.description.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = title.toLowerCase().includes(search.toLowerCase()) || 
+                          description.toLowerCase().includes(search.toLowerCase());
     return matchesFilter && matchesSearch;
-  });
+  }) || [];
 
   return (
     <div className="w-full pb-24 pt-20 min-h-screen bg-slate-50">
@@ -105,15 +117,17 @@ const Projects = () => {
                 </div>
                 
                 <div className="p-6 flex-grow flex flex-col">
-                  <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-primary transition-colors">{project.title}</h3>
+                  <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-primary transition-colors">
+                    {String(project.title || 'Untitled Project')}
+                  </h3>
                   
                   <div className="flex items-center gap-4 text-xs font-medium text-slate-500 mb-4">
-                    <span className="flex items-center gap-1"><Calendar size={14} /> {project.date}</span>
-                    <span className="flex items-center gap-1"><MapPin size={14} /> {project.location}</span>
+                    <span className="flex items-center gap-1"><Calendar size={14} /> {String(project.date || 'N/A')}</span>
+                    <span className="flex items-center gap-1"><MapPin size={14} /> {String(project.location || 'N/A')}</span>
                   </div>
                   
                   <p className="text-slate-600 mb-6 text-sm flex-grow line-clamp-3">
-                    {project.description}
+                    {String(project.description || '')}
                   </p>
                   
                   <div className="pt-4 border-t border-slate-100 mt-auto">

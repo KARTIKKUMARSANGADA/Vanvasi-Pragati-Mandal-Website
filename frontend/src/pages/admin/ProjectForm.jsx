@@ -96,19 +96,26 @@ const ProjectForm = () => {
         });
 
         try {
+            console.log('Submitting Project Data:', Object.fromEntries(data.entries()));
+            let response;
             if (isEdit) {
-                await api.put(`/projects/${id}`, data, {
+                response = await api.put(`/projects/${id}`, data, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
             } else {
-                await api.post('/projects/', data, {
+                response = await api.post('/projects/', data, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
             }
+            console.log('Save response:', response.data);
             navigate('/admin/dashboard');
         } catch (err) {
-            console.error('Save failed', err);
-            alert('Failed to save project');
+            console.error('Save failed. Error details:', JSON.stringify(err.response?.data || err.message));
+            if (err.response?.status === 422) {
+                alert(`Validation Error: ${JSON.stringify(err.response.data.detail)}`);
+            } else {
+                alert('Failed to save project. Check console for details.');
+            }
         } finally {
             setLoading(false);
         }

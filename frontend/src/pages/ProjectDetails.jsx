@@ -12,10 +12,11 @@ const ProjectDetails = () => {
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const { data } = await api.get(`/projects/${id}`);
-        setProject(data);
+        const response = await api.get(`/projects/${id}`);
+        console.log(`GET /projects/${id} response:`, response.data);
+        setProject(response.data);
       } catch (err) {
-        console.error('Failed to fetch project', err);
+        console.error('Failed to fetch project. Error details:', JSON.stringify(err.response?.data || err.message));
       } finally {
         setLoading(false);
       }
@@ -63,14 +64,14 @@ const ProjectDetails = () => {
                 <ArrowLeft size={18} /> Back to Projects
               </Link>
               <div className="inline-block bg-primary text-white text-sm font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4 shadow-lg shadow-green-500/30">
-                {project.category}
+                {String(project.category || 'N/A')}
               </div>
               <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-4 tracking-tight drop-shadow-md">
-                {project.title}
+                {String(project.title || 'Untitled Project')}
               </h1>
               <div className="flex flex-wrap items-center gap-6 text-white/90 font-medium">
-                <span className="flex items-center gap-2"><Calendar size={20} className="text-primary" /> {project.date}</span>
-                <span className="flex items-center gap-2"><MapPin size={20} className="text-primary" /> {project.location}</span>
+                <span className="flex items-center gap-2"><Calendar size={20} className="text-primary" /> {String(project.date || 'N/A')}</span>
+                <span className="flex items-center gap-2"><MapPin size={20} className="text-primary" /> {String(project.location || 'N/A')}</span>
               </div>
             </motion.div>
           </div>
@@ -93,11 +94,11 @@ const ProjectDetails = () => {
                 <Info className="text-primary" /> Project Overview
               </h2>
               <p className="text-slate-700 text-lg leading-relaxed mb-8 font-medium">
-                {project.description}
+                {String(project.description || '')}
               </p>
               <div className="prose prose-slate max-w-none">
                 <p className="text-slate-600 leading-relaxed whitespace-pre-line">
-                  {project.full_description}
+                  {String(project.full_description || '')}
                 </p>
               </div>
             </motion.div>
@@ -139,7 +140,7 @@ const ProjectDetails = () => {
                       <div className="w-5 h-5 bg-green-100 text-primary rounded-full flex items-center justify-center shrink-0 mt-0.5">
                         <CheckCircle2 size={12} strokeWidth={3} />
                       </div>
-                      <span className="text-slate-700 font-medium">{point}</span>
+                      <span className="text-slate-700 font-medium">{String(point)}</span>
                     </li>
                   ))}
                 </ul>
@@ -163,7 +164,7 @@ const ProjectDetails = () => {
                   </div>
                   <div>
                     <span className="block text-xs text-slate-500 uppercase font-bold">Location</span>
-                    <span className="text-slate-700 font-medium">{project.location}</span>
+                    <span className="text-slate-700 font-medium">{String(project.location || 'N/A')}</span>
                   </div>
                 </li>
                 <li className="flex items-start gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-100">
@@ -172,7 +173,7 @@ const ProjectDetails = () => {
                   </div>
                   <div>
                     <span className="block text-xs text-slate-500 uppercase font-bold">Date</span>
-                    <span className="text-slate-700 font-medium">{project.date}</span>
+                    <span className="text-slate-700 font-medium">{String(project.date || 'N/A')}</span>
                   </div>
                 </li>
               </ul>
