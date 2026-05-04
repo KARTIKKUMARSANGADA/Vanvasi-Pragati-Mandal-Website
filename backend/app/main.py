@@ -15,7 +15,10 @@ app = FastAPI(title=settings.PROJECT_NAME)
 # CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust this for production
+    allow_origins=[
+        "http://localhost:5173",
+        "https://vanvasi-pragati-mandal-pipaliya.vercel.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
