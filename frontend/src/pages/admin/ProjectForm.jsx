@@ -3,9 +3,33 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import api from '../../api/axios';
 import { ArrowLeft, Save, X, Plus } from 'lucide-react';
 
+const appendScalarField = (formData, key, value) => {
+    if (value === null || value === undefined) return;
+
+    if (key.startsWith('is_') || key.startsWith('has_') || key.startsWith('show_')) {
+        const boolValue = Array.isArray(value) ? false : !!value;
+        formData.append(key, String(boolValue));
+        return;
+    }
+
+    if (Array.isArray(value)) {
+        return;
+    }
+
+    if (typeof value === 'boolean') {
+        formData.append(key, String(value));
+        return;
+    }
+
+    const normalizedValue = typeof value === 'string' ? value.trim() : value;
+    if (normalizedValue === '' || normalizedValue === '[]') return;
+
+    formData.append(key, normalizedValue);
+};
+
 const ProjectForm = () => {
-    const { id } = useParams();
-    const isEdit = !!id;
+    const { uuid } = useParams();
+    const isEdit = !!uuid;
     const navigate = useNavigate();
     
     const [formData, setFormData] = useState({
@@ -26,7 +50,7 @@ const ProjectForm = () => {
         if (isEdit) {
             const fetchProject = async () => {
                 try {
-                    const { data } = await api.get(`/projects/${id}`);
+                    const { data } = await api.get(`/projects/${uuid}`);
                     setFormData({
                         title: data.title,
                         category: data.category,
@@ -47,7 +71,7 @@ const ProjectForm = () => {
             };
             fetchProject();
         }
-    }, [id, isEdit, navigate]);
+    }, [uuid, isEdit, navigate]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -81,16 +105,14 @@ const ProjectForm = () => {
         setLoading(true);
 
         const data = new FormData();
-        Object.keys(formData).forEach(key => {
+        Object.entries(formData).forEach(([key, value]) => {
             if (key === 'impact_points') {
-                formData[key].forEach(point => {
+                value.forEach(point => {
                     if (point.trim()) data.append('impact_points', point.trim());
                 });
-            } else if (key === 'category') {
-                data.append(key, formData[key].trim());
-            } else {
-                data.append(key, formData[key]);
+                return;
             }
+            appendScalarField(data, key, value);
         });
 
         images.forEach(image => {
@@ -98,23 +120,24 @@ const ProjectForm = () => {
         });
 
         try {
-            console.log('Submitting Project Data:', Object.fromEntries(data.entries()));
-            let response;
             if (isEdit) {
-                response = await api.put(`/projects/${id}`, data, {
+                await api.put(`/projects/${uuid}`, data, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
             } else {
-                response = await api.post('/projects/', data, {
+                await api.post('/projects/', data, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
             }
-            console.log('Save response:', response.data);
             navigate('/admin/dashboard');
         } catch (err) {
-            console.error('Save failed. Error details:', JSON.stringify(err.response?.data || err.message));
+            const errorData = err.response?.data;
             if (err.response?.status === 422) {
-                alert(`Validation Error: ${JSON.stringify(err.response.data.detail)}`);
+                const details = errorData?.detail;
+                const errorMsg = Array.isArray(details) 
+                    ? details.map(d => `${d.loc.join('.')}: ${d.msg}`).join('\n')
+                    : JSON.stringify(details);
+                alert(`Validation Error:\n${errorMsg}`);
             } else {
                 alert('Failed to save project. Check console for details.');
             }

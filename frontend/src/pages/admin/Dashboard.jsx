@@ -106,7 +106,7 @@ const Dashboard = () => {
                                     </tr>
                                 ) : (
                                     projects.map(project => (
-                                        <tr key={project.id} className="hover:bg-slate-50 transition-colors group cursor-default">
+                                        <tr key={project.uuid} className="hover:bg-slate-50 transition-colors group cursor-default">
                                             <td className="px-6 py-4 font-bold text-slate-900 group-hover:text-primary transition-colors">
                                                 {String(project.title || 'Untitled')}
                                             </td>

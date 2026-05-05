@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../api/axios';
 import { Plus, Trash2, Edit2, Briefcase, AlertTriangle, X } from 'lucide-react';
+import { supabase } from '../../supabase';
 import AdminLayout from '../../components/admin/AdminLayout';
 import ProjectModal from '../../components/admin/ProjectModal';
 
@@ -21,8 +22,15 @@ const AdminProjects = () => {
 
     const fetchProjects = async () => {
         try {
-            const { data } = await api.get('/projects/');
-            setProjects(data);
+            const { data, error } = await supabase
+                .from('projects')
+                .select('*, project_images(*)')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            
+            console.log("Projects:", data); // Debugging log
+            setProjects(data || []);
         } catch (err) {
             console.error('Failed to fetch projects', err);
         } finally {
@@ -43,8 +51,8 @@ const AdminProjects = () => {
         if (!projectToDelete) return;
         setIsDeleting(true);
         try {
-            await api.delete(`/projects/${projectToDelete.id}?delete_gallery_images=${deleteGalleryImages}`);
-            setProjects(projects.filter(p => p.id !== projectToDelete.id));
+            await api.delete(`/projects/${projectToDelete.uuid}?delete_gallery_images=${deleteGalleryImages}`);
+            setProjects(projects.filter(p => p.uuid !== projectToDelete.uuid));
             
             // Show toast message
             const toast = document.createElement('div');
@@ -70,7 +78,8 @@ const AdminProjects = () => {
     };
 
     const openEditModal = (project) => {
-        setEditingProject(project);
+        console.log("Opening edit modal for project:", project); // Debugging
+        setEditingProject(project); // Pass full object including uuid
         setIsModalOpen(true);
     };
 
@@ -78,7 +87,7 @@ const AdminProjects = () => {
         if (type === 'create') {
             setProjects([...projects, savedProject]);
         } else {
-            setProjects(projects.map(p => p.id === savedProject.id ? savedProject : p));
+            setProjects(projects.map(p => p.uuid === savedProject.uuid ? savedProject : p));
         }
     };
 
@@ -120,7 +129,7 @@ const AdminProjects = () => {
                                     </tr>
                                 )}
                                 {projects.map(project => (
-                                    <tr key={project.id} className="hover:bg-slate-50 transition-colors">
+                                    <tr key={project.uuid} className="hover:bg-slate-50 transition-colors">
                                         <td className="px-4 sm:px-6 py-4 font-bold text-slate-900">{project.title}</td>
                                         <td className="px-4 sm:px-6 py-4 text-center">
                                             <div className="flex flex-wrap justify-center gap-1">

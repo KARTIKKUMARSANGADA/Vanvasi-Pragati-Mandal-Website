@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
 import ImageGallery from '../components/ImageGallery';
 
@@ -7,17 +7,19 @@ const Gallery = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchGallery = async () => {
       try {
         const { data } = await api.get('/gallery/');
-        setImages(data);
+        if (isMounted) setImages(data);
       } catch (err) {
-        console.error('Failed to fetch gallery', err);
+        console.error('Failed to fetch gallery');
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
     fetchGallery();
+    return () => { isMounted = false; };
   }, []);
 
   return (
@@ -34,7 +36,9 @@ const Gallery = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {loading ? (
-          <div className="text-center py-20">Loading gallery...</div>
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          </div>
         ) : (
           <ImageGallery images={images} />
         )}
@@ -43,4 +47,4 @@ const Gallery = () => {
   );
 };
 
-export default Gallery;
+export default React.memo(Gallery);

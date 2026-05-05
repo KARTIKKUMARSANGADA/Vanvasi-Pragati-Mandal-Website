@@ -12,13 +12,9 @@ if not hasattr(bcrypt, "__about__"):
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
-# CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "https://vanvasi-pragati-mandal-pipaliya.vercel.app"
-    ],
+    allow_origin_regex="https?://.*", # Permits all http and https origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

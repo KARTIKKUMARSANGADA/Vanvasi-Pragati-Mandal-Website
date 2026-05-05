@@ -1,3 +1,4 @@
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Target, Eye, Award } from 'lucide-react';
 import communityimg from '../assets/communityphoto.png'
@@ -66,6 +67,7 @@ const About = () => {
               <img 
                 src={communityimg} 
                 alt="Community Group" 
+                loading="lazy"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -107,6 +109,7 @@ const About = () => {
                 <img 
                   src={presidentimg} 
                   alt="Sangada Devisingbhai" 
+                  loading="lazy"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -125,6 +128,7 @@ const About = () => {
                 <img 
                   src={coordinatorimg} 
                   alt="Kartikkumar Sangada" 
+                  loading="lazy"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -145,4 +149,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default React.memo(About);

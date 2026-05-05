@@ -1,114 +1,107 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Filter, Calendar, MapPin, ArrowRight } from 'lucide-react';
+import { Calendar, MapPin, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
 
 const Projects = () => {
-  const [filter, setFilter] = useState('All');
-  const [search, setSearch] = useState('');
+  const [activeCategory, setActiveCategory] = useState('All');
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchProjects = async () => {
       try {
-        const response = await api.get('/projects/');
-        console.log('GET /projects/ response:', response.data);
-        
-        if (Array.isArray(response.data)) {
-          setProjects(response.data);
-        } else {
-          console.error('Expected array but got:', response.data);
-          setProjects([]);
+        const res = await api.get('/projects/');
+        if (isMounted) {
+          const projectsData = Array.isArray(res.data) 
+            ? res.data 
+            : (res.data?.data || []);
+          setProjects(projectsData);
         }
       } catch (err) {
-        console.error('Failed to fetch projects. Error details:', JSON.stringify(err.response?.data || err.message));
-        if (err.response?.status === 422) {
-          console.warn('API Validation Error (422):', err.response.data);
-        }
+        // Keep important error logging but minimal
+        console.error("Failed to fetch projects");
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
     fetchProjects();
+    return () => { isMounted = false; };
   }, []);
 
-  // ✅ Fix: Dynamically extract unique categories from projects
-  const categories = ['All', ...new Set(projects.flatMap(p => 
-    String(p.category || '').split(',').map(c => c.trim())
-  ).filter(Boolean))];
+  // Dynamically extract unique categories from projects - Memoized
+  const categories = useMemo(() => {
+    return ['All', ...new Set(projects.flatMap(p => 
+      String(p.category || '').split(',').map(c => c.trim())
+    ).filter(Boolean))];
+  }, [projects]);
 
-  const filteredProjects = projects?.filter(project => {
-    if (!project || typeof project !== 'object') return false;
-    
-    const title = String(project.title || '');
-    const description = String(project.description || '');
-    const projectCategories = String(project.category || '').split(',').map(c => c.trim());
-    
-    const matchesFilter = filter === 'All' || projectCategories.includes(filter);
-    const matchesSearch = title.toLowerCase().includes(search.toLowerCase()) || 
-                          description.toLowerCase().includes(search.toLowerCase());
-    return matchesFilter && matchesSearch;
-  }) || [];
+  // Memoized filtered projects
+  const filteredProjects = useMemo(() => {
+    return activeCategory === 'All' 
+      ? projects 
+      : projects.filter(p => {
+          const cats = String(p.category || '').split(',').map(c => c.trim());
+          return cats.includes(activeCategory);
+        });
+  }, [activeCategory, projects]);
+
+  const handleCategoryChange = useCallback((cat) => {
+    setActiveCategory(cat);
+  }, []);
 
   return (
-    <div className="w-full pb-24 pt-20 min-h-screen bg-slate-50">
-      {/* Header */}
-      <div className="bg-white py-16 border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4">Our Work & Projects</h1>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Explore our ongoing and completed projects that are making a real difference in the lives of rural communities.
+    <div className="min-h-screen bg-white">
+      {/* Page Header */}
+      <section className="pt-32 pb-20 bg-slate-900 relative overflow-hidden">
+        <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="max-w-3xl">
+            <h1 className="text-4xl md:text-6xl font-black text-white mb-6">Our Projects</h1>
+            <p className="text-xl text-slate-300 leading-relaxed">
+              Discover the impact of our initiatives across rural and tribal communities. 
+              From building infrastructure to empowering local youth.
             </p>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Controls */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-12">
-          {/* Categories */}
-          <div className="flex flex-wrap justify-center gap-2">
-            {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setFilter(cat)}
-                className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
-                  filter === cat 
-                    ? 'bg-primary text-white shadow-md shadow-green-500/30' 
-                    : 'bg-white text-slate-600 border border-slate-200 hover:border-primary hover:text-primary'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-
-          {/* Search */}
-          <div className="relative w-full md:w-80">
-            <input
-              type="text"
-              placeholder="Search projects..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-full border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white shadow-sm"
-            />
-            <Search className="absolute left-4 top-3.5 text-slate-400" size={18} />
-          </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        {/* Category Filter */}
+        <div className="flex flex-wrap gap-3 mb-16 overflow-x-auto pb-4 scrollbar-hide">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => handleCategoryChange(cat)}
+              className={`px-8 py-3 rounded-full font-bold text-sm transition-all shadow-sm ${
+                activeCategory === cat 
+                  ? 'bg-primary text-white shadow-primary/20' 
+                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
 
         {/* Project Grid */}
         {loading ? (
-          <div className="text-center py-20">Loading projects...</div>
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredProjects.map((project, index) => {
-              console.log('Rendering project:', project);
+              const projectId = project.uuid || project.id;
+              const mainImageUrl = project.main_image_url || (project.images && project.images.length > 0 ? project.images[0].image_url : 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80');
+
               return (
                 <motion.div
-                  key={project.id}
+                  key={projectId}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: index * 0.05 }}
@@ -123,8 +116,9 @@ const Projects = () => {
                       ))}
                     </div>
                     <img 
-                      src={project.main_image_url || project.images?.[0]?.image_url || 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80'} 
+                      src={mainImageUrl} 
                       alt={project.title} 
+                      loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
                     />
                   </div>
@@ -145,7 +139,7 @@ const Projects = () => {
                   
                   <div className="pt-4 border-t border-slate-100 mt-auto">
                     <Link 
-                      to={`/projects/${project.id}`} 
+                      to={projectId ? `/projects/${projectId}` : "#"} 
                       className="inline-flex items-center justify-between w-full text-secondary font-semibold hover:text-blue-800 transition-colors group/link"
                     >
                       <span>View Project Details</span>
@@ -163,7 +157,7 @@ const Projects = () => {
           <div className="text-center py-20">
             <p className="text-xl text-slate-500">No projects found matching your criteria.</p>
             <button 
-              onClick={() => {setFilter('All'); setSearch('');}}
+              onClick={() => {setActiveCategory('All');}}
               className="mt-4 text-primary font-medium hover:underline"
             >
               Clear filters
@@ -175,4 +169,4 @@ const Projects = () => {
   );
 };
 
-export default Projects;
+export default React.memo(Projects);

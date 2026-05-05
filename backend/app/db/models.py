@@ -12,6 +12,7 @@ class Admin(Base):
 class Project(Base):
     __tablename__ = "projects"
     id = Column(Integer, primary_key=True, index=True)
+    uuid = Column(String, unique=True, index=True)
     title = Column(String, index=True)
     category = Column(String)
     description = Column(Text)
@@ -26,8 +27,10 @@ class Project(Base):
 class ProjectImage(Base):
     __tablename__ = "project_images"
     id = Column(Integer, primary_key=True, index=True)
+    uuid = Column(String, unique=True, index=True)
     image_url = Column(String)
     is_gallery = Column(Boolean, default=False)
+    is_main = Column(Boolean, default=False)
     project_id = Column(Integer, ForeignKey("projects.id"))
     
     project = relationship("Project", back_populates="images")

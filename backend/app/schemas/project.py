@@ -1,37 +1,31 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 from typing import List, Optional
 from datetime import datetime
 
 class ProjectImageBase(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    uuid: str
     image_url: str
     is_gallery: bool = False
-    class Config:
-        from_attributes = True
+    is_main: bool = False
 
 class ProjectBase(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
     title: str
     category: str
     description: str
     full_description: str
     location: str
     date: str
-    impact_points: Optional[List[str]] = []
-
-class ProjectCreate(ProjectBase):
-    pass
-
-class ProjectUpdate(BaseModel):
-    title: Optional[str] = None
-    category: Optional[str] = None
-    description: Optional[str] = None
-    full_description: Optional[str] = None
-    location: Optional[str] = None
-    date: Optional[str] = None
-    impact_points: Optional[List[str]] = None
+    impact_points: Optional[List[str]] = Field(default_factory=list)
 
 class Project(ProjectBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
+    uuid: str
     created_at: datetime
-    images: List[ProjectImageBase] = []
-    class Config:
-        from_attributes = True
+    main_image_url: Optional[str] = None
+    images: List[ProjectImageBase] = Field(default_factory=list)

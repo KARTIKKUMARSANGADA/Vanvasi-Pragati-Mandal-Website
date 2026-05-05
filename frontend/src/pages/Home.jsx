@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Users, CheckCircle, MapPin, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -6,30 +6,33 @@ import api from '../api/axios';
 import communityimg from '../assets/communityphoto.png';
 
 const Home = () => {
-  const stats = [
+  const stats = useMemo(() => [
     { label: 'Projects Completed', value: '150+', icon: CheckCircle },
     { label: 'People Benefited', value: '50,000+', icon: Users },
     { label: 'Villages Covered', value: '120+', icon: MapPin },
     { label: 'Years of Service', value: '15+', icon: Calendar },
-  ];
+  ], []);
 
   const [featuredProjects, setFeaturedProjects] = useState([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchProjects = async () => {
       try {
-        const { data } = await api.get('/projects/');
-        // Sort by id descending to get the newest first, then take 3
-        const latestProjects = data.sort((a, b) => b.id - a.id).slice(0, 3);
-        setFeaturedProjects(latestProjects);
+        const { data } = await api.get('/projects/?limit=3');
+        if (isMounted) {
+          const projectsData = Array.isArray(data) ? data : (data?.data || []);
+          setFeaturedProjects(projectsData);
+        }
       } catch (err) {
-        console.error('Failed to fetch featured projects', err);
+        console.error("Failed to fetch featured projects");
       } finally {
-        setLoadingProjects(false);
+        if (isMounted) setLoadingProjects(false);
       }
     };
     fetchProjects();
+    return () => { isMounted = false; };
   }, []);
 
   return (
@@ -42,6 +45,7 @@ const Home = () => {
             src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070&auto=format&fit=crop" 
             alt="Community Help" 
             className="w-full h-full object-cover object-center scale-105"
+            loading="eager"
           />
           {/* Specific Dark Gradient Overlay: Darker on mobile for readability */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-black/50 md:via-black/50 md:to-transparent"></div>
@@ -129,12 +133,13 @@ const Home = () => {
               <img 
                 src={communityimg}
                 alt="Community work" 
+                loading="lazy"
                 className="rounded-2xl shadow-2xl object-cover h-[400px] w-full"
               />
             </div>
             <div className="w-full md:w-1/2">
               <h4 className="text-primary font-bold tracking-wider uppercase mb-2">Who We Are</h4>
-              <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-6">Building a Better Future Together</h2>
+              <h2 className="text-3xl md:text-40 font-extrabold text-slate-900 mb-6">Building a Better Future Together</h2>
               <p className="text-slate-600 mb-6 text-lg leading-relaxed">
                 Vanvasi Pragati Mandal Pipaliya is a non-profit organization dedicated to the holistic development of rural and tribal areas. 
                 Founded by Sangada Devisingbhai, our mission is to bridge the gap between resources and those who need them most.
@@ -142,7 +147,10 @@ const Home = () => {
               <p className="text-slate-600 mb-8 text-lg leading-relaxed">
                 We work closely with the government and local communities to execute transparent, high-impact projects.
               </p>
-              <Link to="/about" className="inline-flex items-center gap-2 text-secondary font-semibold hover:text-blue-800 transition-colors">
+              <Link 
+                to="/about" 
+                className="inline-flex items-center justify-between w-full text-secondary font-semibold hover:text-blue-800 transition-colors group/link"
+              >
                 Read More About Us <ArrowRight size={18} />
               </Link>
             </div>
@@ -175,34 +183,43 @@ const Home = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {featuredProjects.map((project, index) => (
-                <motion.div 
-                  key={project.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="bg-white rounded-2xl overflow-hidden shadow-lg border border-slate-100 group cursor-pointer flex flex-col h-full"
-                >
-                  <div className="relative h-48 overflow-hidden shrink-0">
-                    <div className="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur text-primary text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide shadow-sm">
-                      {project.category}
+               {featuredProjects.map((project, index) => {
+                const projectId = project.uuid || project.id;
+                const imageUrl = project.main_image_url || (project.images && project.images.length > 0 ? `${project.images.find(img => img.is_main)?.image_url || project.images[0].image_url}` : 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80');
+                
+                return (
+                  <motion.div 
+                    key={projectId}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    className="bg-white rounded-2xl overflow-hidden shadow-lg border border-slate-100 group cursor-pointer flex flex-col h-full"
+                  >
+                    <div className="relative h-48 overflow-hidden shrink-0">
+                      <div className="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur text-primary text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide shadow-sm">
+                        {project.category}
+                      </div>
+                      <img 
+                        src={imageUrl} 
+                        alt={project.title} 
+                        loading="lazy"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
                     </div>
-                    <img 
-                      src={project.main_image_url || (project.images && project.images.length > 0 ? `${project.images[0].image_url}` : 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80')} 
-                      alt={project.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                  <div className="p-6 flex flex-col flex-grow">
-                    <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-primary transition-colors">{project.title}</h3>
-                    <p className="text-slate-600 mb-6 line-clamp-3 flex-grow">{project.description}</p>
-                    <Link to={`/projects/${project.id}`} className="text-secondary font-medium flex items-center gap-1 group-hover:gap-2 transition-all mt-auto w-fit">
+                    <div className="p-6 flex flex-col flex-grow">
+                      <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-primary transition-colors">{project.title}</h3>
+                      <p className="text-slate-600 mb-6 line-clamp-3 flex-grow">{project.description}</p>
+                      <Link 
+                      to={projectId ? `/projects/${projectId}` : "#"} 
+                      className="text-secondary font-medium flex items-center gap-1 group-hover:gap-2 transition-all mt-auto w-fit"
+                    >
                       Read Case Study <ArrowRight size={16} />
                     </Link>
-                  </div>
-                </motion.div>
-              ))}
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           )}
           
@@ -232,4 +249,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default React.memo(Home);

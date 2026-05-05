@@ -1,20 +1,21 @@
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, Users, MapPin, CheckCircle, Home, BookOpen, Activity } from 'lucide-react';
 
 const Impact = () => {
-  const stats = [
+  const stats = useMemo(() => [
     { label: 'Total Projects', value: 154, max: 200, color: 'bg-blue-500', icon: CheckCircle },
     { label: 'People Benefited', value: 52400, max: 60000, color: 'bg-green-500', icon: Users },
     { label: 'Villages Covered', value: 128, max: 150, color: 'bg-purple-500', icon: MapPin },
     { label: 'Years Active', value: 15, max: 20, color: 'bg-orange-500', icon: Heart },
-  ];
+  ], []);
 
-  const categories = [
+  const categories = useMemo(() => [
     { name: 'Education Initiatives', count: 45, icon: BookOpen, desc: 'Schools built, scholarships, and supplies.' },
     { name: 'Healthcare Programs', count: 52, icon: Activity, desc: 'Medical camps, surgeries, and awareness.' },
     { name: 'Infrastructure', count: 30, icon: Home, desc: 'Water pumps, roads, and community halls.' },
     { name: 'Government Relief', count: 27, icon: CheckCircle, desc: 'PMAY housing, widow pensions, etc.' },
-  ];
+  ], []);
 
   return (
     <div className="w-full pb-24 pt-20 min-h-screen bg-white">
@@ -109,4 +110,4 @@ const Impact = () => {
   );
 };
 
-export default Impact;
+export default React.memo(Impact);

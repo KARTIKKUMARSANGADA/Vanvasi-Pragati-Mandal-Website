@@ -9,7 +9,10 @@ def authenticate_admin(username: str, password: str):
         return None
     
     admin = response.data[0]
-    if not security.verify_password(password, admin["password"]):
+    
+    is_valid = security.verify_password(password, admin["password"])
+    
+    if not is_valid:
         return None
         
     return admin

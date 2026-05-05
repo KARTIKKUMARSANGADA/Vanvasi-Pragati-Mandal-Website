@@ -1,37 +1,49 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, MapPin, ArrowLeft, CheckCircle2, Info } from 'lucide-react';
+import { Calendar, MapPin, ArrowLeft, CheckCircle2, Info, ZoomIn } from 'lucide-react';
 import api from '../api/axios';
-import ImageGallery from '../components/ImageGallery';
+import Lightbox from '../components/Lightbox';
 
 const ProjectDetails = () => {
-  const { id } = useParams();
+  const { uuid } = useParams();
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchProject = async () => {
+      if (!uuid || uuid === 'undefined') {
+        if (isMounted) setLoading(false);
+        return;
+      }
       try {
-        const response = await api.get(`/projects/${id}`);
-        console.log(`GET /projects/${id} response:`, response.data);
-        setProject(response.data);
+        const res = await api.get(`/projects/${uuid}`);
+        if (isMounted) setProject(res.data);
       } catch (err) {
-        console.error('Failed to fetch project. Error details:', JSON.stringify(err.response?.data || err.message));
+        // Minimal logging
+        console.error("Failed to fetch project details");
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
     fetchProject();
-  }, [id]);
+    return () => { isMounted = false; };
+  }, [uuid]);
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading project details...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   if (!project) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-white">
         <h1 className="text-4xl font-bold text-slate-800 mb-4">Project Not Found</h1>
         <p className="text-slate-600 mb-8 text-center max-w-md">The project you are looking for does not exist or has been moved.</p>
         <Link to="/projects" className="px-8 py-3 bg-primary text-white font-bold rounded-full hover:bg-green-700 transition-all">
@@ -41,43 +53,57 @@ const ProjectDetails = () => {
     );
   }
 
+  const mainImageUrl = project.main_image_url || project.images?.find(img => img.is_main)?.image_url || project.images?.[0]?.image_url || 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80';
+
   return (
     <div className="w-full bg-slate-50 min-h-screen pb-24 pt-20">
       {/* Hero Section */}
-      <div className="relative h-[50vh] md:h-[60vh] overflow-hidden">
+      <div className="relative h-[85vh] w-full overflow-hidden">
+        {/* Immersive Hero Image */}
         <img 
-          src={project.main_image_url || project.images?.[0]?.image_url || 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80'} 
+          src={mainImageUrl} 
           alt={project.title} 
           className="w-full h-full object-cover"
+          loading="eager"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/30 to-transparent"></div>
-        <div className="absolute bottom-0 left-0 w-full p-8 md:p-16">
-          <div className="max-w-7xl mx-auto">
+        
+        {/* Enhanced Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+        {/* Improved Back Button Visibility: Top-Left */}
+        <Link 
+          to="/projects" 
+          className="absolute top-8 left-8 z-30 inline-flex items-center gap-2 text-white bg-black/40 backdrop-blur-md px-5 py-2.5 rounded-full hover:bg-black/60 transition-all font-semibold border border-white/30 group shadow-xl"
+        >
+          <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+          <span>Back to Projects</span>
+        </Link>
+
+        {/* Content Section: Elevated to bottom-20 with better spacing */}
+        <div className="absolute bottom-20 left-0 w-full px-6 md:px-12 z-20">
+          <div className="max-w-4xl">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="space-y-6"
             >
-              <Link 
-                to="/projects" 
-                className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors font-medium bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20"
-              >
-                <ArrowLeft size={18} /> Back to Projects
-              </Link>
-              <div className="flex flex-wrap gap-2 mb-4">
+              {/* Category Badge */}
+              <div className="flex flex-wrap gap-2">
                 {String(project.category || 'General').split(',').map((cat, i) => (
-                  <span key={i} className="bg-primary text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg shadow-green-500/30">
+                  <span 
+                    key={i} 
+                    className="bg-primary/90 text-white text-[10px] md:text-xs font-bold px-5 py-2 rounded-full uppercase tracking-widest shadow-2xl backdrop-blur-sm"
+                  >
                     {cat.trim()}
                   </span>
                 ))}
               </div>
-              <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-4 tracking-tight drop-shadow-md">
+              
+              {/* Impactful Title with clean hierarchy */}
+              <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight drop-shadow-2xl">
                 {String(project.title || 'Untitled Project')}
               </h1>
-              <div className="flex flex-wrap items-center gap-6 text-white/90 font-medium">
-                <span className="flex items-center gap-2"><Calendar size={20} className="text-primary" /> {String(project.date || 'N/A')}</span>
-                <span className="flex items-center gap-2"><MapPin size={20} className="text-primary" /> {String(project.location || 'N/A')}</span>
-              </div>
             </motion.div>
           </div>
         </div>
@@ -115,8 +141,33 @@ const ProjectDetails = () => {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="bg-white p-8 md:p-10 rounded-3xl shadow-xl border border-slate-100"
             >
-              <h2 className="text-2xl font-bold text-slate-900 mb-8">Image Gallery</h2>
-              <ImageGallery images={project.images} />
+              <h2 className="text-2xl font-bold text-slate-900 mb-8">Project Gallery</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {project.images?.map((image, index) => (
+                  <motion.div 
+                    key={index}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="relative aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer group shadow-md"
+                    onClick={() => {
+                      setSelectedImageIndex(index);
+                      setIsLightboxOpen(true);
+                    }}
+                  >
+                    <img 
+                      src={image.image_url || image} 
+                      alt={`Project gallery ${index + 1}`}
+                      loading="lazy"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                      <div className="bg-white/20 backdrop-blur-md p-3 rounded-full border border-white/30 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                        <ZoomIn className="text-white" size={24} />
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
             </motion.div>
           </div>
 
@@ -185,8 +236,16 @@ const ProjectDetails = () => {
           </div>
         </div>
       </div>
+      {/* Image Lightbox */}
+      <Lightbox 
+        images={project.images || []}
+        isOpen={isLightboxOpen}
+        onClose={() => setIsLightboxOpen(false)}
+        currentIndex={selectedImageIndex}
+        setCurrentIndex={setSelectedImageIndex}
+      />
     </div>
   );
 };
 
-export default ProjectDetails;
+export default React.memo(ProjectDetails);

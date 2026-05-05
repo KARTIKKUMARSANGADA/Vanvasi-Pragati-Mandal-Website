@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Phone, Mail, MapPin, Send } from 'lucide-react';
 import api from '../api/axios';
@@ -23,14 +23,12 @@ const Contact = () => {
 
     setStatus('sending');
     try {
-      console.log("Sending Contact Form Data:", formData);
-      const response = await api.post('/contact/', formData);
-      console.log("Contact API Response:", response.data);
+      await api.post('/contact/', formData);
       setStatus('success');
       setFormData({ name: '', email: '', phone: '', message: '' });
       setTimeout(() => setStatus(null), 3000);
     } catch (error) {
-      console.error("Failed to send message. Details:", JSON.stringify(error.response?.data || error.message));
+      console.error("Failed to send message");
       setStatus('error');
       if (error.response?.status === 422) {
           alert(`Validation Error: ${JSON.stringify(error.response.data.detail)}`);
@@ -41,9 +39,10 @@ const Contact = () => {
     }
   };
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  }, []);
 
   return (
     <div className="w-full pb-24 pt-20 min-h-screen bg-slate-50">
@@ -199,4 +198,4 @@ const Contact = () => {
   );
 };
 
-export default Contact;
+export default React.memo(Contact);
