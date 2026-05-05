@@ -11,7 +11,7 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      setScrolled(window.scrollY > 50);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -27,26 +27,36 @@ const Navbar = () => {
   ];
 
   const isActive = (path) => location.pathname === path;
-
-  // Check if we are on the home page to determine transparency behavior
-  const isHomePage = location.pathname === '/';
-  const navBackground = scrolled || !isHomePage ? 'bg-white shadow-md py-4' : 'bg-transparent py-6';
-  const textColor = scrolled || !isHomePage ? 'text-slate-800' : 'text-white';
-  const logoColor = scrolled || !isHomePage ? 'text-slate-800' : 'text-white';
-
+  
+  // Logic for transparent vs solid states
+  const isTransparent = !scrolled && location.pathname === '/';
+  
   return (
-    <nav className={`fixed w-full z-50 transition-all duration-300 ${navBackground}`}>
+    <nav 
+      className={`fixed w-full z-50 transition-all duration-500 ease-in-out ${
+        isTransparent 
+          ? 'bg-transparent py-5' 
+          : 'bg-white py-3 shadow-lg border-b border-slate-100'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
+          {/* Logo Section */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center gap-2">
-              <img 
-                src={LOGO}
-                alt="Community Logo"
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary flex items-center justify-center text-white shadow-lg shrink-0"
-              />
-              <div className="ml-2 sm:ml-3">
-                <h1 className={`text-[13px] sm:text-base md:text-xl font-bold leading-[1.2] transition-colors ${logoColor} max-w-[180px] sm:max-w-none`}>
+            <Link to="/" className="flex items-center gap-3 group">
+              <div className="relative">
+                <img 
+                  src={LOGO}
+                  alt="Community Logo"
+                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover transition-all duration-300 ${
+                    isTransparent ? 'shadow-md ring-2 ring-white/20' : 'shadow-sm ring-1 ring-slate-100'
+                  } group-hover:scale-105`}
+                />
+              </div>
+              <div className="flex flex-col">
+                <h1 className={`text-base sm:text-lg md:text-xl font-extrabold leading-tight transition-colors duration-300 ${
+                  isTransparent ? 'text-white' : 'text-slate-900'
+                }`}>
                   Vanvasi Pragati<br className="hidden sm:block" />
                   <span className="sm:hidden"> </span>Mandal Pipaliya
                 </h1>
@@ -55,32 +65,47 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-1">
-            {links.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
-                  isActive(link.path)
-                    ? 'text-primary'
-                    : `${textColor} hover:text-primary`
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
+          <div className="hidden md:flex items-center space-x-8">
+            <div className="flex items-center space-x-6">
+              {links.map((link) => (
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  className={`relative py-2 text-sm font-semibold transition-all duration-300 ease-in-out hover:text-primary ${
+                    isActive(link.path)
+                      ? 'text-primary'
+                      : isTransparent ? 'text-white/90 hover:text-white' : 'text-slate-600'
+                  }`}
+                >
+                  {link.name}
+                  {/* Active Link Underline */}
+                  <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-primary transform origin-left transition-transform duration-300 ${
+                    isActive(link.path) ? 'scale-x-100' : 'scale-x-0'
+                  }`}></span>
+                </Link>
+              ))}
+            </div>
+            
             <Link
               to="/contact"
-              className="ml-4 px-6 py-2.5 rounded-full bg-secondary text-white font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30"
+              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 active:translate-y-0 ${
+                isTransparent 
+                  ? 'bg-white text-primary hover:bg-slate-50' 
+                  : 'bg-primary text-white hover:bg-green-700'
+              }`}
             >
               Support Us
             </Link>
           </div>
 
-          <div className="flex items-center md:hidden ml-auto">
+          {/* Mobile Menu Button */}
+          <div className="flex items-center md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className={`${textColor} hover:text-primary focus:outline-none p-2 -mr-2`}
+              className={`focus:outline-none p-2 transition-colors ${
+                isTransparent ? 'text-white' : 'text-slate-600 hover:text-primary'
+              }`}
+              aria-label="Toggle menu"
             >
               {isOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
@@ -88,38 +113,36 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {isOpen && (
-        <div className="md:hidden bg-white border-t border-slate-100 shadow-2xl absolute w-full left-0 max-h-[calc(100vh-70px)] overflow-y-auto">
-          <div className="px-4 py-4 flex flex-col gap-1">
-            {links.map((link, idx) => (
-              <div key={link.name}>
-                <Link
-                  to={link.path}
-                  onClick={() => setIsOpen(false)}
-                  className={`block px-4 py-3 rounded-xl text-base font-bold transition-all ${
-                    isActive(link.path)
-                      ? 'text-primary bg-green-50 border border-green-100/50'
-                      : 'text-slate-600 hover:text-primary hover:bg-slate-50'
-                  }`}
-                >
-                  {link.name}
-                </Link>
-                {idx !== links.length - 1 && <div className="h-px bg-slate-50 mx-4 my-1"></div>}
-              </div>
-            ))}
-            <div className="pt-3 mt-2 border-t border-slate-100">
-              <Link
-                to="/contact"
-                onClick={() => setIsOpen(false)}
-                className="block w-full text-center px-6 py-3.5 rounded-xl bg-secondary text-white font-bold hover:bg-blue-700 shadow-lg"
-              >
-                Support Us
-              </Link>
-            </div>
+      {/* Mobile Menu Dropdown */}
+      <div className={`md:hidden absolute w-full bg-white border-t border-slate-100 shadow-2xl transition-all duration-300 ease-in-out ${
+        isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'
+      }`}>
+        <div className="px-4 py-6 flex flex-col space-y-4">
+          {links.map((link) => (
+            <Link
+              key={link.name}
+              to={link.path}
+              onClick={() => setIsOpen(false)}
+              className={`block px-4 py-3 rounded-xl text-base font-semibold transition-all ${
+                isActive(link.path)
+                  ? 'text-primary bg-green-50'
+                  : 'text-slate-600 hover:text-primary hover:bg-slate-50'
+              }`}
+            >
+              {link.name}
+            </Link>
+          ))}
+          <div className="pt-4 border-t border-slate-100">
+            <Link
+              to="/contact"
+              onClick={() => setIsOpen(false)}
+              className="block w-full text-center px-6 py-4 rounded-xl bg-primary text-white font-bold hover:bg-green-700 shadow-md"
+            >
+              Support Us
+            </Link>
           </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 };
