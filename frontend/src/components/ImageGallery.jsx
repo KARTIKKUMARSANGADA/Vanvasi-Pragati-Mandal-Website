@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ZoomIn, ChevronLeft, ChevronRight } from 'lucide-react';
+import LazyImage from './common/LazyImage';
 
 const ImageGallery = ({ images = [] }) => {
     const [selectedIndex, setSelectedIndex] = useState(null);
@@ -47,9 +48,10 @@ const ImageGallery = ({ images = [] }) => {
                         className="relative group cursor-pointer overflow-hidden rounded-xl bg-slate-100 aspect-square"
                         onClick={() => openLightbox(index)}
                     >
-                        <img 
+                        <LazyImage 
                             src={image.image_url || image} 
                             alt={`Gallery ${index}`} 
+                            containerClassName="w-full h-full"
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center">

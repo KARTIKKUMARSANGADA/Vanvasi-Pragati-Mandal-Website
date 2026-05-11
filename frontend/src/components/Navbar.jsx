@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Heart } from 'lucide-react';
 import LOGO from '../assets/LOGO.png'; 
-
+import { useDonation } from '../context/DonationContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { openDonation } = useDonation();
   const location = useLocation();
 
   useEffect(() => {
@@ -28,7 +29,6 @@ const Navbar = () => {
 
   const isActive = (path) => location.pathname === path;
   
-  // Logic for transparent vs solid states
   const isTransparent = !scrolled && location.pathname === '/';
   
   return (
@@ -78,7 +78,6 @@ const Navbar = () => {
                   }`}
                 >
                   {link.name}
-                  {/* Active Link Underline */}
                   <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-primary transform origin-left transition-transform duration-300 ${
                     isActive(link.path) ? 'scale-x-100' : 'scale-x-0'
                   }`}></span>
@@ -86,8 +85,8 @@ const Navbar = () => {
               ))}
             </div>
             
-            <Link
-              to="/contact"
+            <button
+              onClick={openDonation}
               className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 active:translate-y-0 ${
                 isTransparent 
                   ? 'bg-white text-primary hover:bg-slate-50' 
@@ -95,7 +94,7 @@ const Navbar = () => {
               }`}
             >
               Support Us
-            </Link>
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -133,13 +132,12 @@ const Navbar = () => {
             </Link>
           ))}
           <div className="pt-4 border-t border-slate-100">
-            <Link
-              to="/contact"
-              onClick={() => setIsOpen(false)}
+            <button
+              onClick={() => { setIsOpen(false); openDonation(); }}
               className="block w-full text-center px-6 py-4 rounded-xl bg-primary text-white font-bold hover:bg-green-700 shadow-md"
             >
               Support Us
-            </Link>
+            </button>
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 from typing import List
 from fastapi import UploadFile
 from app.db.supabase import get_supabase
+from app.core.image_handler import compress_image
 import uuid
 
 supabase = get_supabase()
@@ -11,10 +12,17 @@ def get_gallery(skip: int = 0, limit: int = 100):
 
 async def upload_images(images: List[UploadFile]):
     for image in images:
-        file_ext = image.filename.split(".")[-1]
-        file_name = f"gallery/{uuid.uuid4()}.{file_ext}"
+        # Compress image
+        try:
+            content = await compress_image(image)
+            file_ext = "jpg" # Forced to jpg for compression
+            file_name = f"gallery/{uuid.uuid4()}.{file_ext}"
+        except Exception as e:
+            # Fallback if compression fails
+            file_ext = image.filename.split(".")[-1]
+            file_name = f"gallery/{uuid.uuid4()}.{file_ext}"
+            content = await image.read()
         
-        content = await image.read()
         supabase.storage.from_("images").upload(file_name, content)
         
         image_url = supabase.storage.from_("images").get_public_url(file_name)

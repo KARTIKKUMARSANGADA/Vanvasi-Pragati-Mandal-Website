@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../../api/axios';
 import { motion } from 'framer-motion';
+import { ArrowLeft } from 'lucide-react';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -53,7 +54,14 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-900 flex items-center justify-center px-4">
+        <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center px-4">
+            <Link 
+                to="/" 
+                className="mb-8 flex items-center gap-2 text-slate-400 hover:text-white transition-colors group"
+            >
+                <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                Back to Website
+            </Link>
             <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

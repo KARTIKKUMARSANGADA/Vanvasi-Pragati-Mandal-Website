@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../api/axios';
-import { Plus, Trash2, Edit2, Briefcase, AlertTriangle, X } from 'lucide-react';
+import { Plus, Trash2, Edit2, Briefcase, AlertTriangle, X, Search } from 'lucide-react';
 import { supabase } from '../../supabase';
 import AdminLayout from '../../components/admin/AdminLayout';
 import ProjectModal from '../../components/admin/ProjectModal';
@@ -15,6 +15,7 @@ const AdminProjects = () => {
     const [projectToDelete, setProjectToDelete] = useState(null);
     const [deleteGalleryImages, setDeleteGalleryImages] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         fetchProjects();
@@ -91,6 +92,11 @@ const AdminProjects = () => {
         }
     };
 
+    const filteredProjects = projects.filter(project => 
+        project.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.category?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <AdminLayout title="Projects Management">
             <div className="flex justify-between items-center mb-8">
@@ -103,34 +109,50 @@ const AdminProjects = () => {
                         <p className="text-sm text-slate-500">Manage, add or edit your NGO projects here</p>
                     </div>
                 </div>
-                <button onClick={openAddModal} className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold shadow-lg shadow-green-500/30 hover:bg-green-700 transition-all">
-                    <Plus size={18} /> Add Project
-                </button>
+                <div className="flex items-center gap-4 w-full md:w-auto mt-4 md:mt-0">
+                    <div className="relative flex-grow md:w-64 lg:w-80 group">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
+                        <input 
+                            type="text" 
+                            placeholder="Search projects..." 
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm"
+                        />
+                    </div>
+                    <button onClick={openAddModal} className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold shadow-lg shadow-green-500/30 hover:bg-green-700 transition-all whitespace-nowrap">
+                        <Plus size={18} /> Add Project
+                    </button>
+                </div>
             </div>
 
             {loading ? (
                 <div className="flex justify-center p-12 text-slate-500">Loading projects...</div>
             ) : (
                 <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left whitespace-nowrap">
+                    <div className="overflow-x-auto custom-scrollbar">
+                        <table className="w-full text-left">
                             <thead className="bg-slate-50 text-slate-500 text-sm uppercase">
                                 <tr>
                                     <th className="px-4 sm:px-6 py-5 font-semibold">Project Title</th>
                                     <th className="px-4 sm:px-6 py-5 font-semibold text-center">Category</th>
-                                    <th className="px-4 sm:px-6 py-5 font-semibold text-right">Date</th>
+                                    <th className="px-4 sm:px-6 py-5 font-semibold text-right whitespace-nowrap">Date</th>
                                     <th className="px-4 sm:px-6 py-5 font-semibold text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
-                                {projects.length === 0 && (
+                                {filteredProjects.length === 0 && (
                                     <tr>
-                                        <td colSpan="4" className="px-6 py-12 text-center text-slate-500 italic">No projects found. Create one!</td>
+                                        <td colSpan="4" className="px-6 py-12 text-center text-slate-500 italic">
+                                            {searchTerm ? `No projects matching "${searchTerm}"` : "No projects found. Create one!"}
+                                        </td>
                                     </tr>
                                 )}
-                                {projects.map(project => (
+                                {filteredProjects.map(project => (
                                     <tr key={project.uuid} className="hover:bg-slate-50 transition-colors">
-                                        <td className="px-4 sm:px-6 py-4 font-bold text-slate-900">{project.title}</td>
+                                        <td className="px-4 sm:px-6 py-4 font-bold text-slate-900 max-w-[300px] break-words">
+                                            {project.title}
+                                        </td>
                                         <td className="px-4 sm:px-6 py-4 text-center">
                                             <div className="flex flex-wrap justify-center gap-1">
                                                 {String(project.category || 'N/A').split(',').map((cat, i) => (
@@ -140,7 +162,7 @@ const AdminProjects = () => {
                                                 ))}
                                             </div>
                                         </td>
-                                        <td className="px-4 sm:px-6 py-4 text-slate-500 font-medium text-right">{project.date}</td>
+                                        <td className="px-4 sm:px-6 py-4 text-slate-500 font-medium text-right whitespace-nowrap">{project.date}</td>
                                         <td className="px-4 sm:px-6 py-4">
                                             <div className="flex justify-center gap-2">
                                                 <button onClick={() => openEditModal(project)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Edit Project">

@@ -1,44 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, MapPin, ArrowLeft, CheckCircle2, Info, ZoomIn } from 'lucide-react';
+import { Calendar, MapPin, ArrowLeft, CheckCircle2, Info, ZoomIn, ArrowRight } from 'lucide-react';
 import api from '../api/axios';
 import Lightbox from '../components/Lightbox';
+import { ProjectDetailSkeleton } from '../components/common/Skeleton';
+import LazyImage from '../components/common/LazyImage';
 
 const ProjectDetails = () => {
   const { uuid } = useParams();
   const [project, setProject] = useState(null);
+  const [relatedProjects, setRelatedProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
-    const fetchProject = async () => {
+    const fetchProjectAndRelated = async () => {
       if (!uuid || uuid === 'undefined') {
         if (isMounted) setLoading(false);
         return;
       }
       try {
         const res = await api.get(`/projects/${uuid}`);
-        if (isMounted) setProject(res.data);
+        if (isMounted) {
+          setProject(res.data);
+          // Fetch related projects by category
+          const category = res.data.category || 'General';
+          const relatedRes = await api.get(`/projects/?category=${category}&limit=4`);
+          const filtered = Array.isArray(relatedRes.data) 
+            ? relatedRes.data.filter(p => {
+                const pid = String(p.uuid || p.id);
+                const currentId = String(uuid);
+                return pid !== currentId;
+              })
+            : [];
+          setRelatedProjects(filtered.slice(0, 3));
+        }
       } catch (err) {
-        // Minimal logging
         console.error("Failed to fetch project details");
       } finally {
         if (isMounted) setLoading(false);
       }
     };
-    fetchProject();
+    fetchProjectAndRelated();
     return () => { isMounted = false; };
   }, [uuid]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <ProjectDetailSkeleton />;
   }
 
   if (!project) {
@@ -60,19 +71,19 @@ const ProjectDetails = () => {
       {/* Hero Section */}
       <div className="relative h-[85vh] w-full overflow-hidden">
         {/* Immersive Hero Image */}
-        <img 
-          src={mainImageUrl} 
-          alt={project.title} 
+        <img
+          src={mainImageUrl}
+          alt={project.title}
           className="w-full h-full object-cover"
           loading="eager"
         />
-        
+
         {/* Enhanced Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
         {/* Improved Back Button Visibility: Top-Left */}
-        <Link 
-          to="/projects" 
+        <Link
+          to="/projects"
           className="absolute top-8 left-8 z-30 inline-flex items-center gap-2 text-white bg-black/40 backdrop-blur-md px-5 py-2.5 rounded-full hover:bg-black/60 transition-all font-semibold border border-white/30 group shadow-xl"
         >
           <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
@@ -91,15 +102,15 @@ const ProjectDetails = () => {
               {/* Category Badge */}
               <div className="flex flex-wrap gap-2">
                 {String(project.category || 'General').split(',').map((cat, i) => (
-                  <span 
-                    key={i} 
+                  <span
+                    key={i}
                     className="bg-primary/90 text-white text-[10px] md:text-xs font-bold px-5 py-2 rounded-full uppercase tracking-widest shadow-2xl backdrop-blur-sm"
                   >
                     {cat.trim()}
                   </span>
                 ))}
               </div>
-              
+
               {/* Impactful Title with clean hierarchy */}
               <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight drop-shadow-2xl">
                 {String(project.title || 'Untitled Project')}
@@ -111,11 +122,11 @@ const ProjectDetails = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-20">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
+
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Overview Card */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
@@ -135,7 +146,7 @@ const ProjectDetails = () => {
             </motion.div>
 
             {/* Gallery Card */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
@@ -144,7 +155,7 @@ const ProjectDetails = () => {
               <h2 className="text-2xl font-bold text-slate-900 mb-8">Project Gallery</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {project.images?.map((image, index) => (
-                  <motion.div 
+                  <motion.div
                     key={index}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -154,8 +165,8 @@ const ProjectDetails = () => {
                       setIsLightboxOpen(true);
                     }}
                   >
-                    <img 
-                      src={image.image_url || image} 
+                    <img
+                      src={image.image_url || image}
                       alt={`Project gallery ${index + 1}`}
                       loading="lazy"
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
@@ -175,7 +186,7 @@ const ProjectDetails = () => {
           <div className="lg:col-span-1 space-y-8 sticky top-24">
             {/* Impact Card */}
             {project.impact_points && project.impact_points.length > 0 && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.35 }}
@@ -198,7 +209,7 @@ const ProjectDetails = () => {
             )}
 
             {/* Key Details Card */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
@@ -235,9 +246,40 @@ const ProjectDetails = () => {
             </motion.div>
           </div>
         </div>
+
+        {/* Related Projects Section */}
+        {relatedProjects.length > 0 && (
+          <div className="mt-24 border-t border-slate-200 pt-16 pb-12">
+            <h2 className="text-3xl font-bold text-slate-900 mb-10 text-center md:text-left">You Might Also Like</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {relatedProjects.map((p, idx) => {
+                const pid = p.uuid || p.id;
+                const img = p.main_image_url || p.images?.[0]?.image_url || 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80';
+                return (
+                  <Link
+                    key={pid}
+                    to={`/projects/${pid}`}
+                    onClick={() => window.scrollTo(0, 0)}
+                    className="bg-white rounded-[2rem] overflow-hidden shadow-lg border border-slate-100 group flex flex-col h-full hover:shadow-2xl transition-all"
+                  >
+                    <div className="relative h-48 overflow-hidden shrink-0">
+                      <img src={img} alt={p.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    </div>
+                    <div className="p-6 flex-grow flex flex-col">
+                      <h3 className="font-bold text-slate-900 group-hover:text-primary transition-colors line-clamp-2 text-lg">{p.title}</h3>
+                      <div className="mt-auto pt-4 text-primary text-sm font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
+                        Explore Case Study <ArrowRight size={14} />
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
       {/* Image Lightbox */}
-      <Lightbox 
+      <Lightbox
         images={project.images || []}
         isOpen={isLightboxOpen}
         onClose={() => setIsLightboxOpen(false)}

@@ -1,21 +1,34 @@
 # Vanvasi Pragati Mandal (VPM) - NGO Platform
 
-A modern, full-stack web platform built for the Vanvasi Pragati Mandal (VPM) NGO. It features a stunning, dynamic public-facing website and a secure, powerful Admin Dashboard for managing projects and gallery assets.
+![NGO Website Mockup](https://raw.githubusercontent.com/KARTIKKUMARSANGADA/Vanvasi-Pragati-Mandal-Website/master/public/hero-bg.png)
+
+A state-of-the-art, full-stack digital platform built for **Vanvasi Pragati Mandal (Pipaliya)**. This platform empowers the NGO to showcase its tribal welfare projects, manage its digital assets, and engage with supporters globally through a premium, high-performance web experience.
+
+## ✨ Premium Features
+
+- **🚀 Cinematic UI/UX**: Built with React, Tailwind CSS, and Framer Motion for buttery-smooth animations and a modern aesthetic.
+- **📊 Admin Analytics**: Real-time dashboard with message engagement charts and project statistics.
+- **💬 WhatsApp Integration**: Floating contact button with smart-pulsing animation for instant support.
+- **🔍 Advanced Search**: Live search and filtering for projects and gallery assets in the Admin Panel.
+- **🖼️ Filterable Gallery**: Interactive photo gallery categorized by project type (Education, Health, etc.).
+- **⚡ Performance First**: Optimized with Skeleton screens, lazy-loaded images, and SEO-ready meta tags.
+- **🛡️ Secure Admin**: JWT-protected authentication for managing sensitive organizational data.
 
 ## 🚀 Tech Stack
 
 ### Frontend
-*   **Framework:** React + Vite
-*   **Styling:** Tailwind CSS
-*   **Animations:** Framer Motion
-*   **Routing:** React Router DOM
-*   **Icons:** Lucide React
+- **Core:** React 18 + Vite
+- **Styling:** Vanilla CSS + Tailwind CSS
+- **Animations:** Framer Motion
+- **Icons:** Lucide React
+- **SEO:** React Helmet Async
+- **Charts:** Recharts
 
 ### Backend
-*   **Framework:** FastAPI (Python)
-*   **Database:** SQLite (Local) / PostgreSQL (Production via Supabase)
-*   **ORM:** SQLAlchemy
-*   **Authentication:** JWT + bcrypt password hashing
+- **Core:** FastAPI (Python)
+- **Database:** PostgreSQL (Supabase)
+- **Email:** SMTP Service for contact notifications
+- **Auth:** JWT + Bcrypt Hashing
 
 ---
 
@@ -23,66 +36,35 @@ A modern, full-stack web platform built for the Vanvasi Pragati Mandal (VPM) NGO
 
 ### 1. Clone the Repository
 ```bash
-git clone <your-repo-url>
-cd Webiste_Trust
+git clone https://github.com/KARTIKKUMARSANGADA/Vanvasi-Pragati-Mandal-Website.git
+cd Vanvasi-Pragati-Mandal-Website
 ```
 
 ### 2. Backend Setup (FastAPI)
-Open a terminal and navigate to the `backend` folder:
 ```bash
 cd backend
-
-# Create a virtual environment
 python -m venv venv
-
-# Activate the virtual environment
-# On Windows:
-venv\Scripts\activate
-# On macOS/Linux:
-source venv/bin/activate
-
-# Install dependencies
+source venv/Scripts/activate # On Windows use `venv\Scripts\activate`
 pip install -r requirements.txt
-
-# Create a .env file based on the required variables
-echo "SECRET_KEY=your_super_secret_key" > .env
-echo "DATABASE_URL=sqlite:///./database.db" >> .env
-
-# Run the backend server
-uvicorn app.main:app --reload --port 8000
+# Copy .env.example to .env and fill in your Supabase & SMTP keys
+uvicorn app.main:app --reload
 ```
-*The API will be available at `http://localhost:8000`. API documentation is available at `http://localhost:8000/docs`.*
 
 ### 3. Frontend Setup (React/Vite)
-Open a **new** terminal and navigate to the `frontend` folder:
 ```bash
 cd frontend
-
-# Install dependencies
 npm install
-
-# Run the development server
+# Copy .env.example to .env and fill in your Supabase URL & Key
 npm run dev
 ```
-*The frontend will run at `http://localhost:5173`. It is configured to automatically connect to `http://localhost:8000` locally.*
 
 ---
 
-## 🌍 Production Deployment
+## 🌎 Deployment
 
-The project is fully pre-configured for modern deployment platforms.
+- **Frontend:** Optimized for **Vercel** or Netlify.
+- **Backend:** Optimized for **Render** or DigitalOcean.
+- **Database:** Hosted on **Supabase**.
 
-### Database: Supabase
-1. Create a PostgreSQL project on Supabase.
-2. Obtain your Connection String (URI).
-
-### Backend: Render
-1. Connect your GitHub repository to Render as a **Blueprint** (it will auto-detect the `render.yaml` file).
-2. Render will automatically provision a Python web service and attach a persistent disk for handling local file uploads.
-3. In the Render dashboard, set the `DATABASE_URL` environment variable to your Supabase Connection String.
-
-### Frontend: Vercel
-1. Connect your repository to Vercel and select the `frontend` folder as the Root Directory.
-2. Vercel will auto-detect the Vite framework.
-3. In the Vercel Environment Variables, set `VITE_BACKEND_URL` to your newly created live Render URL.
-4. Deploy! The included `vercel.json` ensures React Router SPA behaviors work perfectly.
+## 📄 License
+Copyright © 2026 Vanvasi Pragati Mandal. All rights reserved.

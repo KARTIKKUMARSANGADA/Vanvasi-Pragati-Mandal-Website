@@ -74,7 +74,7 @@ const AdminContacts = () => {
                 ) : (
                   messages.map((msg) => (
                     <tr key={msg.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="p-4 px-6 font-semibold text-slate-900">{String(msg.name || 'Anonymous')}</td>
+                      <td className="p-4 px-6 font-semibold text-slate-900 whitespace-normal break-words max-w-[200px]">{String(msg.name || 'Anonymous')}</td>
                       <td className="p-4 px-6">
                         <div className="flex flex-col gap-1 text-sm">
                           <span className="flex items-center gap-2"><Mail size={14} className="text-slate-400"/> {String(msg.email || 'No Email')}</span>

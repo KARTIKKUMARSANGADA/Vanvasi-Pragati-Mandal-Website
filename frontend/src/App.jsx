@@ -5,6 +5,8 @@ import { Analytics } from "@vercel/analytics/react";
 import ScrollToTop from './components/ScrollToTop';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import WhatsAppButton from './components/common/WhatsAppButton';
+import { DonationProvider } from './context/DonationContext';
 
 // Lazy Load Public Pages
 const Home = lazy(() => import('./pages/Home'));
@@ -32,67 +34,70 @@ const PageLoader = () => (
 
 function App() {
   return (
-    <Router>
-      <ScrollToTop />
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
-          {/* Admin Routes */}
-          <Route path="/admin" element={<AdminLogin />} />
+    <DonationProvider>
+      <Router>
+        <ScrollToTop />
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminLogin />} />
 
-          <Route path="/admin/dashboard" element={
-            <ProtectedRoute><AdminDashboard /></ProtectedRoute>
-          } />
+            <Route path="/admin/dashboard" element={
+              <ProtectedRoute><AdminDashboard /></ProtectedRoute>
+            } />
 
-          <Route path="/admin/projects" element={
-            <ProtectedRoute><AdminProjects /></ProtectedRoute>
-          } />
+            <Route path="/admin/projects" element={
+              <ProtectedRoute><AdminProjects /></ProtectedRoute>
+            } />
 
-          <Route path="/admin/gallery" element={
-            <ProtectedRoute><GalleryManager /></ProtectedRoute>
-          } />
+            <Route path="/admin/gallery" element={
+              <ProtectedRoute><GalleryManager /></ProtectedRoute>
+            } />
 
-          <Route path="/admin/contacts" element={
-            <ProtectedRoute><AdminContacts /></ProtectedRoute>
-          } />
+            <Route path="/admin/contacts" element={
+              <ProtectedRoute><AdminContacts /></ProtectedRoute>
+            } />
 
-          {/* Public Layout */}
-          <Route path="/" element={
-            <div className="flex flex-col min-h-screen">
-              <Navbar />
-              <main className="flex-grow">
-                <Home />
-              </main>
-              <Footer />
-            </div>
-          } />
+            {/* Public Layout */}
+            <Route path="/" element={
+              <div className="flex flex-col min-h-screen">
+                <Navbar />
+                <main className="flex-grow">
+                  <Home />
+                </main>
+                <WhatsAppButton />
+                <Footer />
+              </div>
+            } />
 
-          <Route path="/about" element={
-            <Layout><About /></Layout>
-          } />
+            <Route path="/about" element={
+              <Layout><About /></Layout>
+            } />
 
-          <Route path="/projects" element={
-            <Layout><Projects /></Layout>
-          } />
+            <Route path="/projects" element={
+              <Layout><Projects /></Layout>
+            } />
 
-          <Route path="/projects/:uuid" element={
-            <Layout><ProjectDetails /></Layout>
-          } />
+            <Route path="/projects/:uuid" element={
+              <Layout><ProjectDetails /></Layout>
+            } />
 
-          <Route path="/gallery" element={
-            <Layout><Gallery /></Layout>
-          } />
+            <Route path="/gallery" element={
+              <Layout><Gallery /></Layout>
+            } />
 
-          <Route path="/impact" element={
-            <Layout><Impact /></Layout>
-          } />
+            <Route path="/impact" element={
+              <Layout><Impact /></Layout>
+            } />
 
-          <Route path="/contact" element={
-            <Layout><Contact /></Layout>
-          } />
-        </Routes>
-      </Suspense>
-      <Analytics />
-    </Router>
+            <Route path="/contact" element={
+              <Layout><Contact /></Layout>
+            } />
+          </Routes>
+        </Suspense>
+        <Analytics />
+      </Router>
+    </DonationProvider>
   );
 }
 
@@ -102,6 +107,7 @@ function Layout({ children }) {
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <main className="flex-grow">{children}</main>
+      <WhatsAppButton />
       <Footer />
     </div>
   );

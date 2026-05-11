@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Layout, ImageIcon, Briefcase, LogOut, Menu, X, MessageSquare } from 'lucide-react';
-
+import LOGO from '../../assets/LOGO.png'; 
 import ErrorBoundary from '../common/ErrorBoundary';
 
 const AdminLayout = ({ children, title }) => {
@@ -21,8 +21,8 @@ const AdminLayout = ({ children, title }) => {
             {/* Mobile Header */}
             <div className="md:hidden bg-slate-900 text-white p-4 flex justify-between items-center sticky top-0 z-30 shadow-md">
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center font-bold text-white">V</div>
-                    <span className="font-bold text-xl tracking-tight">VPM Admin</span>
+                    <img src={LOGO} alt="Trust Logo" className="w-8 h-8 rounded-full object-cover" />
+                    <span className="font-bold text-lg tracking-tight">Admin Panel</span>
                 </div>
                 <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 bg-slate-800 rounded-lg text-slate-300 hover:text-white transition-colors">
                     {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
@@ -38,8 +38,11 @@ const AdminLayout = ({ children, title }) => {
             <div className={`fixed inset-y-0 left-0 w-72 bg-slate-900 text-white p-6 flex flex-col z-50 shadow-2xl transition-transform duration-300 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static md:h-screen md:sticky top-0 shrink-0`}>
                 <div className="flex items-center justify-between mb-10">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-green-500/30">V</div>
-                        <span className="font-bold text-xl tracking-tight">VPM Admin</span>
+                        <img src={LOGO} alt="Trust Logo" className="w-10 h-10 rounded-full object-cover shadow-lg shadow-green-500/20" />
+                        <div className="flex flex-col">
+                            <span className="font-black text-lg tracking-tight leading-none">VPM</span>
+                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Admin Panel</span>
+                        </div>
                     </div>
                     <button onClick={() => setSidebarOpen(false)} className="md:hidden p-1 text-slate-400 hover:text-white transition-colors">
                         <X size={24} />
@@ -66,7 +69,7 @@ const AdminLayout = ({ children, title }) => {
             </div>
 
             {/* Main Content */}
-            <div className="flex-grow p-4 sm:p-6 md:p-8 w-full max-w-[100vw] overflow-hidden">
+            <div className="flex-grow p-4 sm:p-6 md:p-10 w-full overflow-x-hidden min-w-0">
                 {title && (
                     <div className="flex justify-between items-center mb-10">
                         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">{title}</h1>

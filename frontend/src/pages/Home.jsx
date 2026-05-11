@@ -3,9 +3,14 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Users, CheckCircle, MapPin, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../api/axios';
+import AnimatedCounter from '../components/common/AnimatedCounter';
 import communityimg from '../assets/communityphoto.png';
+import FAQ from '../components/FAQ';
+import { useDonation } from '../context/DonationContext';
+import SEO from '../components/common/SEO';
 
 const Home = () => {
+  const { openDonation } = useDonation();
   const stats = useMemo(() => [
     { label: 'Projects Completed', value: '150+', icon: CheckCircle },
     { label: 'People Benefited', value: '50,000+', icon: Users },
@@ -37,66 +42,59 @@ const Home = () => {
 
   return (
     <div className="w-full">
+      <SEO 
+        title="Home" 
+        description="Empowering rural and tribal communities in Gujarat through education, healthcare, and sustainable development projects." 
+      />
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center overflow-hidden pt-[80px]">
+      <section className="relative h-screen flex items-start overflow-hidden pt-[80px]">
         {/* Background Image - Absolute and at the bottom layer */}
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070&auto=format&fit=crop" 
+            src="/hero-bg.png" 
             alt="Community Help" 
             className="w-full h-full object-cover object-center scale-105"
             loading="eager"
           />
-          {/* Specific Dark Gradient Overlay: Darker on mobile for readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-black/50 md:via-black/50 md:to-transparent"></div>
+          {/* Specific Dark Gradient Overlay - Left-to-Right for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full pt-10">
-          <div className="flex items-center min-h-[calc(100vh-120px)] md:min-h-[calc(100vh-80px)]">
-            {/* Left Column: Text Content */}
-            <div className="text-left w-full max-w-[100%] sm:max-w-[90%] md:max-w-[700px]">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                className="space-y-6 md:space-y-8"
-              >
-                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tight leading-[1.15] md:leading-[1.05]">
-                  Empowering <br />
-                  <span className="text-primary">Rural & Tribal</span> <br />
-                  Communities
-                </h1>
+        <div className="max-w-7xl ml-4 sm:ml-8 lg:ml-12 px-2 relative z-10 w-full h-full flex items-start pt-[5vh]">
+          <div className="w-full max-w-2xl text-left">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="space-y-8"
+            >
+              <div className="inline-flex items-center gap-2 px-5 py-2 bg-primary/20 backdrop-blur-md border border-primary/30 text-white rounded-full text-xs md:text-sm font-bold uppercase tracking-widest">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                </span>
+                Serving Since 2010
+              </div>
+              
+              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white tracking-tighter leading-[1.1]">
+                Empowering <br />
+                <span className="text-primary italic">Rural & Tribal</span> <br />
+                Communities
+              </h1>
                 
-                <p className="text-lg sm:text-xl md:text-2xl text-slate-200 leading-relaxed font-medium md:font-normal max-w-xl">
-                  Dedicated to improving healthcare, education, and livelihoods in underserved communities through sustainable social impact initiatives.
-                </p>
-                
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-5 pt-2">
-                  <Link to="/projects" className="w-full sm:w-auto px-8 py-3.5 md:py-4 bg-primary text-white font-bold rounded-full hover:bg-green-700 transition-all shadow-xl shadow-green-500/40 flex items-center justify-center gap-2 text-base md:text-lg">
-                    View Our Work <ArrowRight size={20} />
-                  </Link>
-                  <Link to="/contact" className="w-full sm:w-auto px-8 py-3.5 md:py-4 bg-transparent text-white font-bold rounded-full border-2 border-white hover:bg-white hover:text-slate-900 transition-all flex items-center justify-center text-base md:text-lg">
-                    Contact Us
-                  </Link>
-                </div>
-
-                {/* Trust Indicators */}
-                <div className="flex flex-col sm:flex-row flex-wrap gap-y-3 gap-x-6 pt-4 md:pt-6">
-                  <div className="flex items-center gap-2.5 text-white font-medium text-sm sm:text-base">
-                    <CheckCircle size={18} className="text-primary shrink-0" />
-                    <span>Government Projects Completed</span>
-                  </div>
-                  <div className="flex items-center gap-2.5 text-white font-medium text-sm sm:text-base">
-                    <CheckCircle size={18} className="text-primary shrink-0" />
-                    <span>50,000+ People Benefited</span>
-                  </div>
-                  <div className="flex items-center gap-2.5 text-white font-medium text-sm sm:text-base">
-                    <CheckCircle size={18} className="text-primary shrink-0" />
-                    <span>120+ Villages Covered</span>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
+              <p className="text-base sm:text-lg md:text-xl text-slate-200 leading-relaxed font-medium max-w-xl opacity-90">
+                Dedicated to improving healthcare, education, and livelihoods in underserved communities through sustainable initiatives.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <Link to="/projects" className="px-8 py-3 bg-primary text-white font-bold rounded-full hover:bg-green-600 transition-all shadow-xl shadow-primary/30 flex items-center justify-center gap-2 text-base">
+                  View Our Work <ArrowRight size={18} />
+                </Link>
+                <Link to="/contact" className="px-8 py-3 bg-transparent text-white font-bold rounded-full border-2 border-white/30 hover:bg-white/10 transition-all flex items-center justify-center text-base">
+                  Contact Us
+                </Link>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -117,7 +115,9 @@ const Home = () => {
                 <div className="w-12 h-12 md:w-14 md:h-14 bg-green-50 text-primary rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform">
                   <stat.icon size={24} className="md:w-7 md:h-7" />
                 </div>
-                <h3 className="text-3xl md:text-4xl font-black text-slate-900 mb-1 md:mb-2">{stat.value}</h3>
+                <h3 className="text-3xl md:text-4xl font-black text-slate-900 mb-1 md:mb-2">
+                  <AnimatedCounter value={stat.value} />
+                </h3>
                 <p className="text-xs md:text-sm font-bold text-slate-500 uppercase tracking-widest">{stat.label}</p>
               </motion.div>
             ))}
@@ -231,6 +231,92 @@ const Home = () => {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      {/* Success Story Carousel */}
+      <section className="py-24 bg-white relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h4 className="text-primary font-bold tracking-wider uppercase mb-2">Success Stories</h4>
+            <h2 className="text-3xl md:text-5xl font-black text-slate-900">Voices of Change</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <motion.div 
+              whileHover={{ y: -5 }}
+              className="p-6 md:p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 flex flex-col justify-between shadow-sm"
+            >
+              <p className="text-base md:text-lg text-slate-700 italic font-medium leading-relaxed mb-6">
+                "I never thought I could finish school after my father passed away. Vanvasi Pragati Mandal supported my education, and today I am the first college graduate in my village."
+              </p>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-slate-200 rounded-full"></div>
+                <div>
+                  <h4 className="font-bold text-slate-900 text-base">Ramesh Sangada</h4>
+                  <p className="text-slate-500 text-sm">Student & Scholarship Recipient</p>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div 
+              whileHover={{ y: -5 }}
+              className="p-6 md:p-8 bg-primary/5 rounded-[2.5rem] border border-primary/10 flex flex-col justify-between shadow-sm"
+            >
+              <p className="text-base md:text-lg text-slate-700 italic font-medium leading-relaxed mb-6">
+                "The medical camp saved my daughter's life. We couldn't afford the surgery, but the trust organized everything and covered all costs. We are forever grateful."
+              </p>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-slate-200 rounded-full"></div>
+                <div>
+                  <h4 className="font-bold text-slate-900 text-base">Meena Ben</h4>
+                  <p className="text-slate-500 text-sm">Beneficiary Mother</p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      <FAQ />
+
+      {/* Newsletter Section */}
+      <section className="py-24 bg-slate-900 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-primary rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-8 md:p-14 overflow-hidden relative group">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              <div>
+                <h2 className="text-2xl md:text-4xl font-black text-white mb-4 leading-tight">
+                  Stay Updated with <br />Our <span className="text-primary">Impact Stories</span>
+                </h2>
+                <p className="text-slate-400 text-base md:text-lg leading-relaxed max-w-md">
+                  Join our monthly newsletter to get updates on new projects, success stories, and ways you can help.
+                </p>
+              </div>
+              
+              <div>
+                <form className="flex flex-col sm:flex-row gap-4">
+                  <input 
+                    type="email" 
+                    placeholder="Enter your email address" 
+                    className="flex-grow px-8 py-5 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-lg"
+                  />
+                  <button className="px-10 py-5 bg-primary text-white font-bold rounded-2xl hover:bg-green-700 transition-all shadow-xl shadow-primary/20 text-lg whitespace-nowrap">
+                    Subscribe Now
+                  </button>
+                </form>
+                <p className="mt-4 text-slate-500 text-sm">
+                  We respect your privacy. No spam, only impact updates.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-16 md:py-24 bg-primary relative overflow-hidden">
         <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-white opacity-10 rounded-full blur-3xl"></div>
@@ -240,9 +326,12 @@ const Home = () => {
           <p className="text-green-50 text-lg md:text-xl mb-8 md:mb-10 leading-relaxed max-w-2xl mx-auto">
             Together we can make a difference. Partner with us, volunteer, or contribute to bring positive change to the lives of thousands.
           </p>
-          <Link to="/contact" className="inline-flex w-full sm:w-auto items-center justify-center px-8 py-3.5 md:py-4 bg-white text-primary font-bold rounded-full hover:bg-green-50 transition-colors shadow-xl text-base md:text-lg">
+          <button 
+            onClick={openDonation}
+            className="inline-flex w-full sm:w-auto items-center justify-center px-8 py-3.5 md:py-4 bg-white text-primary font-bold rounded-full hover:bg-green-50 transition-colors shadow-xl text-base md:text-lg"
+          >
             Join Us Today
-          </Link>
+          </button>
         </div>
       </section>
     </div>

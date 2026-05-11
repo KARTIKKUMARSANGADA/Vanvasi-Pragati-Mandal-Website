@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, Users, MapPin, CheckCircle, Home, BookOpen, Activity } from 'lucide-react';
+import AnimatedCounter from '../components/common/AnimatedCounter';
+import ImpactMap from '../components/ImpactMap';
 
 const Impact = () => {
   const stats = useMemo(() => [
@@ -47,7 +49,7 @@ const Impact = () => {
                 </div>
               </div>
               <h3 className="text-3xl font-extrabold text-slate-900 mb-1">
-                {stat.value.toLocaleString()}{stat.value > 100 ? '+' : ''}
+                <AnimatedCounter value={stat.value.toLocaleString() + (stat.value > 100 ? '+' : '')} />
               </h3>
               <p className="text-slate-500 font-medium">{stat.label}</p>
               
@@ -90,6 +92,11 @@ const Impact = () => {
               </motion.div>
             ))}
           </div>
+        </div>
+
+        {/* Impact Map Section */}
+        <div className="mb-20">
+          <ImpactMap />
         </div>
 
         {/* Narrative */}

@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Set
 
 from fastapi import UploadFile
 from app.db.supabase import get_supabase
+from app.core.image_handler import compress_image
 
 supabase = get_supabase()
 logger = logging.getLogger(__name__)
@@ -129,10 +130,16 @@ async def create_project(project_in: dict, images: List[UploadFile] = None, gall
     if images:
         for index, image in enumerate(images):
             # Upload to Supabase Storage
-            file_ext = image.filename.split(".")[-1]
-            file_name = f"projects/{project['id']}/{uuid.uuid4()}.{file_ext}"
-            
-            content = await image.read()
+            # Compress image
+            try:
+                content = await compress_image(image)
+                file_ext = "jpg" # Forced to jpg for compression
+                file_name = f"projects/{project['id']}/{uuid.uuid4()}.{file_ext}"
+            except Exception as e:
+                logger.error(f"Compression failed, uploading original: {e}")
+                content = await image.read()
+                file_name = f"projects/{project['id']}/{uuid.uuid4()}.{file_ext}"
+
             storage_response = supabase.storage.from_("images").upload(file_name, content)
             
             if storage_response:
@@ -192,10 +199,16 @@ async def update_project(project_uuid: str, project_in: dict, images: List[Uploa
     # 4. Insert new images
     if images:
         for index, image in enumerate(images):
-            file_ext = image.filename.split(".")[-1]
-            file_name = f"projects/{project_id}/{uuid.uuid4()}.{file_ext}"
+            # Compress image
+            try:
+                content = await compress_image(image)
+                file_ext = "jpg" # Forced to jpg for compression
+                file_name = f"projects/{project_id}/{uuid.uuid4()}.{file_ext}"
+            except Exception as e:
+                logger.error(f"Compression failed, uploading original: {e}")
+                content = await image.read()
+                file_name = f"projects/{project_id}/{uuid.uuid4()}.{file_ext}"
             
-            content = await image.read()
             supabase.storage.from_("images").upload(file_name, content)
             
             image_url = supabase.storage.from_("images").get_public_url(file_name)

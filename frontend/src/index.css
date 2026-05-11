@@ -1,3 +1,9 @@
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
