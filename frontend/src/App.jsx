@@ -23,6 +23,7 @@ const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
 const AdminProjects = lazy(() => import('./pages/admin/AdminProjects'));
 const GalleryManager = lazy(() => import('./pages/admin/GalleryManager'));
 const AdminContacts = lazy(() => import('./pages/admin/AdminContacts'));
+const AdminLocations = lazy(() => import('./pages/admin/AdminLocations'));
 const ProtectedRoute = lazy(() => import('./components/admin/ProtectedRoute'));
 
 // Loading Fallback Component
@@ -56,6 +57,10 @@ function App() {
 
             <Route path="/admin/contacts" element={
               <ProtectedRoute><AdminContacts /></ProtectedRoute>
+            } />
+
+            <Route path="/admin/locations" element={
+              <ProtectedRoute><AdminLocations /></ProtectedRoute>
             } />
 
             {/* Public Layout */}

@@ -12,9 +12,9 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-    iconRetinaUrl: markerIcon2x,
-    iconUrl: markerIcon,
-    shadowUrl: markerShadow,
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
 });
 
 const ImpactMap = () => {
@@ -27,15 +27,9 @@ const ImpactMap = () => {
         const { data, error } = await supabase
           .from('impact_locations')
           .select('*');
-        
-        if (data && data.length > 0) {
+
+        if (data) {
           setLocations(data);
-        } else {
-          // Fallback to static data if table is empty or missing
-          setLocations([
-            { id: 1, name: "Pipaliya Head Office", lat: 22.8333, lng: 74.2500, description: "Main operations and community center." },
-            { id: 2, name: "Dahod Medical Camp", lat: 22.8300, lng: 74.2600, description: "Recent healthcare outreach for 500+ families." },
-          ]);
         }
       } catch (err) {
         console.error("Map data fetch failed");
@@ -65,9 +59,9 @@ const ImpactMap = () => {
         </div>
 
         <div className="relative h-[600px] rounded-[3rem] overflow-hidden shadow-2xl border-8 border-slate-50">
-          <MapContainer 
-            center={[22.8333, 74.1500]} 
-            zoom={9} 
+          <MapContainer
+            center={[22.8333, 74.1500]}
+            zoom={9}
             style={{ height: '100%', width: '100%' }}
             scrollWheelZoom={false}
           >
@@ -86,7 +80,7 @@ const ImpactMap = () => {
               </Marker>
             ))}
           </MapContainer>
-          
+
           {/* Overlay Info Card */}
           <div className="absolute bottom-8 left-8 z-[1000] hidden md:block">
             <div className="bg-white/90 backdrop-blur-md p-6 rounded-3xl shadow-xl border border-white/20 max-w-xs">

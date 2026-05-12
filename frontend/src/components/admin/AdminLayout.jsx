@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Layout, ImageIcon, Briefcase, LogOut, Menu, X, MessageSquare } from 'lucide-react';
+import { Layout, ImageIcon, Briefcase, LogOut, Menu, X, MessageSquare, MapPin } from 'lucide-react';
 import LOGO from '../../assets/LOGO.png'; 
 import ErrorBoundary from '../common/ErrorBoundary';
 
@@ -58,6 +58,9 @@ const AdminLayout = ({ children, title }) => {
                     </Link>
                     <Link onClick={() => setSidebarOpen(false)} to="/admin/gallery" className={`flex items-center gap-3 p-3.5 rounded-xl transition-all ${isActive('/admin/gallery') ? 'bg-primary/10 text-primary font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>
                         <ImageIcon size={20} /> Gallery
+                    </Link>
+                    <Link onClick={() => setSidebarOpen(false)} to="/admin/locations" className={`flex items-center gap-3 p-3.5 rounded-xl transition-all ${isActive('/admin/locations') ? 'bg-primary/10 text-primary font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>
+                        <MapPin size={20} /> Map Locations
                     </Link>
                     <Link onClick={() => setSidebarOpen(false)} to="/admin/contacts" className={`flex items-center gap-3 p-3.5 rounded-xl transition-all ${isActive('/admin/contacts') ? 'bg-primary/10 text-primary font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>
                         <MessageSquare size={20} /> Messages

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, MapPin, ArrowLeft, CheckCircle2, Info, ZoomIn, ArrowRight } from 'lucide-react';
+import { Calendar, MapPin, ArrowLeft, CheckCircle2, Info, ZoomIn } from 'lucide-react';
 import api from '../api/axios';
 import Lightbox from '../components/Lightbox';
-import { ProjectDetailSkeleton } from '../components/common/Skeleton';
+import Skeleton from '../components/common/Skeleton';
 import LazyImage from '../components/common/LazyImage';
 
 const ProjectDetails = () => {
@@ -29,12 +29,8 @@ const ProjectDetails = () => {
           // Fetch related projects by category
           const category = res.data.category || 'General';
           const relatedRes = await api.get(`/projects/?category=${category}&limit=4`);
-          const filtered = Array.isArray(relatedRes.data) 
-            ? relatedRes.data.filter(p => {
-                const pid = String(p.uuid || p.id);
-                const currentId = String(uuid);
-                return pid !== currentId;
-              })
+          const filtered = Array.isArray(relatedRes.data)
+            ? relatedRes.data.filter(p => (p.uuid || p.id) !== uuid)
             : [];
           setRelatedProjects(filtered.slice(0, 3));
         }
@@ -49,7 +45,23 @@ const ProjectDetails = () => {
   }, [uuid]);
 
   if (loading) {
-    return <ProjectDetailSkeleton />;
+    return (
+      <div className="w-full bg-slate-50 min-h-screen pb-24 pt-20">
+        <div className="relative h-[60vh] w-full bg-slate-200 animate-pulse" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 relative z-20">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-8">
+              <div className="bg-white p-8 rounded-3xl shadow-xl h-64 animate-pulse" />
+              <div className="bg-white p-8 rounded-3xl shadow-xl h-96 animate-pulse" />
+            </div>
+            <div className="lg:col-span-1 space-y-8">
+              <div className="bg-white p-8 rounded-3xl shadow-xl h-48 animate-pulse" />
+              <div className="bg-white p-8 rounded-3xl shadow-xl h-64 animate-pulse" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!project) {

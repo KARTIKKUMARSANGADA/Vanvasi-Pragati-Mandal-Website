@@ -1,244 +1,169 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { MapPin, Plus, Trash2, Save, X, Navigation } from 'lucide-react';
 import { supabase } from '../../supabase';
-import { Plus, Trash2, MapPin, Search, AlertCircle } from 'lucide-react';
+
 import AdminLayout from '../../components/admin/AdminLayout';
 
 const AdminLocations = () => {
-    const [locations, setLocations] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [error, setError] = useState(null);
+  const [locations, setLocations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    lat: '',
+    lng: ''
+  });
 
-    // Form state
-    const [formData, setFormData] = useState({
-        name: '',
-        lat: '',
-        lng: '',
-        description: ''
+  useEffect(() => {
+    fetchLocations();
+  }, []);
+
+  const fetchLocations = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('impact_locations')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (data) setLocations(data);
+    } catch (err) {
+      console.error("Failed to fetch locations");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = (loc) => {
+    setCurrentLocation(loc);
+    setFormData({
+      name: loc.name,
+      description: loc.description,
+      lat: loc.lat,
+      lng: loc.lng
     });
+    setIsModalOpen(true);
+  };
 
-    useEffect(() => {
-        fetchLocations();
-    }, []);
+  const handleDelete = async (id) => {
+    if (window.confirm('Delete this location from the map?')) {
+      await supabase.from('impact_locations').delete().eq('id', id);
+      fetchLocations();
+    }
+  };
 
-    const fetchLocations = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('impact_locations')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) {
-                if (error.code === '42P01') {
-                    setError("Table 'impact_locations' not found. Please create it in your Supabase SQL Editor.");
-                } else {
-                    setError(error.message);
-                }
-            } else {
-                setLocations(data || []);
-            }
-        } catch (err) {
-            setError('Failed to connect to database');
-        } finally {
-            setLoading(false);
-        }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const payload = {
+      name: formData.name,
+      description: formData.description,
+      lat: parseFloat(formData.lat),
+      lng: parseFloat(formData.lng)
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm('Delete this location?')) return;
-        try {
-            await supabase.from('impact_locations').delete().eq('id', id);
-            setLocations(locations.filter(l => l.id !== id));
-        } catch (err) {
-            alert('Delete failed');
-        }
-    };
+    if (currentLocation) {
+      await supabase.from('impact_locations').update(payload).eq('id', currentLocation.id);
+    } else {
+      await supabase.from('impact_locations').insert([payload]);
+    }
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const { data, error } = await supabase.from('impact_locations').insert([{
-                name: formData.name,
-                lat: parseFloat(formData.lat),
-                lng: parseFloat(formData.lng),
-                description: formData.description
-            }]).select();
+    setIsModalOpen(false);
+    fetchLocations();
+  };
 
-            if (error) throw error;
-            if (data) {
-                setLocations([data[0], ...locations]);
-                setIsModalOpen(false);
-                setFormData({ name: '', lat: '', lng: '', description: '' });
-            }
-        } catch (err) {
-            alert('Failed to save location');
-        }
-    };
+  return (
+    <AdminLayout title="Map Locations">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <p className="text-slate-500 font-medium">Manage interactive markers on the impact map</p>
+          </div>
+          <button 
+            onClick={() => { setCurrentLocation(null); setFormData({ name: '', description: '', lat: '', lng: '' }); setIsModalOpen(true); }}
+            className="bg-primary text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-green-700 transition-all shadow-lg shadow-green-500/20"
+          >
+            <Plus size={20} /> Add Location
+          </button>
+        </div>
 
-    const filtered = locations.filter(l => 
-        l.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+        <div className="bg-blue-50 p-6 rounded-3xl mb-8 border border-blue-100 flex items-start gap-4">
+          <div className="bg-white p-3 rounded-2xl shadow-sm text-secondary">
+            <Navigation size={24} />
+          </div>
+          <div>
+            <h3 className="font-bold text-blue-900">Live Map Markers</h3>
+            <p className="text-sm text-blue-700 mt-1">These markers will appear on the "Our Footprint" map section of the website.</p>
+          </div>
+        </div>
 
-    return (
-        <AdminLayout title="Map Locations">
-            <div className="flex justify-between items-center mb-8">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-50 text-secondary rounded-xl flex items-center justify-center">
-                        <MapPin size={20} />
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-slate-900">Manage Impact Map</h2>
-                        <p className="text-sm text-slate-500">Add or remove markers from your interactive map</p>
-                    </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {locations.map(loc => (
+            <motion.div 
+              layout
+              key={loc.id}
+              className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 hover:shadow-xl transition-all group"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <div className="bg-slate-50 p-3 rounded-2xl group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                  <MapPin size={24} />
                 </div>
-                <button 
-                    onClick={() => setIsModalOpen(true)}
-                    className="flex items-center gap-2 px-6 py-3 bg-secondary text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-all"
-                >
-                    <Plus size={18} /> Add Marker
+                <div className="flex gap-2">
+                  <button onClick={() => handleEdit(loc)} className="p-2 text-slate-400 hover:text-primary transition-colors"><Save size={18} /></button>
+                  <button onClick={() => handleDelete(loc.id)} className="p-2 text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={18} /></button>
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">{loc.name}</h3>
+              <p className="text-slate-500 text-sm mb-4 line-clamp-2">{loc.description}</p>
+              <div className="flex gap-4 text-xs font-mono text-slate-400 bg-slate-50 p-3 rounded-xl">
+                <span>LAT: {loc.lat}</span>
+                <span>LNG: {loc.lng}</span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-[3rem] p-8 w-full max-w-md shadow-2xl"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-black text-slate-900">{currentLocation ? 'Edit Location' : 'New Location'}</h2>
+                <button onClick={() => setIsModalOpen(false)}><X size={24} /></button>
+              </div>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1">Location Name</label>
+                  <input required className="w-full px-4 py-3 rounded-2xl border border-slate-200" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Health Camp Pipaliya" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1">Description</label>
+                  <textarea className="w-full px-4 py-3 rounded-2xl border border-slate-200" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Brief impact summary..." />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Latitude</label>
+                    <input type="number" step="any" required className="w-full px-4 py-3 rounded-2xl border border-slate-200" value={formData.lat} onChange={e => setFormData({...formData, lat: e.target.value})} placeholder="22.833" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Longitude</label>
+                    <input type="number" step="any" required className="w-full px-4 py-3 rounded-2xl border border-slate-200" value={formData.lng} onChange={e => setFormData({...formData, lng: e.target.value})} placeholder="74.250" />
+                  </div>
+                </div>
+                <button type="submit" className="w-full bg-primary text-white py-4 rounded-2xl font-black shadow-lg shadow-green-500/30 hover:bg-green-700 transition-all mt-4">
+                  Save Location
                 </button>
-            </div>
-
-            {error && (
-                <div className="bg-amber-50 border border-amber-200 p-6 rounded-[2rem] mb-8 flex items-start gap-4">
-                    <AlertCircle className="text-amber-600 shrink-0 mt-1" size={24} />
-                    <div>
-                        <h4 className="font-bold text-amber-900 mb-1">Database Setup Required</h4>
-                        <p className="text-amber-700 text-sm mb-4">{error}</p>
-                        <pre className="bg-white/50 p-4 rounded-xl text-[10px] font-mono text-amber-900 overflow-x-auto">
-{`CREATE TABLE impact_locations (
-  id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  name TEXT NOT NULL,
-  lat FLOAT8 NOT NULL,
-  lng FLOAT8 NOT NULL,
-  description TEXT
-);`}
-                        </pre>
-                    </div>
-                </div>
-            )}
-
-            <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
-                <div className="p-6 border-b border-slate-100 bg-white">
-                    <div className="relative max-w-md group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-secondary transition-colors" size={18} />
-                        <input 
-                            type="text" 
-                            placeholder="Search locations..." 
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
-                        />
-                    </div>
-                </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-bold tracking-wider">
-                            <tr>
-                                <th className="px-6 py-4">Location Name</th>
-                                <th className="px-6 py-4 text-center">Coordinates</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {filtered.length === 0 ? (
-                                <tr>
-                                    <td colSpan="3" className="px-6 py-12 text-center text-slate-500 italic">No locations found.</td>
-                                </tr>
-                            ) : (
-                                filtered.map(loc => (
-                                    <tr key={loc.id} className="hover:bg-slate-50 transition-colors">
-                                        <td className="px-6 py-4">
-                                            <div className="font-bold text-slate-900">{loc.name}</div>
-                                            <div className="text-xs text-slate-500 truncate max-w-[200px]">{loc.description}</div>
-                                        </td>
-                                        <td className="px-6 py-4 text-center font-mono text-xs text-slate-500">
-                                            {loc.lat.toFixed(4)}, {loc.lng.toFixed(4)}
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <button 
-                                                onClick={() => handleDelete(loc.id)}
-                                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            {/* Add Location Modal */}
-            {isModalOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-                    <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg relative z-10 overflow-hidden">
-                        <form onSubmit={handleSubmit} className="p-8">
-                            <h2 className="text-2xl font-bold text-slate-900 mb-6">Add New Map Marker</h2>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-2">Location Name</label>
-                                    <input 
-                                        required
-                                        type="text" 
-                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-secondary outline-none"
-                                        placeholder="e.g. Dahod School"
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-700 mb-2">Latitude</label>
-                                        <input 
-                                            required
-                                            type="number" 
-                                            step="any"
-                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-secondary outline-none"
-                                            placeholder="22.8333"
-                                            value={formData.lat}
-                                            onChange={(e) => setFormData({...formData, lat: e.target.value})}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-700 mb-2">Longitude</label>
-                                        <input 
-                                            required
-                                            type="number" 
-                                            step="any"
-                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-secondary outline-none"
-                                            placeholder="74.2500"
-                                            value={formData.lng}
-                                            onChange={(e) => setFormData({...formData, lng: e.target.value})}
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-2">Description</label>
-                                    <textarea 
-                                        required
-                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-secondary outline-none h-24"
-                                        placeholder="Briefly describe the work here..."
-                                        value={formData.description}
-                                        onChange={(e) => setFormData({...formData, description: e.target.value})}
-                                    />
-                                </div>
-                            </div>
-                            <div className="flex gap-4 mt-8">
-                                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-3 font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-all">Cancel</button>
-                                <button type="submit" className="flex-1 py-3 bg-secondary text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all">Save Location</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-        </AdminLayout>
-    );
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </div>
+    </AdminLayout>
+  );
 };
 
 export default AdminLocations;

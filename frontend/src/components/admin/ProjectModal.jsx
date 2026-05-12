@@ -30,7 +30,7 @@ const appendScalarField = (formData, key, value) => {
 const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
     const isEdit = !!project;
     const [loading, setLoading] = useState(false);
-    
+
     const [formData, setFormData] = useState({
         title: '',
         category: 'Education',
@@ -61,9 +61,9 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
                 });
                 setExistingImages(project.images || []);
                 const existingMain = project.images ? project.images.find(img => img.is_main) : null;
-                setMainImageSelection({ 
-                    type: existingMain ? 'existing' : null, 
-                    identifier: existingMain ? (existingMain.uuid || existingMain.image_url) : null 
+                setMainImageSelection({
+                    type: existingMain ? 'existing' : null,
+                    identifier: existingMain ? (existingMain.uuid || existingMain.image_url) : null
                 });
             } else {
                 setFormData({
@@ -120,8 +120,8 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
 
         setGallerySelections(prev => ({
             ...prev,
-            [type]: isSelected 
-                ? currentSelections.filter(id => id !== identifier) 
+            [type]: isSelected
+                ? currentSelections.filter(id => id !== identifier)
                 : [...currentSelections, identifier]
         }));
     };
@@ -137,7 +137,7 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
             return;
         }
         setImages([...images, ...files]);
-        
+
         const filePreviews = files.map(file => URL.createObjectURL(file));
         setPreviewImages([...previewImages, ...filePreviews]);
     };
@@ -165,7 +165,7 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
             newPreviews.splice(index, 1);
             setImages(newImages);
             setPreviewImages(newPreviews);
-            
+
             setGallerySelections(prev => ({
                 ...prev,
                 new: prev.new.filter(i => i !== index).map(i => i > index ? i - 1 : i)
@@ -224,7 +224,7 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
             const errorData = err.response?.data;
             if (err.response?.status === 422) {
                 const details = errorData?.detail;
-                const errorMsg = Array.isArray(details) 
+                const errorMsg = Array.isArray(details)
                     ? details.map(d => `${d.loc.join('.')}: ${d.msg}`).join('\n')
                     : JSON.stringify(details);
                 alert(`Validation Error:\n${errorMsg}`);
@@ -241,15 +241,15 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
     return (
         <AnimatePresence>
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={onClose}
                     className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
                 ></motion.div>
-                
-                <motion.div 
+
+                <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -336,14 +336,14 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
                                         {totalImages} / {MAX_IMAGES} Images
                                     </span>
                                 </div>
-                                
-                                <input 
-                                    type="file" 
-                                    multiple 
-                                    accept="image/*" 
-                                    onChange={handleImageChange} 
+
+                                <input
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    onChange={handleImageChange}
                                     disabled={totalImages >= MAX_IMAGES}
-                                    className="mb-4 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-primary hover:file:bg-green-100 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
+                                    className="mb-4 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-primary hover:file:bg-green-100 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                 />
 
                                 {(existingImages.length > 0 || previewImages.length > 0) && (
@@ -371,8 +371,8 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
                                                     </div>
                                                     <div className="p-2 border-t border-slate-100 bg-slate-50 flex items-center justify-center grow">
                                                         <label className="flex items-center gap-2 cursor-pointer w-full justify-center group/label">
-                                                            <input 
-                                                                type="checkbox" 
+                                                            <input
+                                                                type="checkbox"
                                                                 checked={isSelected}
                                                                 onChange={() => handleGalleryToggle('existing', src)}
                                                                 className="w-4 h-4 text-primary border-slate-300 rounded focus:ring-primary cursor-pointer transition-colors"
@@ -383,7 +383,7 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
                                                 </div>
                                             );
                                         })}
-                                        
+
                                         {previewImages.map((src, idx) => {
                                             const isSelected = gallerySelections.new.includes(idx);
                                             const isMain = mainImageSelection.type === 'new' && mainImageSelection.identifier === idx;
@@ -407,8 +407,8 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
                                                     </div>
                                                     <div className="p-2 border-t border-slate-100 bg-slate-50 flex items-center justify-center grow">
                                                         <label className="flex items-center gap-2 cursor-pointer w-full justify-center group/label">
-                                                            <input 
-                                                                type="checkbox" 
+                                                            <input
+                                                                type="checkbox"
                                                                 checked={isSelected}
                                                                 onChange={() => handleGalleryToggle('new', idx)}
                                                                 className="w-4 h-4 text-primary border-slate-300 rounded focus:ring-primary cursor-pointer transition-colors"
