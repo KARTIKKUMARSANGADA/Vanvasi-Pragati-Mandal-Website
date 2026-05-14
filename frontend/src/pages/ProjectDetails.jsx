@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, MapPin, ArrowLeft, CheckCircle2, Info, ZoomIn } from 'lucide-react';
+import { Calendar, MapPin, ArrowLeft, CheckCircle2, Info, ZoomIn, ArrowRight } from 'lucide-react';
 import api from '../api/axios';
 import Lightbox from '../components/Lightbox';
 import { Skeleton, ProjectDetailSkeleton } from '../components/common/Skeleton';
