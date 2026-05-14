@@ -70,3 +70,5 @@ export const ProjectDetailSkeleton = () => (
     </div>
   </div>
 );
+
+export default Skeleton;

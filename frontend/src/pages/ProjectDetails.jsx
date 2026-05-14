@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Calendar, MapPin, ArrowLeft, CheckCircle2, Info, ZoomIn } from 'lucide-react';
 import api from '../api/axios';
 import Lightbox from '../components/Lightbox';
-import Skeleton from '../components/common/Skeleton';
+import { Skeleton, ProjectDetailSkeleton } from '../components/common/Skeleton';
 import LazyImage from '../components/common/LazyImage';
 
 const ProjectDetails = () => {
@@ -47,19 +47,7 @@ const ProjectDetails = () => {
   if (loading) {
     return (
       <div className="w-full bg-slate-50 min-h-screen pb-24 pt-20">
-        <div className="relative h-[60vh] w-full bg-slate-200 animate-pulse" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 relative z-20">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-8">
-              <div className="bg-white p-8 rounded-3xl shadow-xl h-64 animate-pulse" />
-              <div className="bg-white p-8 rounded-3xl shadow-xl h-96 animate-pulse" />
-            </div>
-            <div className="lg:col-span-1 space-y-8">
-              <div className="bg-white p-8 rounded-3xl shadow-xl h-48 animate-pulse" />
-              <div className="bg-white p-8 rounded-3xl shadow-xl h-64 animate-pulse" />
-            </div>
-          </div>
-        </div>
+        <ProjectDetailSkeleton />
       </div>
     );
   }
