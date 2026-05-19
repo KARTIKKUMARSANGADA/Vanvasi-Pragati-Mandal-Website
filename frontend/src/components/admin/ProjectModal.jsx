@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, Plus, Trash2, ArrowLeft, ArrowRight } from 'lucide-react';
 import api from '../../api/axios';
+import { compressImage } from '../../utils/imageCompressor';
 
 const appendScalarField = (formData, key, value) => {
     if (value === null || value === undefined) return;
@@ -149,16 +150,27 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
         setMainImageSelection({ type, identifier });
     };
 
-    const handleImageChange = (e) => {
+    const handleImageChange = async (e) => {
         const files = Array.from(e.target.files);
         if (totalImages + files.length > MAX_IMAGES) {
             alert(`Maximum ${MAX_IMAGES} images allowed. You can only add ${MAX_IMAGES - totalImages} more.`);
             return;
         }
-        setImages([...images, ...files]);
 
-        const filePreviews = files.map(file => URL.createObjectURL(file));
-        setPreviewImages([...previewImages, ...filePreviews]);
+        try {
+            const compressedFiles = await Promise.all(
+                files.map(file => compressImage(file, { maxWidth: 1200, maxHeight: 1200, quality: 0.8 }))
+            );
+            setImages([...images, ...compressedFiles]);
+
+            const filePreviews = compressedFiles.map(file => URL.createObjectURL(file));
+            setPreviewImages([...previewImages, ...filePreviews]);
+        } catch (err) {
+            console.error("Compression error, uploading original files:", err);
+            setImages([...images, ...files]);
+            const filePreviews = files.map(file => URL.createObjectURL(file));
+            setPreviewImages([...previewImages, ...filePreviews]);
+        }
     };
 
     const removeExistingImage = (img) => {

@@ -90,14 +90,20 @@ const Contact = () => {
   };
 
   return (
-    <div className="w-full pb-24 pt-20 min-h-screen bg-slate-50">
+    <div className="w-full pb-24 min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="bg-white py-16 border-b border-slate-200">
+      <div className="bg-white pt-32 pb-16 border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4">Contact Us</h1>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Get in touch with us to volunteer, support, or inquire about our ongoing projects.
-          </p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4">Contact Us</h1>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              Get in touch with us to volunteer, support, or inquire about our ongoing projects.
+            </p>
+          </motion.div>
         </div>
       </div>
 

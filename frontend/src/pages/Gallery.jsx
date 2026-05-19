@@ -63,15 +63,14 @@ const Gallery = () => {
   }, [images, activeCategory]);
 
   return (
-    <div className="w-full pb-24 pt-20 min-h-screen bg-white">
+    <div className="w-full pb-24 min-h-screen bg-white">
       <SEO 
         title="Gallery" 
         description="Explore the visual journey of Vanvasi Pragati Mandal. Photos from our projects in education, healthcare, and tribal empowerment." 
       />
 
       {/* Header */}
-      <div className="bg-slate-50 py-20 border-b border-slate-100 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-secondary to-primary"></div>
+      <div className="bg-slate-50 pt-36 pb-20 border-b border-slate-100 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

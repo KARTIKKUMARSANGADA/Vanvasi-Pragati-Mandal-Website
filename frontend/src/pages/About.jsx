@@ -64,14 +64,20 @@ const About = () => {
   }
 
   return (
-    <div className="w-full pb-24 pt-20 bg-slate-50/50">
+    <div className="w-full pb-24 bg-slate-50/50">
       {/* Page Header */}
-      <div className="bg-slate-50 py-16 border-b border-slate-100">
+      <div className="bg-slate-50 pt-32 pb-16 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">About Us</h1>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Discover the driving force, vision, and people behind Vanvasi Pragati Mandal Pipaliya.
-          </p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">About Us</h1>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              Discover the driving force, vision, and people behind Vanvasi Pragati Mandal Pipaliya.
+            </p>
+          </motion.div>
         </div>
       </div>
 

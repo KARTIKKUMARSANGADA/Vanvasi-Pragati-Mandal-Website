@@ -58,14 +58,20 @@ const Impact = () => {
   }, [fetchStats]);
 
   return (
-    <div className="w-full pb-24 pt-20 min-h-screen bg-white">
+    <div className="w-full pb-24 min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-slate-50 py-16 border-b border-slate-100">
+      <div className="bg-slate-50 pt-32 pb-16 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4">Our Impact</h1>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Numbers that tell a story of change, hope, and relentless effort. 
-          </p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4">Our Impact</h1>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              Numbers that tell a story of change, hope, and relentless effort. 
+            </p>
+          </motion.div>
         </div>
       </div>
 

@@ -46,7 +46,7 @@ const ProjectDetails = () => {
 
   if (loading) {
     return (
-      <div className="w-full bg-slate-50 min-h-screen pb-24 pt-20">
+      <div className="w-full bg-slate-50 min-h-screen pb-24 pt-28">
         <ProjectDetailSkeleton />
       </div>
     );
@@ -67,10 +67,10 @@ const ProjectDetails = () => {
   const mainImageUrl = project.main_image_url || project.images?.find(img => img.is_main)?.image_url || project.images?.[0]?.image_url || 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80';
 
   return (
-    <div className="w-full bg-slate-50 min-h-screen pb-24 pt-20">
+    <div className="w-full bg-slate-50 min-h-screen pb-24">
       
       {/* Restored Original Hero Section - Fixed with Flexbox to prevent overlap */}
-      <div className="relative min-h-[85vh] w-full flex flex-col justify-end pb-24 overflow-hidden">
+      <div className="relative min-h-[85vh] w-full flex flex-col justify-end pb-24 overflow-hidden pt-28">
         {/* Immersive Hero Image */}
         <div className="absolute inset-0 z-0">
           <img

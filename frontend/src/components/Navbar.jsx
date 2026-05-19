@@ -34,13 +34,13 @@ const Navbar = () => {
   
   return (
     <nav 
-      className={`fixed w-full z-50 transition-all duration-500 ease-in-out ${
+      className={`fixed top-4 left-1/2 -translate-x-1/2 w-[92%] max-w-7xl z-50 transition-all duration-500 ease-in-out ${
         isTransparent 
-          ? 'bg-transparent py-5' 
-          : 'bg-white py-3 shadow-lg border-b border-slate-100'
+          ? 'bg-transparent py-5 shadow-none border-none' 
+          : 'bg-white/95 backdrop-blur-md py-3 px-6 shadow-xl border border-slate-100 rounded-[2rem]'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-2 sm:px-4">
         <div className="flex justify-between items-center">
           {/* Logo Section */}
           <div className="flex items-center">
@@ -121,7 +121,7 @@ const Navbar = () => {
             animate={{ opacity: 1, height: 'auto', y: 0 }}
             exit={{ opacity: 0, height: 0, y: -20 }}
             transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
-            className="md:hidden absolute w-full bg-white border-t border-slate-100 shadow-2xl overflow-hidden"
+            className="md:hidden absolute top-full left-0 w-full bg-white border-t border-slate-100 shadow-2xl rounded-b-[2rem] overflow-hidden"
           >
             <div className="px-4 py-6 flex flex-col space-y-4">
               {links.map((link) => (

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../api/axios';
+import { compressImage } from '../../utils/imageCompressor';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { 
     Upload, Trash2, Image as ImageIcon, Search, Filter, 
@@ -41,9 +42,17 @@ const UploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
         }
     };
 
-    const handleFiles = (newFiles) => {
+    const handleFiles = async (newFiles) => {
         const imageFiles = newFiles.filter(f => f.type.startsWith('image/'));
-        setFiles(prev => [...prev, ...imageFiles]);
+        try {
+            const compressed = await Promise.all(
+                imageFiles.map(file => compressImage(file, { maxWidth: 1200, maxHeight: 1200, quality: 0.8 }))
+            );
+            setFiles(prev => [...prev, ...compressed]);
+        } catch (err) {
+            console.error("Compression failed, using originals:", err);
+            setFiles(prev => [...prev, ...imageFiles]);
+        }
     };
 
     const removeFile = (index) => {
