@@ -18,9 +18,13 @@ allowed_origins = [
     "http://localhost:3000",
     "https://vanvasi.org",
 ]
-frontend_url = os.getenv("FRONTEND_URL")
-if frontend_url:
-    allowed_origins.append(frontend_url)
+frontend_url_env = os.getenv("FRONTEND_URL")
+if frontend_url_env:
+    # Support comma-separated lists and strictly strip trailing slashes (which cause CORS preflight mismatch)
+    parsed_origins = [url.strip().rstrip("/") for url in frontend_url_env.split(",") if url.strip()]
+    for origin in parsed_origins:
+        if origin not in allowed_origins:
+            allowed_origins.append(origin)
 
 app.add_middleware(
     CORSMiddleware,
