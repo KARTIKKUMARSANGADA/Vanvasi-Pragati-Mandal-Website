@@ -102,7 +102,7 @@ from functools import lru_cache
 def get_projects(skip: int = 0, limit: int = 100):
     # Explicitly select columns and ensure uuid is treated as a string
     response = supabase.table("projects") \
-        .select('id, uuid, title, category, description, full_description, location, date, impact_points, created_at, images:project_images(*)') \
+        .select('id, uuid, title, category, description, full_description, location, date, impact_points, lat, lng, created_at, images:project_images(*)') \
         .order("created_at", desc=True) \
         .range(skip, skip + limit - 1) \
         .execute()
@@ -118,7 +118,7 @@ def get_projects(skip: int = 0, limit: int = 100):
 @lru_cache(maxsize=128)
 def get_project(project_uuid: str):
     # Try finding by UUID first, fallback to ID if it's a number
-    query = supabase.table("projects").select('id, uuid, title, category, description, full_description, location, date, impact_points, created_at, images:project_images(*)')
+    query = supabase.table("projects").select('id, uuid, title, category, description, full_description, location, date, impact_points, lat, lng, created_at, images:project_images(*)')
     
     try:
         if project_uuid.isdigit():

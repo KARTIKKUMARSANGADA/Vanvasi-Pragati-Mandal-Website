@@ -35,6 +35,8 @@ async def create_project(
     location: str = Form(...),
     date: str = Form(...),
     impact_points: List[str] = Form(default=[]),
+    lat: Optional[str] = Form(None),
+    lng: Optional[str] = Form(None),
     gallery_new_indices: List[int] = Form(default=[]),
     main_image_index: Optional[int] = Form(None),
     images: List[UploadFile] = File(None),
@@ -55,7 +57,9 @@ async def create_project(
         "full_description": full_description,
         "location": location,
         "date": date,
-        "impact_points": impact_points
+        "impact_points": impact_points,
+        "lat": float(lat) if lat and lat.strip() else None,
+        "lng": float(lng) if lng and lng.strip() else None
     }
     return await project_service.create_project(project_in, images, gallery_new_indices, main_image_index)
 
@@ -70,6 +74,8 @@ async def update_project(
     location: Optional[str] = Form(None),
     date: Optional[str] = Form(None),
     impact_points: List[str] = Form(default=[]),
+    lat: Optional[str] = Form(None),
+    lng: Optional[str] = Form(None),
     deleted_images: List[str] = Form(default=[]),
     gallery_urls: List[str] = Form(default=[]),
     gallery_new_indices: List[int] = Form(default=[]),
@@ -91,7 +97,9 @@ async def update_project(
             "full_description": full_description,
             "location": location,
             "date": date,
-            "impact_points": impact_points if impact_points else []
+            "impact_points": impact_points if impact_points else [],
+            "lat": float(lat) if lat and lat.strip() else None,
+            "lng": float(lng) if lng and lng.strip() else None
         }
     
     # Clean up None values

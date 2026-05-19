@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, JSON, Boolean
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, JSON, Boolean, Float
 from sqlalchemy.orm import relationship
 from app.db.database import Base
 import datetime
@@ -20,6 +20,8 @@ class Project(Base):
     location = Column(String)
     date = Column(String)
     impact_points = Column(JSON, nullable=True)
+    lat = Column(Float, nullable=True)
+    lng = Column(Float, nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     
     images = relationship("ProjectImage", back_populates="project", cascade="all, delete-orphan")

@@ -39,7 +39,10 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
         location: '',
         date: '',
         impact_points: [],
+        lat: '',
+        lng: '',
     });
+    const [hasLocation, setHasLocation] = useState(false);
     const [images, setImages] = useState([]);
     const [previewImages, setPreviewImages] = useState([]);
     const [existingImages, setExistingImages] = useState([]);
@@ -50,6 +53,7 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
     useEffect(() => {
         if (isOpen) {
             if (project) {
+                const hasCoordinates = project.lat !== undefined && project.lat !== null && project.lng !== undefined && project.lng !== null;
                 setFormData({
                     title: project.title || '',
                     category: project.category || 'Education',
@@ -58,12 +62,24 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
                     location: project.location || '',
                     date: project.date || '',
                     impact_points: project.impact_points || [],
+                    lat: hasCoordinates ? String(project.lat) : '',
+                    lng: hasCoordinates ? String(project.lng) : '',
                 });
-                setExistingImages(project.images || []);
-                const existingMain = project.images ? project.images.find(img => img.is_main) : null;
+                setHasLocation(hasCoordinates);
+                
+                const imgs = project.project_images || project.images || [];
+                setExistingImages(imgs);
+                const existingMain = imgs.find(img => img.is_main);
                 setMainImageSelection({
                     type: existingMain ? 'existing' : null,
-                    identifier: existingMain ? (existingMain.uuid || existingMain.image_url) : null
+                    identifier: existingMain ? (existingMain.image_url) : null
+                });
+                
+                // Populate existing gallery selections
+                const existingGallery = imgs.filter(img => img.is_gallery || img.show_in_gallery).map(img => img.image_url);
+                setGallerySelections({
+                    existing: existingGallery,
+                    new: []
                 });
             } else {
                 setFormData({
@@ -74,7 +90,10 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
                     location: '',
                     date: '',
                     impact_points: [],
+                    lat: '',
+                    lng: '',
                 });
+                setHasLocation(false);
                 setExistingImages([]);
                 setGallerySelections({ existing: [], new: [] });
                 setMainImageSelection({ type: null, identifier: null });
@@ -246,8 +265,19 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
                 });
                 return;
             }
+            if (key === 'lat' || key === 'lng') {
+                return;
+            }
             appendScalarField(data, key, value);
         });
+
+        if (hasLocation) {
+            data.append('lat', formData.lat || '');
+            data.append('lng', formData.lng || '');
+        } else {
+            data.append('lat', '');
+            data.append('lng', '');
+        }
 
         images.forEach(image => data.append('images', image));
         deletedImages.forEach(url => data.append('deleted_images', url));
@@ -342,6 +372,58 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
                                     <label className="block text-sm font-semibold text-slate-700 mb-2">Date</label>
                                     <input type="text" name="date" required className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary focus:outline-none transition-all" value={formData.date} onChange={handleChange} placeholder="e.g. June 2023" />
                                 </div>
+                            </div>
+
+                            {/* Toggleable Map Location Fields */}
+                            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-4">
+                                <label className="flex items-center gap-3 cursor-pointer group">
+                                    <input
+                                        type="checkbox"
+                                        checked={hasLocation}
+                                        onChange={(e) => {
+                                            setHasLocation(e.target.checked);
+                                            if (!e.target.checked) {
+                                                setFormData(prev => ({ ...prev, lat: '', lng: '' }));
+                                            }
+                                        }}
+                                        className="w-5 h-5 text-primary border-slate-300 rounded focus:ring-primary cursor-pointer transition-colors"
+                                    />
+                                    <div>
+                                        <span className="text-sm font-bold text-slate-800 group-hover:text-primary transition-colors">Add Map Location Coordinates</span>
+                                        <p className="text-xs text-slate-500 mt-0.5">Pins this project to the interactive footprint map using latitude & longitude.</p>
+                                    </div>
+                                </label>
+
+                                {hasLocation && (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-200/60">
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Latitude (e.g. 22.833)</label>
+                                            <input
+                                                type="number"
+                                                step="any"
+                                                name="lat"
+                                                required
+                                                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary focus:outline-none transition-all font-mono text-sm"
+                                                value={formData.lat}
+                                                onChange={handleChange}
+                                                placeholder="22.8333"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Longitude (e.g. 74.150)</label>
+                                            <input
+                                                type="number"
+                                                step="any"
+                                                name="lng"
+                                                required
+                                                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary focus:outline-none transition-all font-mono text-sm"
+                                                value={formData.lng}
+                                                onChange={handleChange}
+                                                placeholder="74.1500"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div>

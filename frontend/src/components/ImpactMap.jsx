@@ -22,23 +22,45 @@ const ImpactMap = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchLocations = async () => {
+    const fetchData = async () => {
       try {
-        const { data, error } = await supabase
-          .from('impact_locations')
-          .select('*');
+        const [locRes, projRes] = await Promise.all([
+          supabase.from('impact_locations').select('*'),
+          supabase.from('projects').select('*').not('lat', 'is', null).not('lng', 'is', null)
+        ]);
 
-        if (data) {
-          setLocations(data);
+        const markers = [];
+        if (locRes.data) {
+          locRes.data.forEach(l => {
+            markers.push({
+              id: `loc-${l.id}`,
+              name: l.name,
+              description: l.description || 'Impact Location',
+              lat: l.lat,
+              lng: l.lng
+            });
+          });
         }
+        if (projRes.data) {
+          projRes.data.forEach(p => {
+            markers.push({
+              id: `proj-${p.uuid}`,
+              name: p.title,
+              description: p.description || 'Active Project',
+              lat: p.lat,
+              lng: p.lng
+            });
+          });
+        }
+        setLocations(markers);
       } catch (err) {
-        console.error("Map data fetch failed");
+        console.error("Map data fetch failed", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchLocations();
+    fetchData();
   }, []);
 
   return (

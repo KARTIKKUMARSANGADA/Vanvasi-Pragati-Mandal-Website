@@ -20,6 +20,8 @@ class ProjectBase(BaseModel):
     location: str
     date: str
     impact_points: Optional[List[str]] = Field(default_factory=list)
+    lat: Optional[float] = None
+    lng: Optional[float] = None
 
 class Project(ProjectBase):
     model_config = ConfigDict(from_attributes=True)
@@ -40,4 +42,6 @@ class ProjectUpdate(BaseModel):
     location: Optional[str] = None
     date: Optional[str] = None
     impact_points: Optional[List[str]] = None
+    lat: Optional[float] = None
+    lng: Optional[float] = None
 

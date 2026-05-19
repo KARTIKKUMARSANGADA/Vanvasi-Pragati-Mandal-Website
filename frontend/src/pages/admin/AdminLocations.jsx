@@ -40,6 +40,8 @@ const MapClickHandler = ({ onMapClick }) => {
 
 const AdminLocations = () => {
   const [locations, setLocations] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [selectedProjectType, setSelectedProjectType] = useState('other');
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentLocation, setCurrentLocation] = useState(null);
@@ -52,6 +54,7 @@ const AdminLocations = () => {
 
   useEffect(() => {
     fetchLocations();
+    fetchProjects();
   }, []);
 
   const fetchLocations = async () => {
@@ -69,11 +72,51 @@ const AdminLocations = () => {
     }
   };
 
+  const fetchProjects = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('id, title, lat, lng');
+      if (data) setProjects(data);
+    } catch (err) {
+      console.error("Failed to fetch projects", err);
+    }
+  };
+
+  const handleProjectChange = (e) => {
+    const val = e.target.value;
+    setSelectedProjectType(val);
+    if (val === 'other') {
+      setFormData(prev => ({
+        ...prev,
+        name: '',
+        description: '',
+        lat: '',
+        lng: ''
+      }));
+    } else {
+      const proj = projects.find(p => String(p.id) === val);
+      if (proj) {
+        setFormData(prev => ({
+          ...prev,
+          name: proj.title,
+          description: '',
+          lat: proj.lat !== undefined && proj.lat !== null ? String(proj.lat) : '',
+          lng: proj.lng !== undefined && proj.lng !== null ? String(proj.lng) : ''
+        }));
+      }
+    }
+  };
+
   const handleEdit = (loc) => {
     setCurrentLocation(loc);
+    const matchedProject = projects.find(p => p.title === loc.name);
+    const projectType = matchedProject ? String(matchedProject.id) : 'other';
+    setSelectedProjectType(projectType);
+
     setFormData({
       name: loc.name,
-      description: loc.description,
+      description: projectType === 'other' ? (loc.description || '') : '',
       lat: loc.lat,
       lng: loc.lng
     });
@@ -114,7 +157,7 @@ const AdminLocations = () => {
             <p className="text-slate-500 font-medium">Manage interactive markers on the impact map</p>
           </div>
           <button 
-            onClick={() => { setCurrentLocation(null); setFormData({ name: '', description: '', lat: '', lng: '' }); setIsModalOpen(true); }}
+            onClick={() => { setCurrentLocation(null); setSelectedProjectType('other'); setFormData({ name: '', description: '', lat: '', lng: '' }); setIsModalOpen(true); }}
             className="bg-primary text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-green-700 transition-all shadow-lg shadow-green-500/20"
           >
             <Plus size={20} /> Add Location
@@ -171,13 +214,40 @@ const AdminLocations = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1">Location Name</label>
-                    <input required className="w-full px-4 py-3 rounded-2xl border border-slate-200" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Health Camp Pipaliya" />
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Link to Project</label>
+                    <select 
+                      className="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-primary focus:outline-none bg-white font-medium"
+                      value={selectedProjectType}
+                      onChange={handleProjectChange}
+                    >
+                      <option value="other">Other (Standalone Map Marker)</option>
+                      {projects.map(p => (
+                        <option key={p.id} value={String(p.id)}>{p.title}</option>
+                      ))}
+                    </select>
                   </div>
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1">Description</label>
-                    <textarea className="w-full px-4 py-3 rounded-2xl border border-slate-200" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Brief impact summary..." />
-                  </div>
+
+                  {selectedProjectType === 'other' ? (
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Location Name</label>
+                      <input required className="w-full px-4 py-3 rounded-2xl border border-slate-200" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Health Camp Pipaliya" />
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Location Name</label>
+                      <div className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold text-slate-800 flex items-center gap-2">
+                        🔒 {formData.name}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedProjectType === 'other' && (
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Description</label>
+                      <textarea className="w-full px-4 py-3 rounded-2xl border border-slate-200" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Brief impact summary..." />
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-bold text-slate-700 mb-1">Latitude</label>

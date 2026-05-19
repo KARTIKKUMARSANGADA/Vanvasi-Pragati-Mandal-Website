@@ -1,12 +1,8 @@
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, Heart, ArrowUp } from 'lucide-react';
+import { Mail, Phone, MapPin, Heart } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 
 const Footer = () => {
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   return (
     <footer className="bg-slate-900 text-slate-300 mt-auto w-full max-w-full overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-5 md:px-8 pt-10 pb-6 md:pt-14 md:pb-8">
@@ -85,24 +81,6 @@ const Footer = () => {
           <Link to="/admin-vpm-portal" className="text-[12px] md:text-[13px] text-slate-500 hover:text-white transition-colors">
             Admin Login
           </Link>
-          
-          <button 
-            onClick={scrollToTop}
-            className="absolute right-0 top-6 hidden md:flex items-center justify-center w-10 h-10 bg-slate-800 text-white rounded-full hover:bg-primary transition-colors shadow-lg"
-            title="Back to Top"
-          >
-            <ArrowUp size={20} />
-          </button>
-        </div>
-        
-        {/* Mobile Back to Top */}
-        <div className="md:hidden flex justify-center mt-6">
-           <button 
-            onClick={scrollToTop}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-slate-300 text-[13px] rounded-full hover:bg-primary hover:text-white transition-colors shadow-sm border border-slate-700"
-          >
-            <ArrowUp size={16} /> Back to Top
-          </button>
         </div>
 
       </div>
