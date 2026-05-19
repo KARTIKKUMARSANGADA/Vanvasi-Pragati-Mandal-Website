@@ -15,6 +15,13 @@ class Settings(BaseSettings):
     ADMIN_USERNAME: str
     ADMIN_PASSWORD: str
 
+    # Email
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
+    ADMIN_EMAIL: Optional[str] = None
+
     @field_validator("ADMIN_USERNAME", "ADMIN_PASSWORD")
     @classmethod
     def check_not_empty(cls, v: str):

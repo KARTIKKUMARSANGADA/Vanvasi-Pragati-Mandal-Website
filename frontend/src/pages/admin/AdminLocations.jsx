@@ -2,8 +2,41 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Plus, Trash2, Save, X, Navigation } from 'lucide-react';
 import { supabase } from '../../supabase';
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
 
 import AdminLayout from '../../components/admin/AdminLayout';
+
+const MapController = ({ center }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (center && !isNaN(center[0]) && !isNaN(center[1])) {
+      map.setView(center, map.getZoom());
+    }
+  }, [center, map]);
+  return null;
+};
+
+const MapClickHandler = ({ onMapClick }) => {
+  useMapEvents({
+    click(e) {
+      onMapClick(e.latlng.lat, e.latlng.lng);
+    }
+  });
+  return null;
+};
 
 const AdminLocations = () => {
   const [locations, setLocations] = useState([]);
@@ -129,35 +162,60 @@ const AdminLocations = () => {
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-white rounded-[3rem] p-8 w-full max-w-md shadow-2xl"
+              className="bg-white rounded-[3rem] p-8 w-full max-w-3xl shadow-2xl overflow-y-auto max-h-[90vh]"
             >
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-black text-slate-900">{currentLocation ? 'Edit Location' : 'New Location'}</h2>
-                <button onClick={() => setIsModalOpen(false)}><X size={24} /></button>
+                <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={24} /></button>
               </div>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1">Location Name</label>
-                  <input required className="w-full px-4 py-3 rounded-2xl border border-slate-200" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Health Camp Pipaliya" />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1">Description</label>
-                  <textarea className="w-full px-4 py-3 rounded-2xl border border-slate-200" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Brief impact summary..." />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1">Latitude</label>
-                    <input type="number" step="any" required className="w-full px-4 py-3 rounded-2xl border border-slate-200" value={formData.lat} onChange={e => setFormData({...formData, lat: e.target.value})} placeholder="22.833" />
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Location Name</label>
+                    <input required className="w-full px-4 py-3 rounded-2xl border border-slate-200" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Health Camp Pipaliya" />
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1">Longitude</label>
-                    <input type="number" step="any" required className="w-full px-4 py-3 rounded-2xl border border-slate-200" value={formData.lng} onChange={e => setFormData({...formData, lng: e.target.value})} placeholder="74.250" />
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Description</label>
+                    <textarea className="w-full px-4 py-3 rounded-2xl border border-slate-200" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Brief impact summary..." />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Latitude</label>
+                      <input type="number" step="any" required className="w-full px-4 py-3 rounded-2xl border border-slate-200 font-mono text-sm" value={formData.lat} onChange={e => setFormData({...formData, lat: e.target.value})} placeholder="22.833" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Longitude</label>
+                      <input type="number" step="any" required className="w-full px-4 py-3 rounded-2xl border border-slate-200 font-mono text-sm" value={formData.lng} onChange={e => setFormData({...formData, lng: e.target.value})} placeholder="74.250" />
+                    </div>
+                  </div>
+                  <button type="submit" className="w-full bg-primary text-white py-4 rounded-2xl font-black shadow-lg shadow-green-500/30 hover:bg-green-700 transition-all mt-4">
+                    Save Location
+                  </button>
+                </form>
+
+                {/* Interactive Leaflet Map Preview */}
+                <div className="flex flex-col h-full min-h-[320px]">
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Location Preview (Click Map to Place Marker)</label>
+                  <div className="grow rounded-[2rem] overflow-hidden border border-slate-200 relative shadow-inner h-[280px] md:h-full z-10 min-h-[260px]">
+                    <MapContainer
+                      center={[parseFloat(formData.lat) || 22.8333, parseFloat(formData.lng) || 74.1500]}
+                      zoom={11}
+                      style={{ height: '100%', width: '100%' }}
+                      scrollWheelZoom={true}
+                    >
+                      <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                      <MapController center={[parseFloat(formData.lat) || 22.8333, parseFloat(formData.lng) || 74.1500]} />
+                      <MapClickHandler onMapClick={(lat, lng) => setFormData(prev => ({ ...prev, lat: lat.toFixed(6), lng: lng.toFixed(6) }))} />
+                      {(formData.lat && formData.lng && !isNaN(parseFloat(formData.lat)) && !isNaN(parseFloat(formData.lng))) && (
+                        <Marker position={[parseFloat(formData.lat), parseFloat(formData.lng)]} />
+                      )}
+                    </MapContainer>
                   </div>
                 </div>
-                <button type="submit" className="w-full bg-primary text-white py-4 rounded-2xl font-black shadow-lg shadow-green-500/30 hover:bg-green-700 transition-all mt-4">
-                  Save Location
-                </button>
-              </form>
+              </div>
             </motion.div>
           </div>
         )}

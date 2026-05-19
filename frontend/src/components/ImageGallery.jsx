@@ -45,16 +45,25 @@ const ImageGallery = ({ images = [] }) => {
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.3, delay: index * 0.05 }}
-                        className="relative group cursor-pointer overflow-hidden rounded-xl bg-slate-100 aspect-square"
+                        className="relative group cursor-pointer overflow-hidden rounded-xl bg-slate-100 aspect-square focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                         onClick={() => openLightbox(index)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                openLightbox(index);
+                            }
+                        }}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`View larger preview of ${image.category || 'gallery'} image ${index + 1}`}
                     >
                         <LazyImage 
                             src={image.image_url || image} 
-                            alt={`Gallery ${index}`} 
+                            alt={image.category ? `${image.category} Initiative - Gallery Image ${index + 1}` : `Vanvasi Community Initiative - Gallery Image ${index + 1}`} 
                             containerClassName="w-full h-full"
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center">
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center">
                             <ZoomIn className="text-white mb-2" size={32} />
                         </div>
                     </motion.div>
@@ -104,7 +113,7 @@ const ImageGallery = ({ images = [] }) => {
                         >
                             <img 
                                 src={images[selectedIndex]?.image_url || images[selectedIndex]} 
-                                alt="Gallery View" 
+                                alt={images[selectedIndex]?.category ? `Enlarged View - ${images[selectedIndex].category} Initiative` : 'Enlarged Gallery View'} 
                                 className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl pointer-events-auto"
                             />
                             

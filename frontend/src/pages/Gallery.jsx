@@ -8,22 +8,48 @@ import SEO from '../components/common/SEO';
 const Gallery = () => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [activeCategory, setActiveCategory] = useState('All');
+  const [skip, setSkip] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const LIMIT = 12;
+
+  const fetchGallery = async (reset = false) => {
+    try {
+      if (reset) {
+        setLoading(true);
+        setSkip(0);
+      } else {
+        setLoadingMore(true);
+      }
+      
+      const currentSkip = reset ? 0 : skip;
+      const { data } = await api.get(`/gallery/?skip=${currentSkip}&limit=${LIMIT}`);
+      
+      if (Array.isArray(data)) {
+        if (reset) {
+          setImages(data);
+        } else {
+          setImages(prev => [...prev, ...data]);
+        }
+        
+        if (data.length < LIMIT) {
+          setHasMore(false);
+        } else {
+          setHasMore(true);
+          setSkip(currentSkip + LIMIT);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch gallery');
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
 
   useEffect(() => {
-    let isMounted = true;
-    const fetchGallery = async () => {
-      try {
-        const { data } = await api.get('/gallery/');
-        if (isMounted) setImages(data);
-      } catch (err) {
-        console.error('Failed to fetch gallery');
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-    fetchGallery();
-    return () => { isMounted = false; };
+    fetchGallery(true);
   }, []);
 
   const categories = useMemo(() => {
@@ -91,7 +117,31 @@ const Gallery = () => {
              <p className="text-slate-500 font-bold text-xl">No photos found in this category.</p>
            </div>
         ) : (
-          <ImageGallery images={filteredImages} />
+          <>
+            <ImageGallery images={filteredImages} />
+            
+            {hasMore && (
+              <div className="flex justify-center mt-16">
+                <button
+                  onClick={() => fetchGallery(false)}
+                  disabled={loadingMore}
+                  className="px-10 py-4 bg-white border-2 border-slate-200 text-slate-700 font-bold rounded-full hover:border-primary hover:text-primary disabled:opacity-50 transition-all flex items-center gap-2 group shadow-sm active:scale-95 cursor-pointer"
+                >
+                  {loadingMore ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-primary mr-2"></div>
+                      Loading Photos...
+                    </>
+                  ) : (
+                    <>
+                      Load More Photos
+                      <svg className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7-7-7" /></svg>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

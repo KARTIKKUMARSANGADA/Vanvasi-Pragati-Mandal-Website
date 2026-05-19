@@ -14,7 +14,7 @@ const Login = () => {
     useEffect(() => {
         const adminInfo = localStorage.getItem('adminInfo');
         if (adminInfo) {
-            navigate('/admin/dashboard');
+            navigate('/admin-vpm-portal/dashboard');
         }
     }, [navigate]);
 
@@ -31,7 +31,7 @@ const Login = () => {
             
             console.log('Login successful:', response.data);
             localStorage.setItem('adminInfo', JSON.stringify(response.data));
-            navigate('/admin/dashboard');
+            navigate('/admin-vpm-portal/dashboard');
         } catch (err) {
             console.error('Login error details:', err.response?.data || err.message);
             

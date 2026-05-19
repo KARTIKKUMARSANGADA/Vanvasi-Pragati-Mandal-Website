@@ -40,6 +40,14 @@ async def create_project(
     images: List[UploadFile] = File(None),
     current_admin: dict = Depends(deps.get_current_admin)
 ):
+    if images:
+        from app.core.image_handler import validate_image_file
+        for img in images:
+            try:
+                await validate_image_file(img)
+            except ValueError as e:
+                raise HTTPException(status_code=400, detail=str(e))
+                
     project_in = {
         "title": title,
         "category": category,
@@ -89,6 +97,14 @@ async def update_project(
     # Clean up None values
     project_in = {k: v for k, v in project_in.items() if v is not None}
     
+    if images:
+        from app.core.image_handler import validate_image_file
+        for img in images:
+            try:
+                await validate_image_file(img)
+            except ValueError as e:
+                raise HTTPException(status_code=400, detail=str(e))
+                
     try:
         updated_project = await project_service.update_project(
             project_uuid=uuid, 

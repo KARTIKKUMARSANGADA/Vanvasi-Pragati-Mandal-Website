@@ -17,6 +17,12 @@ async def upload_gallery_images(
     images: List[UploadFile] = File(...),
     current_admin: dict = Depends(deps.get_current_admin)
 ):
+    from app.core.image_handler import validate_image_file
+    for img in images:
+        try:
+            await validate_image_file(img)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
     return await gallery_service.upload_images(images)
 
 @router.delete("/{uuid}")

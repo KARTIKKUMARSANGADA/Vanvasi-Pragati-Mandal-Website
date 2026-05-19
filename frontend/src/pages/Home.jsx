@@ -11,21 +11,74 @@ import SEO from '../components/common/SEO';
 
 const Home = () => {
   const { openDonation } = useDonation();
-  const stats = useMemo(() => [
-    { label: 'Projects Completed', value: '150+', icon: CheckCircle },
-    { label: 'People Benefited', value: '50,000+', icon: Users },
-    { label: 'Villages Covered', value: '120+', icon: MapPin },
-    { label: 'Years of Service', value: '15+', icon: Calendar },
-  ], []);
+  const [stats, setStats] = useState([
+    { label: 'Projects Completed', value: '150+', icon: CheckCircle, key: 'total_projects' },
+    { label: 'People Benefited', value: '50,000+', icon: Users, key: 'people_benefited' },
+    { label: 'Villages Covered', value: '120+', icon: MapPin, key: 'villages_covered' },
+    { label: 'Years of Service', value: '15+', icon: Calendar, key: 'years_active' },
+  ]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchPublicStats = async () => {
+      try {
+        const res = await api.get('/stats/public');
+        const data = res.data;
+        if (data && isMounted) {
+          setStats(prev => prev.map(stat => {
+            const val = data[stat.key];
+            return {
+              ...stat,
+              value: val ? `${val.toLocaleString()}+` : stat.value
+            };
+          }));
+        }
+      } catch (err) {
+        console.error("Failed to fetch public stats");
+      }
+    };
+    fetchPublicStats();
+    return () => { isMounted = false; };
+  }, []);
 
   const [featuredProjects, setFeaturedProjects] = useState([]);
+  const [startIndex, setStartIndex] = useState(0);
   const [loadingProjects, setLoadingProjects] = useState(true);
+
+  // Newsletter state
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [subscribeStatus, setSubscribeStatus] = useState('idle');
+  const [subscribeMessage, setSubscribeMessage] = useState('');
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+    if (!newsletterEmail) return;
+    
+    setSubscribeStatus('loading');
+    try {
+      const res = await api.post('/subscribers/', { email: newsletterEmail });
+      setSubscribeStatus('success');
+      setSubscribeMessage(res.data.message || 'Subscribed successfully!');
+      setNewsletterEmail('');
+      setTimeout(() => {
+        setSubscribeStatus('idle');
+        setSubscribeMessage('');
+      }, 3000);
+    } catch (err) {
+      setSubscribeStatus('error');
+      setSubscribeMessage(err.response?.data?.detail || 'Failed to subscribe. Please try again.');
+      setTimeout(() => {
+        setSubscribeStatus('idle');
+        setSubscribeMessage('');
+      }, 3000);
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
     const fetchProjects = async () => {
       try {
-        const { data } = await api.get('/projects/?limit=3');
+        const { data } = await api.get('/projects/?limit=10');
         if (isMounted) {
           const projectsData = Array.isArray(data) ? data : (data?.data || []);
           setFeaturedProjects(projectsData);
@@ -39,6 +92,21 @@ const Home = () => {
     fetchProjects();
     return () => { isMounted = false; };
   }, []);
+
+  const shuffleProjects = () => {
+    setFeaturedProjects(prev => [...prev].sort(() => Math.random() - 0.5));
+    setStartIndex(0);
+  };
+
+  const visibleProjects = useMemo(() => {
+    if (featuredProjects.length === 0) return [];
+    const result = [];
+    for (let i = 0; i < Math.min(3, featuredProjects.length); i++) {
+      const idx = (startIndex + i) % featuredProjects.length;
+      result.push(featuredProjects[idx]);
+    }
+    return result;
+  }, [featuredProjects, startIndex]);
 
   return (
     <div className="w-full">
@@ -161,14 +229,42 @@ const Home = () => {
       {/* Featured Projects */}
       <section className="py-24 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-end mb-12">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-12">
             <div>
               <h4 className="text-primary font-bold tracking-wider uppercase mb-2">Our Impact</h4>
               <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">Featured Projects</h2>
             </div>
-            <Link to="/projects" className="hidden md:inline-flex items-center gap-2 text-secondary font-semibold hover:text-blue-800">
-              View All Projects <ArrowRight size={18} />
-            </Link>
+            <div className="flex flex-wrap items-center gap-3">
+              {featuredProjects.length > 3 && (
+                <>
+                  <button 
+                    onClick={shuffleProjects}
+                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-full transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                  >
+                    🔄 Shuffle
+                  </button>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => setStartIndex(prev => (prev - 1 + featuredProjects.length) % featuredProjects.length)}
+                      className="w-8 h-8 bg-white hover:bg-slate-50 border border-slate-200 rounded-full flex items-center justify-center text-slate-600 transition-all shadow-sm font-bold active:scale-95"
+                      title="Previous Projects"
+                    >
+                      ←
+                    </button>
+                    <button 
+                      onClick={() => setStartIndex(prev => (prev + 1) % featuredProjects.length)}
+                      className="w-8 h-8 bg-white hover:bg-slate-50 border border-slate-200 rounded-full flex items-center justify-center text-slate-600 transition-all shadow-sm font-bold active:scale-95"
+                      title="Next Projects"
+                    >
+                      →
+                    </button>
+                  </div>
+                </>
+              )}
+              <Link to="/projects" className="inline-flex items-center gap-2 text-secondary font-bold hover:text-blue-800">
+                View All Projects <ArrowRight size={18} />
+              </Link>
+            </div>
           </div>
           
           {loadingProjects ? (
@@ -183,7 +279,7 @@ const Home = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-               {featuredProjects.map((project, index) => {
+               {visibleProjects.map((project, index) => {
                 const projectId = project.uuid || project.id;
                 const imageUrl = project.main_image_url || (project.images && project.images.length > 0 ? `${project.images.find(img => img.is_main)?.image_url || project.images[0].image_url}` : 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80');
                 
@@ -298,16 +394,39 @@ const Home = () => {
               </div>
               
               <div>
-                <form className="flex flex-col sm:flex-row gap-4">
+                <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-4 relative">
                   <input 
                     type="email" 
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
                     placeholder="Enter your email address" 
-                    className="flex-grow px-8 py-5 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-lg"
+                    required
+                    disabled={subscribeStatus === 'loading'}
+                    className="flex-grow px-8 py-5 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-lg disabled:opacity-50"
                   />
-                  <button className="px-10 py-5 bg-primary text-white font-bold rounded-2xl hover:bg-green-700 transition-all shadow-xl shadow-primary/20 text-lg whitespace-nowrap">
-                    Subscribe Now
+                  <button 
+                    type="submit"
+                    disabled={subscribeStatus === 'loading'}
+                    className="px-10 py-5 bg-primary text-white font-bold rounded-2xl hover:bg-green-700 transition-all shadow-xl shadow-primary/20 text-lg whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {subscribeStatus === 'loading' ? 'Subscribing...' : 'Subscribe Now'}
                   </button>
                 </form>
+                
+                {subscribeMessage && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`mt-4 px-4 py-3 rounded-xl border ${
+                      subscribeStatus === 'success' 
+                        ? 'bg-green-500/20 border-green-500/50 text-green-200' 
+                        : 'bg-red-500/20 border-red-500/50 text-red-200'
+                    }`}
+                  >
+                    {subscribeMessage}
+                  </motion.div>
+                )}
+                
                 <p className="mt-4 text-slate-500 text-sm">
                   We respect your privacy. No spam, only impact updates.
                 </p>

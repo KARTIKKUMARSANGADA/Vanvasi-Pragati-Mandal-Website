@@ -167,6 +167,10 @@ const GalleryManager = () => {
     const [lightboxImage, setLightboxImage] = useState(null);
     const [toast, setToast] = useState(null);
 
+    // Multi-select and checkbox mode
+    const [isSelectMode, setIsSelectMode] = useState(false);
+    const [selectedUuids, setSelectedUuids] = useState([]);
+
     // Filters
     const [searchTerm, setSearchTerm] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('All');
@@ -207,6 +211,37 @@ const GalleryManager = () => {
                 showToast('Image deleted successfully');
             } catch (err) {
                 showToast('Failed to delete image', 'error');
+            }
+        }
+    };
+
+    const toggleSelectImage = (uuid) => {
+        setSelectedUuids(prev => 
+            prev.includes(uuid) ? prev.filter(id => id !== uuid) : [...prev, uuid]
+        );
+    };
+
+    const handleSelectAll = () => {
+        setSelectedUuids(filteredImages.map(img => img.uuid || img.id));
+    };
+
+    const handleDeselectAll = () => {
+        setSelectedUuids([]);
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedUuids.length === 0) return;
+        if (window.confirm(`Are you sure you want to delete the ${selectedUuids.length} selected images?`)) {
+            try {
+                await Promise.all(selectedUuids.map(id => api.delete(`/gallery/${id}`)));
+                setImages(prev => prev.filter(img => !selectedUuids.includes(img.uuid || img.id)));
+                setSelectedUuids([]);
+                setIsSelectMode(false);
+                showToast('Selected images deleted successfully');
+            } catch (err) {
+                console.error("Bulk delete failed", err);
+                showToast('Failed to delete some images', 'error');
+                fetchImages();
             }
         }
     };
@@ -255,12 +290,23 @@ const GalleryManager = () => {
                         </h1>
                         <p className="text-slate-500 mt-2 font-medium">Manage and organize your beautiful project images.</p>
                     </div>
-                    <button 
-                        onClick={() => setUploadModalOpen(true)}
-                        className="flex items-center gap-2 px-6 py-3 bg-secondary text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-all shrink-0"
-                    >
-                        <UploadCloud size={20} /> Upload Images
-                    </button>
+                    <div className="flex gap-3 shrink-0">
+                        <button
+                            onClick={() => {
+                                setIsSelectMode(!isSelectMode);
+                                setSelectedUuids([]);
+                            }}
+                            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${isSelectMode ? 'bg-slate-800 text-white shadow-lg' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                        >
+                            {isSelectMode ? 'Cancel Selection' : 'Select Photos'}
+                        </button>
+                        <button 
+                            onClick={() => setUploadModalOpen(true)}
+                            className="flex items-center gap-2 px-6 py-3 bg-secondary text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-all"
+                        >
+                            <UploadCloud size={20} /> Upload Images
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -333,53 +379,80 @@ const GalleryManager = () => {
                             }}
                             className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
                         >
-                            {filteredImages.map(img => (
-                                <motion.div 
-                                    variants={{
-                                        hidden: { opacity: 0, y: 20 },
-                                        visible: { opacity: 1, y: 0 }
-                                    }}
-                                    key={img.id} 
-                                    className="group relative aspect-square rounded-2xl overflow-hidden shadow-sm border border-slate-100 bg-slate-50 cursor-pointer"
-                                >
-                                    <img 
-                                        src={`${img.image_url}`} 
-                                        alt="Gallery" 
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" 
-                                    />
-                                    
-                                    {/* Hover Overlay */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                                        <div className="absolute top-4 right-4 flex gap-2 translate-y-[-10px] opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                                            <button 
-                                                onClick={(e) => { e.stopPropagation(); setLightboxImage(img); }}
-                                                className="p-2.5 bg-white/20 backdrop-blur-md text-white rounded-xl hover:bg-white/40 transition-colors"
-                                                title="View Fullscreen"
-                                            >
-                                                <Eye size={18} />
-                                            </button>
-                                            <button 
-                                                onClick={(e) => { e.stopPropagation(); handleDelete(img.id); }}
-                                                className="p-2.5 bg-red-500/80 backdrop-blur-md text-white rounded-xl hover:bg-red-600 transition-colors"
-                                                title="Delete Image"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </div>
+                            {filteredImages.map(img => {
+                                const imgUuid = img.uuid || img.id;
+                                const isSelected = selectedUuids.includes(imgUuid);
+                                return (
+                                    <motion.div 
+                                        variants={{
+                                            hidden: { opacity: 0, y: 20 },
+                                            visible: { opacity: 1, y: 0 }
+                                        }}
+                                        key={img.id} 
+                                        onClick={() => {
+                                            if (isSelectMode) {
+                                                toggleSelectImage(imgUuid);
+                                            } else {
+                                                setLightboxImage(img);
+                                            }
+                                        }}
+                                        className={`group relative aspect-square rounded-2xl overflow-hidden shadow-sm border bg-slate-50 cursor-pointer transition-all ${
+                                            isSelected ? 'ring-4 ring-secondary border-transparent scale-95' : 'border-slate-100'
+                                        }`}
+                                    >
+                                        <img 
+                                            src={`${img.image_url}`} 
+                                            alt="Gallery" 
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" 
+                                        />
                                         
-                                        <div className="translate-y-[10px] opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-75">
-                                            <p className="text-white font-medium truncate text-sm mb-1">{String(img.image_url || '').split('/').pop()}</p>
-                                            <div className="flex items-center gap-2 text-white/70 text-xs">
-                                                <Calendar size={12} />
-                                                <span>{new Date(img.created_at || Date.now()).toLocaleDateString()}</span>
-                                                {img.category && (
-                                                    <span className="bg-white/20 px-2 py-0.5 rounded text-[10px] ml-auto">{String(img.category)}</span>
-                                                )}
+                                        {/* Selection Checkbox Overlay */}
+                                        {isSelectMode && (
+                                            <div className="absolute top-4 left-4 z-10">
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={isSelected}
+                                                    onChange={() => {}}
+                                                    className="w-6 h-6 rounded-lg text-secondary border-slate-300 focus:ring-secondary accent-blue-500 cursor-pointer"
+                                                />
                                             </div>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            ))}
+                                        )}
+                                        
+                                        {/* Hover Overlay */}
+                                        {!isSelectMode && (
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                                                <div className="absolute top-4 right-4 flex gap-2 translate-y-[-10px] opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); setLightboxImage(img); }}
+                                                        className="p-2.5 bg-white/20 backdrop-blur-md text-white rounded-xl hover:bg-white/40 transition-colors"
+                                                        title="View Fullscreen"
+                                                    >
+                                                        <Eye size={18} />
+                                                    </button>
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); handleDelete(imgUuid); }}
+                                                        className="p-2.5 bg-red-500/80 backdrop-blur-md text-white rounded-xl hover:bg-red-600 transition-colors"
+                                                        title="Delete Image"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </div>
+                                                
+                                                <div className="translate-y-[10px] opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-75">
+                                                    <p className="text-white font-medium truncate text-sm mb-1">{String(img.image_url || '').split('/').pop()}</p>
+                                                    <div className="flex items-center gap-2 text-white/70 text-xs">
+                                                        <Calendar size={12} />
+                                                        <span>{new Date(img.created_at || Date.now()).toLocaleDateString()}</span>
+                                                        {img.category && (
+                                                            <span className="bg-white/20 px-2 py-0.5 rounded text-[10px] ml-auto">{String(img.category)}</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                );
+                            })}
                         </motion.div>
                     )}
                 </div>
@@ -387,6 +460,40 @@ const GalleryManager = () => {
 
             <UploadModal isOpen={isUploadModalOpen} onClose={() => setUploadModalOpen(false)} onUploadSuccess={handleUploadSuccess} />
             <Lightbox image={lightboxImage} onClose={() => setLightboxImage(null)} />
+
+            {/* Bulk Deletion Floating Bottom Bar */}
+            <AnimatePresence>
+                {isSelectMode && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 100 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 100 }}
+                        className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] bg-slate-900/95 text-white px-6 py-4 rounded-3xl shadow-2xl border border-white/10 flex items-center gap-6 backdrop-blur-md w-[90%] max-w-2xl justify-between"
+                    >
+                        <div className="flex items-center gap-4">
+                            <span className="bg-secondary text-white font-black px-3 py-1.5 rounded-xl text-sm">
+                                {selectedUuids.length} selected
+                            </span>
+                            <span className="text-slate-400 text-sm hidden sm:inline">of {filteredImages.length} images</span>
+                        </div>
+                        <div className="flex gap-2">
+                            <button 
+                                onClick={selectedUuids.length === filteredImages.length ? handleDeselectAll : handleSelectAll}
+                                className="px-4 py-2 hover:bg-white/10 rounded-xl font-bold transition-colors text-sm"
+                            >
+                                {selectedUuids.length === filteredImages.length ? 'Deselect All' : 'Select All'}
+                            </button>
+                            <button
+                                onClick={handleBulkDelete}
+                                disabled={selectedUuids.length === 0}
+                                className="px-5 py-2 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white rounded-xl font-bold transition-all text-sm flex items-center gap-2 shadow-lg shadow-red-500/25"
+                            >
+                                <Trash2 size={16} /> Delete Selected
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </AdminLayout>
     );
 };

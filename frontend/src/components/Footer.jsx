@@ -57,11 +57,11 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-3 text-[13px] md:text-[14px] leading-[1.6]">
                 <Phone size={18} className="text-primary shrink-0" />
-                <span className="text-slate-300">+91 7874789633</span>
+                <span className="text-slate-300">+91 81402 55951</span>
               </li>
               <li className="flex items-center gap-3 text-[13px] md:text-[14px] leading-[1.6]">
                 <Mail size={18} className="text-primary shrink-0" />
-                <span className="text-slate-300">kartiksangada2004@gmail.com</span>
+                <span className="text-slate-300">official.vanvasipragatimandal@gmail.com</span>
               </li>
             </ul>
             
@@ -82,7 +82,7 @@ const Footer = () => {
           <p className="text-[12px] md:text-[13px] text-center text-slate-500 w-full px-4">
             &copy; {new Date().getFullYear()} Vanvasi Pragati Mandal Pipaliya. All rights reserved.
           </p>
-          <Link to="/admin" className="text-[12px] md:text-[13px] text-slate-500 hover:text-white transition-colors">
+          <Link to="/admin-vpm-portal" className="text-[12px] md:text-[13px] text-slate-500 hover:text-white transition-colors">
             Admin Login
           </Link>
           

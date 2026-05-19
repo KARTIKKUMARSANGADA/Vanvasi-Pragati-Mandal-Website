@@ -151,7 +151,7 @@ const ProjectForm = () => {
     return (
         <div className="min-h-screen bg-slate-50 p-8">
             <div className="max-w-4xl mx-auto">
-                <Link to="/admin/dashboard" className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-all mb-6 font-medium">
+                <Link to="/admin-vpm-portal/dashboard" className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-all mb-6 font-medium">
                     <ArrowLeft size={18} /> Back to Dashboard
                 </Link>
 

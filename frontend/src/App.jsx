@@ -24,7 +24,9 @@ const AdminProjects = lazy(() => import('./pages/admin/AdminProjects'));
 const GalleryManager = lazy(() => import('./pages/admin/GalleryManager'));
 const AdminContacts = lazy(() => import('./pages/admin/AdminContacts'));
 const AdminLocations = lazy(() => import('./pages/admin/AdminLocations'));
+const AdminAbout = lazy(() => import('./pages/admin/AdminAbout'));
 const ProtectedRoute = lazy(() => import('./components/admin/ProtectedRoute'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Loading Fallback Component
 const PageLoader = () => (
@@ -41,26 +43,30 @@ function App() {
         <Suspense fallback={<PageLoader />}>
           <Routes>
             {/* Admin Routes */}
-            <Route path="/admin" element={<AdminLogin />} />
+            <Route path="/admin-vpm-portal" element={<AdminLogin />} />
 
-            <Route path="/admin/dashboard" element={
+            <Route path="/admin-vpm-portal/dashboard" element={
               <ProtectedRoute><AdminDashboard /></ProtectedRoute>
             } />
 
-            <Route path="/admin/projects" element={
+            <Route path="/admin-vpm-portal/projects" element={
               <ProtectedRoute><AdminProjects /></ProtectedRoute>
             } />
 
-            <Route path="/admin/gallery" element={
+            <Route path="/admin-vpm-portal/gallery" element={
               <ProtectedRoute><GalleryManager /></ProtectedRoute>
             } />
 
-            <Route path="/admin/contacts" element={
+            <Route path="/admin-vpm-portal/contacts" element={
               <ProtectedRoute><AdminContacts /></ProtectedRoute>
             } />
 
-            <Route path="/admin/locations" element={
+            <Route path="/admin-vpm-portal/locations" element={
               <ProtectedRoute><AdminLocations /></ProtectedRoute>
+            } />
+
+            <Route path="/admin-vpm-portal/about" element={
+              <ProtectedRoute><AdminAbout /></ProtectedRoute>
             } />
 
             {/* Public Layout */}
@@ -98,6 +104,9 @@ function App() {
             <Route path="/contact" element={
               <Layout><Contact /></Layout>
             } />
+
+            {/* Wildcard 404 Page */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
         <Analytics />

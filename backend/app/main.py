@@ -30,6 +30,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from app.middleware.rate_limit import RateLimitMiddleware
+app.add_middleware(RateLimitMiddleware, limit=20, window=60)
+
 # Static Files (Local fallback if needed, though we use Supabase Storage)
 UPLOAD_DIR = os.path.join(os.getcwd(), "app/uploads")
 if not os.path.exists(UPLOAD_DIR):
