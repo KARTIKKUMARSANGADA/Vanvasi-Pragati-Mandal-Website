@@ -65,6 +65,7 @@ async def update_project(
     deleted_images: List[str] = Form(default=[]),
     gallery_urls: List[str] = Form(default=[]),
     gallery_new_indices: List[int] = Form(default=[]),
+    ordered_image_urls: List[str] = Form(default=[]),
     main_image_index: Optional[int] = Form(None),
     main_image_url: Optional[str] = Form(None),
     images: List[UploadFile] = File(default=[]),
@@ -97,8 +98,10 @@ async def update_project(
             gallery_urls=gallery_urls, 
             gallery_new_indices=gallery_new_indices, 
             main_image_url=main_image_url, 
-            main_image_index=main_image_index
+            main_image_index=main_image_index,
+            ordered_image_urls=ordered_image_urls
         )
+
         
         if not updated_project:
             raise HTTPException(status_code=404, detail="Project not found")

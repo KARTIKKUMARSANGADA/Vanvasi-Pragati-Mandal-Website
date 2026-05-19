@@ -8,7 +8,12 @@ router = APIRouter()
 
 @router.post("/")
 def create_contact(contact_in: ContactCreate):
-    return contact_service.create_contact_message(contact_in.model_dump())
+    if contact_in.honeypot:
+        raise HTTPException(status_code=400, detail="Spam detected")
+        
+    data = contact_in.model_dump()
+    data.pop("honeypot", None)
+    return contact_service.create_contact_message(data)
 
 @router.get("/")
 def read_contacts(
@@ -18,11 +23,26 @@ def read_contacts(
 ):
     return contact_service.get_messages(skip=skip, limit=limit)
 
-@router.delete("/{id}")
-def delete_contact(
-    id: int, 
+@router.get("/unread/count")
+def read_unread_count(current_admin: dict = Depends(deps.get_current_admin)):
+    count = contact_service.get_unread_count()
+    return {"count": count}
+
+@router.put("/{uuid}/read")
+def mark_message_read(
+    uuid: str,
     current_admin: dict = Depends(deps.get_current_admin)
 ):
-    if not contact_service.delete_message(id):
+    if not contact_service.mark_as_read(uuid):
+        raise HTTPException(status_code=404, detail="Message not found")
+    return {"message": "Message marked as read"}
+
+@router.delete("/{uuid}")
+def delete_contact(
+    uuid: str, 
+    current_admin: dict = Depends(deps.get_current_admin)
+):
+    if not contact_service.delete_message(uuid):
         raise HTTPException(status_code=404, detail="Message not found")
     return {"message": "Message deleted successfully"}
+

@@ -9,6 +9,8 @@ frontend/.env.*
 
 # Backend (Python / FastAPI)
 backend/venv/
+backend/venv_linux/
+backend/venv_linux_system/
 backend/env/
 backend/__pycache__/
 backend/**/*.py[cod]
@@ -19,6 +21,7 @@ backend/.env
 
 # Database & Uploads
 backend/database.db
+backend/uploads/
 backend/app/uploads/*
 !backend/app/uploads/.gitkeep
 

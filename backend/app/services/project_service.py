@@ -98,26 +98,46 @@ def sanitize_project_update_data(
 
 from functools import lru_cache
 
+@lru_cache(maxsize=128)
 def get_projects(skip: int = 0, limit: int = 100):
-    # Select only necessary fields for listing
+    # Explicitly select columns and ensure uuid is treated as a string
     response = supabase.table("projects") \
-        .select("id, uuid, title, category, description, location, date, main_image_url") \
+        .select('id, uuid, title, category, description, full_description, location, date, impact_points, created_at, images:project_images(*)') \
         .order("created_at", desc=True) \
         .range(skip, skip + limit - 1) \
         .execute()
-        
-    projects = response.data
-    return projects
-
-@lru_cache(maxsize=32)
-def get_project(project_uuid: str):
-    response = supabase.table("projects") \
-        .select("*, project_images(*)") \
-        .eq("uuid", str(project_uuid)) \
-        .single() \
-        .execute()
-        
+    
+    if response.data:
+        for p in response.data:
+            if 'uuid' in p and p['uuid']:
+                p['uuid'] = str(p['uuid'])
+            if 'images' in p and p['images']:
+                p['images'].sort(key=lambda x: x.get('position', 0) or 0)
     return response.data
+
+@lru_cache(maxsize=128)
+def get_project(project_uuid: str):
+    # Try finding by UUID first, fallback to ID if it's a number
+    query = supabase.table("projects").select('id, uuid, title, category, description, full_description, location, date, impact_points, created_at, images:project_images(*)')
+    
+    try:
+        if project_uuid.isdigit():
+            response = query.eq("id", int(project_uuid)).execute()
+        else:
+            response = query.eq("uuid", str(project_uuid)).execute()
+            
+        if response.data:
+            project = response.data[0]
+            if 'uuid' in project and project['uuid']:
+                project['uuid'] = str(project['uuid'])
+            if 'images' in project and project['images']:
+                project['images'].sort(key=lambda x: x.get('position', 0) or 0)
+            return project
+    except Exception as e:
+        print(f"Error fetching project: {e}")
+        
+    return None
+
 
 async def create_project(project_in: dict, images: List[UploadFile] = None, gallery_new_indices: List[int] = None, main_image_index: int = None):
     # Insert project
@@ -163,9 +183,27 @@ async def create_project(project_in: dict, images: List[UploadFile] = None, gall
                         "category": project["category"]
                     }).execute()
                     
+    try:
+        from app.services import activity_service
+        activity_service.log_activity("Create Project", f"Created project '{project['title']}'")
+    except Exception as act_err:
+        logger.error(f"Activity logging failed: {act_err}")
+
+    get_projects.cache_clear()
+    get_project.cache_clear()
     return get_project(project["uuid"])
 
-async def update_project(project_uuid: str, project_in: dict, images: List[UploadFile] = None, deleted_images: List[str] = None, gallery_urls: List[str] = None, gallery_new_indices: List[int] = None, main_image_url: str = None, main_image_index: int = None):
+async def update_project(
+    project_uuid: str, 
+    project_in: dict, 
+    images: List[UploadFile] = None, 
+    deleted_images: List[str] = None, 
+    gallery_urls: List[str] = None, 
+    gallery_new_indices: List[int] = None, 
+    main_image_url: str = None, 
+    main_image_index: int = None,
+    ordered_image_urls: List[str] = None
+):
     project = get_project(project_uuid)
     if not project:
         return None
@@ -221,7 +259,8 @@ async def update_project(project_uuid: str, project_in: dict, images: List[Uploa
                 "image_url": image_url,
                 "project_id": project_id,
                 "is_gallery": is_gal,
-                "is_main": is_main
+                "is_main": is_main,
+                "position": 9999 + index  # Set high position for new uploads to put them at the end by default
             }).execute()
             
             if is_gal:
@@ -231,10 +270,20 @@ async def update_project(project_uuid: str, project_in: dict, images: List[Uploa
                     "category": cat
                 }).execute()
 
-    # 5. Set existing image as main (If URL was provided)
+    # 5. Set existing image as main (If URL/UUID was provided)
     if main_image_url:
         logger.info("Setting existing image as main: %s", main_image_url)
-        supabase.table("project_images").update({"is_main": True}).eq("project_id", project_id).eq("image_url", main_image_url).execute()
+        is_uuid = False
+        try:
+            uuid.UUID(str(main_image_url))
+            is_uuid = True
+        except ValueError:
+            pass
+
+        if is_uuid:
+            supabase.table("project_images").update({"is_main": True}).eq("project_id", project_id).eq("uuid", str(main_image_url)).execute()
+        else:
+            supabase.table("project_images").update({"is_main": True}).eq("project_id", project_id).eq("image_url", main_image_url).execute()
 
     # 6. Handle gallery status updates for existing images
     if gallery_urls is not None:
@@ -257,7 +306,22 @@ async def update_project(project_uuid: str, project_in: dict, images: List[Uploa
                 else:
                     supabase.table("gallery").delete().eq("image_url", img["image_url"]).execute()
 
+    # 7. Handle image position reordering
+    if ordered_image_urls is not None:
+        logger.info("Reordering image list for project %s: %r", project_id, ordered_image_urls)
+        for pos_idx, url in enumerate(ordered_image_urls):
+            supabase.table("project_images").update({"position": pos_idx}).eq("project_id", project_id).eq("image_url", url).execute()
+
+    try:
+        from app.services import activity_service
+        activity_service.log_activity("Update Project", f"Updated project '{project['title']}'")
+    except Exception as act_err:
+        logger.error(f"Activity logging failed: {act_err}")
+
+    get_projects.cache_clear()
+    get_project.cache_clear()
     return get_project(project_uuid)
+
 
 def delete_project(project_uuid: str):
     project = get_project(project_uuid)
@@ -265,8 +329,18 @@ def delete_project(project_uuid: str):
         return False
     
     project_id = project['id']
+    
+    try:
+        from app.services import activity_service
+        activity_service.log_activity("Delete Project", f"Deleted project '{project['title']}'")
+    except Exception as act_err:
+        logger.error(f"Activity logging failed: {act_err}")
+
     # Delete project images first
     supabase.table("project_images").delete().eq("project_id", project_id).execute()
     # Delete project
     response = supabase.table("projects").delete().eq("uuid", project_uuid).execute()
+    
+    get_projects.cache_clear()
+    get_project.cache_clear()
     return len(response.data) > 0

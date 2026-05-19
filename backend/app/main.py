@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.api.routes import auth, projects, gallery, contact
+from app.api.routes import auth, projects, gallery, contact, stats, activity, content, subscribers
 from app.core.config import settings
 import os
 import bcrypt
@@ -12,9 +12,19 @@ if not hasattr(bcrypt, "__about__"):
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
+# CORS Setup
+allowed_origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://vanvasi.org",
+]
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url:
+    allowed_origins.append(frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex="https?://.*", # Permits all http and https origins
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -32,6 +42,10 @@ app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(projects.router, prefix="/api/projects", tags=["Projects"])
 app.include_router(gallery.router, prefix="/api/gallery", tags=["Gallery"])
 app.include_router(contact.router, prefix="/api/contact", tags=["Contact"])
+app.include_router(stats.router, prefix="/api/stats", tags=["Stats"])
+app.include_router(activity.router, prefix="/api/activity", tags=["Activity"])
+app.include_router(content.router, prefix="/api/content", tags=["Content"])
+app.include_router(subscribers.router, prefix="/api/subscribers", tags=["Subscribers"])
 
 @app.get("/")
 def root():

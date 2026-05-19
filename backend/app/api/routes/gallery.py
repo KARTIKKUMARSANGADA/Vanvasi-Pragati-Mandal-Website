@@ -19,11 +19,11 @@ async def upload_gallery_images(
 ):
     return await gallery_service.upload_images(images)
 
-@router.delete("/{id}")
+@router.delete("/{uuid}")
 def delete_gallery_image(
-    id: int, 
+    uuid: str, 
     current_admin: dict = Depends(deps.get_current_admin)
 ):
-    if not gallery_service.delete_image(id):
+    if not gallery_service.delete_image(uuid):
         raise HTTPException(status_code=404, detail="Image not found")
     return {"message": "Image deleted successfully"}

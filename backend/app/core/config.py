@@ -22,6 +22,6 @@ class Settings(BaseSettings):
             raise ValueError("Admin credentials cannot be empty")
         return v
 
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 settings = Settings()

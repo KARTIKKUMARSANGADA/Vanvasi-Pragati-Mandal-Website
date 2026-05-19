@@ -28,10 +28,24 @@ async def upload_images(images: List[UploadFile]):
         image_url = supabase.storage.from_("images").get_public_url(file_name)
         
         supabase.table("gallery").insert({
+            "uuid": str(uuid.uuid4()),
             "image_url": image_url
         }).execute()
+
+    try:
+        from app.services import activity_service
+        activity_service.log_activity("Upload Gallery", f"Uploaded {len(images)} images to gallery")
+    except Exception:
+        pass
+
     return True
 
-def delete_image(image_id: int):
-    response = supabase.table("gallery").delete().eq("id", image_id).execute()
+def delete_image(image_uuid: str):
+    response = supabase.table("gallery").delete().eq("uuid", image_uuid).execute()
+    if len(response.data) > 0:
+        try:
+            from app.services import activity_service
+            activity_service.log_activity("Delete Gallery Image", f"Deleted gallery image")
+        except Exception:
+            pass
     return len(response.data) > 0
