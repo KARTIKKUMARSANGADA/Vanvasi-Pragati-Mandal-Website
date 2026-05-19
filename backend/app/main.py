@@ -17,6 +17,7 @@ allowed_origins = [
     "http://localhost:5173",
     "http://localhost:3000",
     "https://vanvasi.org",
+    "https://vanvasi-pragati-mandal-pipaliya.vercel.app",
 ]
 frontend_url_env = os.getenv("FRONTEND_URL")
 if frontend_url_env:
