@@ -1,81 +1,85 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Compass, Home, ArrowRight } from 'lucide-react';
-import SEO from '../components/common/SEO';
+import { Home, Compass, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const NotFound = () => {
   return (
-    <div className="min-h-[80vh] flex items-center justify-center bg-slate-50 px-4 py-20 relative overflow-hidden">
-      <SEO 
-        title="Page Not Found (404)" 
-        description="The page you are looking for does not exist on Vanvasi Pragati Mandal trust's website." 
-      />
+    <div className="min-h-screen bg-slate-900 flex flex-col justify-center items-center p-6 text-center relative overflow-hidden">
+      {/* Dynamic Glowing Ambient Blobs */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px] animate-pulse pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-[120px] animate-pulse pointer-events-none" />
 
-      {/* Decorative blurred background blobs */}
-      <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-primary/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-secondary/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 pointer-events-none" />
-
-      <div className="max-w-xl w-full text-center relative z-10">
-        {/* Animated Compass Icon */}
+      {/* Main Glass Card */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 30 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+        className="max-w-xl w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl relative z-10"
+      >
+        {/* Animated Compass Icon Card */}
         <motion.div
-          initial={{ rotate: -180, scale: 0 }}
-          animate={{ rotate: 0, scale: 1 }}
-          transition={{ type: 'spring', stiffness: 100, damping: 15 }}
-          className="w-28 h-28 bg-white text-primary rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-green-500/10 border border-slate-100"
+          initial={{ rotate: -45, opacity: 0 }}
+          animate={{ rotate: 0, opacity: 1 }}
+          transition={{ delay: 0.2, type: 'spring', stiffness: 80 }}
+          className="w-24 h-24 bg-gradient-to-tr from-primary to-green-400 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-green-500/20"
         >
-          <Compass size={56} className="animate-[spin_20s_linear_infinite]" />
+          <Compass className="text-white w-12 h-12 animate-spin-slow" />
         </motion.div>
 
         {/* 404 Heading */}
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-7xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-800 tracking-tighter mb-4"
-        >
+        <h1 className="text-7xl md:text-8xl font-black bg-gradient-to-r from-primary to-emerald-400 bg-clip-text text-transparent tracking-tight leading-none mb-4">
           404
-        </motion.h1>
+        </h1>
 
-        {/* Subtitle */}
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="text-2xl font-extrabold text-slate-800 mb-4"
-        >
-          Page Lost in the Woods
-        </motion.h2>
+        {/* Dynamic Title */}
+        <h2 className="text-2xl md:text-3xl font-extrabold text-white mb-4 tracking-tight">
+          Page Not Found
+        </h2>
 
-        {/* Description */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="text-slate-600 mb-10 text-lg leading-relaxed max-w-md mx-auto"
-        >
-          The resource you are looking for has either been moved, deleted, or never existed in our database. Let's get you back on track.
-        </motion.p>
+        {/* Description Text */}
+        <p className="text-slate-400 text-base md:text-lg mb-10 leading-relaxed max-w-md mx-auto">
+          We couldn't find the page you are looking for. It might have been moved, deleted, or never existed in the first place.
+        </p>
 
-        {/* Back to Home Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center"
-        >
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold rounded-full transition-all duration-300 shadow-[0_10px_20px_-5px_rgba(34,197,94,0.3)] hover:shadow-[0_15px_30px_-5px_rgba(34,197,94,0.4)] hover:scale-105 active:scale-98 text-base group"
-          >
-            <Home size={18} />
-            <span>Return to Homepage</span>
-            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <Link to="/">
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="flex items-center justify-center gap-2 px-8 py-3.5 bg-primary text-white font-extrabold rounded-2xl shadow-lg shadow-green-500/20 hover:bg-green-700 transition-all text-sm w-full sm:w-auto"
+            >
+              <Home size={18} />
+              Return Home
+            </motion.button>
           </Link>
-        </motion.div>
-      </div>
+          
+          <Link to="/projects">
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="flex items-center justify-center gap-2 px-8 py-3.5 bg-white/10 hover:bg-white/15 text-white font-extrabold rounded-2xl border border-white/10 transition-all text-sm w-full sm:w-auto"
+            >
+              <MapPin size={18} />
+              Explore Projects
+            </motion.button>
+          </Link>
+        </div>
+      </motion.div>
+
+      {/* Styled Inline Extra Styles for spin slow */}
+      <style>{`
+        @keyframes spinSlow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+          animation: spinSlow 20s linear infinite;
+        }
+      `}</style>
     </div>
   );
 };
 
-export default NotFound;
+export default React.memo(NotFound);

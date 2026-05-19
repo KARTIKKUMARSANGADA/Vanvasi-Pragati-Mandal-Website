@@ -48,3 +48,33 @@ def compress_image_bytes(content: bytes, max_size=(1200, 1200), quality=80) -> b
     img.save(output, format="JPEG", quality=quality, optimize=True)
     
     return output.getvalue()
+
+def verify_image_magic_bytes(content: bytes) -> bool:
+    """
+    Checks the first few bytes of the file to ensure it matches standard image signatures.
+    """
+    if len(content) < 4:
+        return False
+    # JPEG: FF D8 FF
+    if content.startswith(b"\xff\xd8\xff"):
+        return True
+    # PNG: 89 50 4E 47
+    if content.startswith(b"\x89PNG"):
+        return True
+    # GIF: GIF87a or GIF89a
+    if content.startswith(b"GIF87a") or content.startswith(b"GIF89a"):
+        return True
+    # WebP: RIFF ... WEBP
+    if content.startswith(b"RIFF") and b"WEBP" in content[8:14]:
+        return True
+    return False
+
+async def validate_image_file(image_file: UploadFile):
+    """
+    Reads the beginning of the uploaded file to verify it's a valid image.
+    Throws ValueError if verification fails.
+    """
+    content = await image_file.read()
+    await image_file.seek(0)
+    if not verify_image_magic_bytes(content):
+        raise ValueError(f"Invalid file signature on '{image_file.filename}': uploaded file is not a supported image type.")

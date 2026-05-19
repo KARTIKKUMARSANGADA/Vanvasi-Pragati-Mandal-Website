@@ -1,5 +1,5 @@
 from typing import Generator
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from pydantic import ValidationError
@@ -12,8 +12,23 @@ reusable_oauth2 = OAuth2PasswordBearer(
 )
 
 def get_current_admin(
-    token: str = Depends(reusable_oauth2)
+    request: Request
 ) -> dict:
+    # 1. Try to read from secure cookie
+    token = request.cookies.get("admin_token")
+    
+    # 2. Fallback to standard Bearer authorization header if cookie is missing (Swagger / Script compatible)
+    if not token:
+        authorization: str = request.headers.get("Authorization")
+        if authorization and authorization.startswith("Bearer "):
+            token = authorization.split(" ")[1]
+            
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated. Secure session token missing.",
+        )
+        
     try:
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]

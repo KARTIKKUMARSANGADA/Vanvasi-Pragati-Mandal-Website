@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Heart } from 'lucide-react';
 import LOGO from '../assets/LOGO.png'; 
 import { useDonation } from '../context/DonationContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -113,34 +114,42 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Menu Dropdown */}
-      <div className={`md:hidden absolute w-full bg-white border-t border-slate-100 shadow-2xl transition-all duration-300 ease-in-out ${
-        isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'
-      }`}>
-        <div className="px-4 py-6 flex flex-col space-y-4">
-          {links.map((link) => (
-            <Link
-              key={link.name}
-              to={link.path}
-              onClick={() => setIsOpen(false)}
-              className={`block px-4 py-3 rounded-xl text-base font-semibold transition-all ${
-                isActive(link.path)
-                  ? 'text-primary bg-green-50'
-                  : 'text-slate-600 hover:text-primary hover:bg-slate-50'
-              }`}
-            >
-              {link.name}
-            </Link>
-          ))}
-          <div className="pt-4 border-t border-slate-100">
-            <button
-              onClick={() => { setIsOpen(false); openDonation(); }}
-              className="block w-full text-center px-6 py-4 rounded-xl bg-primary text-white font-bold hover:bg-green-700 shadow-md"
-            >
-              Support Us
-            </button>
-          </div>
-        </div>
-      </div>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0, y: -20 }}
+            animate={{ opacity: 1, height: 'auto', y: 0 }}
+            exit={{ opacity: 0, height: 0, y: -20 }}
+            transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+            className="md:hidden absolute w-full bg-white border-t border-slate-100 shadow-2xl overflow-hidden"
+          >
+            <div className="px-4 py-6 flex flex-col space-y-4">
+              {links.map((link) => (
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  onClick={() => setIsOpen(false)}
+                  className={`block px-4 py-3 rounded-xl text-base font-semibold transition-all ${
+                    isActive(link.path)
+                      ? 'text-primary bg-green-50'
+                      : 'text-slate-600 hover:text-primary hover:bg-slate-50'
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              ))}
+              <div className="pt-4 border-t border-slate-100">
+                <button
+                  onClick={() => { setIsOpen(false); openDonation(); }}
+                  className="block w-full text-center px-6 py-4 rounded-xl bg-primary text-white font-bold hover:bg-green-700 shadow-md"
+                >
+                  Support Us
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 };

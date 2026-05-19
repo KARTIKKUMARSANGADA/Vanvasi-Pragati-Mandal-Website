@@ -68,18 +68,20 @@ const ProjectDetails = () => {
 
   return (
     <div className="w-full bg-slate-50 min-h-screen pb-24 pt-20">
-      {/* Hero Section */}
-      <div className="relative h-[85vh] w-full overflow-hidden">
+      
+      {/* Restored Original Hero Section - Fixed with Flexbox to prevent overlap */}
+      <div className="relative min-h-[85vh] w-full flex flex-col justify-end pb-24 overflow-hidden">
         {/* Immersive Hero Image */}
-        <img
-          src={mainImageUrl}
-          alt={project.title}
-          className="w-full h-full object-cover"
-          loading="eager"
-        />
-
-        {/* Enhanced Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+        <div className="absolute inset-0 z-0">
+          <img
+            src={mainImageUrl}
+            alt={project.title}
+            className="w-full h-full object-cover"
+            loading="eager"
+          />
+          {/* Enhanced Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+        </div>
 
         {/* Improved Back Button Visibility: Top-Left */}
         <Link
@@ -90,8 +92,8 @@ const ProjectDetails = () => {
           <span>Back to Projects</span>
         </Link>
 
-        {/* Content Section: Elevated to bottom-20 with better spacing */}
-        <div className="absolute bottom-20 left-0 w-full px-6 md:px-12 z-20">
+        {/* Content Section: Restored to original position but using relative flex layout */}
+        <div className="relative z-20 w-full px-6 md:px-12">
           <div className="max-w-4xl">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -112,7 +114,7 @@ const ProjectDetails = () => {
               </div>
 
               {/* Impactful Title with clean hierarchy */}
-              <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight drop-shadow-2xl">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight drop-shadow-2xl">
                 {String(project.title || 'Untitled Project')}
               </h1>
             </motion.div>
@@ -120,7 +122,19 @@ const ProjectDetails = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-20">
+      {/* Restored Original Layout Container */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-30">
+        
+        {/* Restored Breadcrumb Navigation Bar */}
+        <div className="bg-white/90 backdrop-blur-md px-6 py-4 rounded-3xl border border-slate-100/50 shadow-lg flex flex-wrap items-center gap-2 text-sm text-slate-500 font-bold mb-8">
+          <Link to="/" className="hover:text-primary transition-colors">Home</Link>
+          <span className="text-slate-300">/</span>
+          <Link to="/projects" className="hover:text-primary transition-colors">Our Work</Link>
+          <span className="text-slate-300">/</span>
+          <span className="text-slate-800 line-clamp-1 max-w-[200px] md:max-w-md font-extrabold">{String(project.title || 'Untitled')}</span>
+        </div>
+
+        {/* Restored Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
           {/* Main Content */}

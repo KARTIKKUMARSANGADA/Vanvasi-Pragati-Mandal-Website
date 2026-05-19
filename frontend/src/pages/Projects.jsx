@@ -1,39 +1,42 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, MapPin, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
 import { CardSkeleton } from '../components/common/Skeleton';
 import LazyImage from '../components/common/LazyImage';
+import ApiErrorCard from '../components/common/ApiErrorCard';
 
 const Projects = () => {
-  const [activeCategory, setActiveCategory] = useState('All');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeCategory = searchParams.get('category') || 'All';
+  const searchQuery = searchParams.get('search') || '';
+
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [error, setError] = useState(null);
   const [displayLimit, setDisplayLimit] = useState(6);
 
-  useEffect(() => {
-    let isMounted = true;
-    const fetchProjects = async () => {
-      try {
-        const res = await api.get('/projects/');
-        if (isMounted) {
-          const projectsData = Array.isArray(res.data) 
-            ? res.data 
-            : (res.data?.data || []);
-          setProjects(projectsData);
-        }
-      } catch (err) {
-        // Keep important error logging but minimal
-        console.error("Failed to fetch projects");
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-    fetchProjects();
-    return () => { isMounted = false; };
+  const fetchProjects = useCallback(async () => {
+    try {
+      setError(null);
+      setLoading(true);
+      const res = await api.get('/projects/');
+      const projectsData = Array.isArray(res.data) 
+        ? res.data 
+        : (res.data?.data || []);
+      setProjects(projectsData);
+    } catch (err) {
+      console.error("Failed to fetch projects");
+      setError("We encountered an error trying to load projects. Please check your internet connection.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   // Dynamically extract unique categories from projects - Memoized
   const categories = useMemo(() => {
@@ -62,15 +65,41 @@ const Projects = () => {
   }, [filteredProjects, displayLimit]);
 
   const handleCategoryChange = useCallback((cat) => {
-    setActiveCategory(cat);
-  }, []);
+    setSearchParams(prev => {
+      if (cat && cat !== 'All') {
+        prev.set('category', cat);
+      } else {
+        prev.delete('category');
+      }
+      // Reset limit on search criteria changes
+      setDisplayLimit(6);
+      return prev;
+    });
+  }, [setSearchParams]);
+
+  const handleSearchChange = (val) => {
+    setSearchParams(prev => {
+      if (val) {
+        prev.set('search', val);
+      } else {
+        prev.delete('search');
+      }
+      setDisplayLimit(6);
+      return prev;
+    });
+  };
+
+  const handleClearAll = () => {
+    setSearchParams({});
+    setDisplayLimit(6);
+  };
 
   return (
     <div className="w-full pb-24 pt-20">
       {/* Page Header */}
       <div className="bg-slate-50 py-16 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4">Our Projects</h1>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">Our Projects</h1>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">
             Discover the impact of our initiatives across rural and tribal communities. From building infrastructure to empowering local youth.
           </p>
@@ -87,8 +116,8 @@ const Projects = () => {
                 type="text"
                 placeholder="Search projects by title, location, or description..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-6 py-4 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none text-slate-700"
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="w-full px-6 py-4 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none text-slate-700 font-medium"
               />
               <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -114,7 +143,9 @@ const Projects = () => {
         </div>
 
         {/* Project Grid */}
-        {loading ? (
+        {error ? (
+          <ApiErrorCard message={error} onRetry={fetchProjects} />
+        ) : loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(6)].map((_, i) => (
               <CardSkeleton key={i} />
@@ -133,7 +164,7 @@ const Projects = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: index * 0.05 }}
-                    className="bg-white rounded-2xl overflow-hidden shadow-lg border border-slate-100 flex flex-col group"
+                    className="bg-white rounded-2xl overflow-hidden shadow-lg border border-slate-100 flex flex-col group hover:shadow-xl transition-all"
                   >
                     <div className="relative h-56 overflow-hidden bg-slate-100">
                       <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-20">
@@ -196,11 +227,12 @@ const Projects = () => {
         )}
 
         {filteredProjects.length === 0 && !loading && (
-          <div className="text-center py-20">
-            <p className="text-xl text-slate-500">No projects found matching your criteria.</p>
+          <div className="text-center py-20 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+            <p className="text-xl text-slate-500 font-bold mb-2">No projects match your criteria.</p>
+            <p className="text-slate-400 text-sm mb-4">Try checking for typos or searching a different category.</p>
             <button 
-              onClick={() => {setActiveCategory('All');}}
-              className="mt-4 text-primary font-medium hover:underline"
+              onClick={handleClearAll}
+              className="px-6 py-2.5 bg-primary text-white font-bold rounded-xl shadow-md shadow-green-500/10 hover:bg-green-700 transition-all text-xs"
             >
               Clear filters
             </button>

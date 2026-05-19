@@ -118,8 +118,10 @@ def broadcast_custom_message(
 ):
     """
     Broadcast a custom email newsletter message to selected emails, or all active subscribers if list is empty/None.
+    Emails are sent in a background thread so the API returns instantly.
     """
-    from app.core.email_handler import send_custom_email
+    import threading
+    from app.core.email_handler import send_bulk_custom_email
     
     recipients = []
     if request.emails and len(request.emails) > 0:
@@ -133,14 +135,18 @@ def broadcast_custom_message(
             
     if not recipients:
         return {"message": "No active recipients to email.", "sent_count": 0}
+    
+    # Send emails in background thread (non-blocking)
+    thread = threading.Thread(
+        target=send_bulk_custom_email,
+        args=(recipients, request.subject, request.body),
+        daemon=True
+    )
+    thread.start()
         
-    success_count = 0
-    for email in recipients:
-        if send_custom_email(email, request.subject, request.body):
-            success_count += 1
-            
     return {
-        "message": f"Successfully sent custom message to {success_count} of {len(recipients)} recipients!",
+        "message": f"Broadcast queued for {len(recipients)} recipients! Emails are being sent.",
         "total_recipients": len(recipients),
-        "sent_count": success_count
+        "sent_count": len(recipients)
     }
+

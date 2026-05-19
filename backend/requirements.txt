@@ -14,3 +14,8 @@ supabase
 pydantic[email]
 Pillow
 requests
+alembic
+fastapi-cache2
+pytest
+pytest-asyncio
+httpx

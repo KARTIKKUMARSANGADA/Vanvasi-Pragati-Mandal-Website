@@ -37,6 +37,12 @@ async def upload_content_image(
     """
     Upload a site content image (e.g. team member avatar) to Supabase Storage and get the public URL.
     """
+    from app.core.image_handler import validate_image_file
+    try:
+        await validate_image_file(file)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+        
     try:
         supabase = get_supabase()
         # Compress image

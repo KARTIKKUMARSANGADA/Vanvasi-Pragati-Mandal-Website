@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, Plus, Trash2 } from 'lucide-react';
+import { X, Save, Plus, Trash2, ArrowLeft, ArrowRight } from 'lucide-react';
 import api from '../../api/axios';
 
 const appendScalarField = (formData, key, value) => {
@@ -181,6 +181,59 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
         }
     };
 
+    const moveExistingImage = (index, direction) => {
+        if (direction === 'left' && index === 0) return;
+        if (direction === 'right' && index === existingImages.length - 1) return;
+        
+        const targetIndex = direction === 'left' ? index - 1 : index + 1;
+        const newImages = [...existingImages];
+        const temp = newImages[index];
+        newImages[index] = newImages[targetIndex];
+        newImages[targetIndex] = temp;
+        setExistingImages(newImages);
+    };
+
+    const movePreviewImage = (index, direction) => {
+        if (direction === 'left' && index === 0) return;
+        if (direction === 'right' && index === previewImages.length - 1) return;
+        
+        const targetIndex = direction === 'left' ? index - 1 : index + 1;
+        
+        const newImages = [...images];
+        const tempImg = newImages[index];
+        newImages[index] = newImages[targetIndex];
+        newImages[targetIndex] = tempImg;
+        setImages(newImages);
+        
+        const newPreviews = [...previewImages];
+        const tempPrev = newPreviews[index];
+        newPreviews[index] = newPreviews[targetIndex];
+        newPreviews[targetIndex] = tempPrev;
+        setPreviewImages(newPreviews);
+        
+        setGallerySelections(prev => {
+            const currentNew = [...prev.new];
+            const hasIndex = currentNew.includes(index);
+            const hasTarget = currentNew.includes(targetIndex);
+            
+            let updated = currentNew;
+            if (hasIndex && !hasTarget) {
+                updated = currentNew.map(i => i === index ? targetIndex : i);
+            } else if (!hasIndex && hasTarget) {
+                updated = currentNew.map(i => i === targetIndex ? index : i);
+            }
+            return { ...prev, new: updated };
+        });
+
+        if (mainImageSelection.type === 'new') {
+            if (mainImageSelection.identifier === index) {
+                setMainImageSelection(prev => ({ ...prev, identifier: targetIndex }));
+            } else if (mainImageSelection.identifier === targetIndex) {
+                setMainImageSelection(prev => ({ ...prev, identifier: index }));
+            }
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -200,6 +253,9 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
         deletedImages.forEach(url => data.append('deleted_images', url));
         gallerySelections.existing.forEach(url => data.append('gallery_urls', url));
         gallerySelections.new.forEach(idx => data.append('gallery_new_indices', idx));
+
+        const orderedUrls = existingImages.map(image => typeof image === 'string' ? image : image.image_url);
+        orderedUrls.forEach(url => data.append('ordered_image_urls', url));
 
         if (mainImageSelection.type === 'existing' && mainImageSelection.identifier) {
             data.append('main_image_url', mainImageSelection.identifier);
@@ -361,12 +417,22 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
                                                         </div>
                                                         <img src={`${src}`} alt="Existing" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                            {idx > 0 && (
+                                                                <button type="button" onClick={() => moveExistingImage(idx, 'left')} className="p-2 bg-white text-slate-800 rounded-full hover:bg-slate-50 transition-all shadow-lg transform hover:scale-110" title="Move Left">
+                                                                    <ArrowLeft size={18} />
+                                                                </button>
+                                                            )}
                                                             <button type="button" onClick={() => handleMainImageToggle('existing', src)} className={`p-2 rounded-full transition-all shadow-lg transform hover:scale-110 ${isMain ? 'bg-amber-400 text-white' : 'bg-white text-amber-500 hover:bg-amber-50'}`} title="Set as Main Image">
                                                                 <Save size={18} />
                                                             </button>
                                                             <button type="button" onClick={() => removeExistingImage(src)} className="p-2 bg-white text-red-500 rounded-full hover:bg-red-50 transition-all shadow-lg transform hover:scale-110" title="Delete Image">
                                                                 <Trash2 size={18} />
                                                             </button>
+                                                            {idx < existingImages.length - 1 && (
+                                                                <button type="button" onClick={() => moveExistingImage(idx, 'right')} className="p-2 bg-white text-slate-800 rounded-full hover:bg-slate-50 transition-all shadow-lg transform hover:scale-110" title="Move Right">
+                                                                    <ArrowRight size={18} />
+                                                                </button>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="p-2 border-t border-slate-100 bg-slate-50 flex items-center justify-center grow">
@@ -397,12 +463,22 @@ const ProjectModal = ({ isOpen, onClose, project, onSave }) => {
                                                         </div>
                                                         <img src={src} alt="Preview" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                            {idx > 0 && (
+                                                                <button type="button" onClick={() => movePreviewImage(idx, 'left')} className="p-2 bg-white text-slate-800 rounded-full hover:bg-slate-50 transition-all shadow-lg transform hover:scale-110" title="Move Left">
+                                                                    <ArrowLeft size={18} />
+                                                                </button>
+                                                            )}
                                                             <button type="button" onClick={() => handleMainImageToggle('new', idx)} className={`p-2 rounded-full transition-all shadow-lg transform hover:scale-110 ${isMain ? 'bg-amber-400 text-white' : 'bg-white text-amber-500 hover:bg-amber-50'}`} title="Set as Main Image">
                                                                 <Save size={18} />
                                                             </button>
                                                             <button type="button" onClick={() => removeNewImage(idx)} className="p-2 bg-white text-red-500 rounded-full hover:bg-red-50 transition-all shadow-lg transform hover:scale-110" title="Delete Image">
                                                                 <Trash2 size={18} />
                                                             </button>
+                                                            {idx < previewImages.length - 1 && (
+                                                                <button type="button" onClick={() => movePreviewImage(idx, 'right')} className="p-2 bg-white text-slate-800 rounded-full hover:bg-slate-50 transition-all shadow-lg transform hover:scale-110" title="Move Right">
+                                                                    <ArrowRight size={18} />
+                                                                </button>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="p-2 border-t border-slate-100 bg-slate-50 flex items-center justify-center grow">

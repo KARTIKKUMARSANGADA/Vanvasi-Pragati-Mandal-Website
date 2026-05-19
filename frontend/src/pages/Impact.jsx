@@ -1,23 +1,61 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Users, MapPin, CheckCircle, Home, BookOpen, Activity } from 'lucide-react';
+import { Heart, Users, MapPin, CheckCircle, Home, BookOpen, Activity, AlertCircle } from 'lucide-react';
 import AnimatedCounter from '../components/common/AnimatedCounter';
 import ImpactMap from '../components/ImpactMap';
+import api from '../api/axios';
+import ApiErrorCard from '../components/common/ApiErrorCard';
 
 const Impact = () => {
-  const stats = useMemo(() => [
-    { label: 'Total Projects', value: 154, max: 200, color: 'bg-blue-500', icon: CheckCircle },
-    { label: 'People Benefited', value: 52400, max: 60000, color: 'bg-green-500', icon: Users },
-    { label: 'Villages Covered', value: 128, max: 150, color: 'bg-purple-500', icon: MapPin },
-    { label: 'Years Active', value: 15, max: 20, color: 'bg-orange-500', icon: Heart },
-  ], []);
+  const [stats, setStats] = useState([
+    { label: 'Total Projects', value: 154, max: 200, color: 'bg-blue-500', icon: CheckCircle, key: 'total_projects' },
+    { label: 'People Benefited', value: 52400, max: 60000, color: 'bg-green-500', icon: Users, key: 'people_benefited' },
+    { label: 'Villages Covered', value: 128, max: 150, color: 'bg-purple-500', icon: MapPin, key: 'villages_covered' },
+    { label: 'Years Active', value: 15, max: 20, color: 'bg-orange-500', icon: Heart, key: 'years_active' },
+  ]);
 
-  const categories = useMemo(() => [
+  const [categories, setCategories] = useState([
     { name: 'Education Initiatives', count: 45, icon: BookOpen, desc: 'Schools built, scholarships, and supplies.' },
     { name: 'Healthcare Programs', count: 52, icon: Activity, desc: 'Medical camps, surgeries, and awareness.' },
     { name: 'Infrastructure', count: 30, icon: Home, desc: 'Water pumps, roads, and community halls.' },
     { name: 'Government Relief', count: 27, icon: CheckCircle, desc: 'PMAY housing, widow pensions, etc.' },
-  ], []);
+  ]);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchStats = useCallback(async () => {
+    try {
+      setError(null);
+      const res = await api.get('/stats/public');
+      const data = res.data;
+      if (data) {
+        setStats(prev => prev.map(stat => ({
+          ...stat,
+          value: data[stat.key] || stat.value
+        })));
+
+        if (Array.isArray(data.categories) && data.categories.length > 0) {
+          setCategories(prev => prev.map(cat => {
+            const matched = data.categories.find(c => c.name.toLowerCase().includes(cat.name.split(' ')[0].toLowerCase()));
+            return {
+              ...cat,
+              count: matched ? matched.count : cat.count
+            };
+          }));
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch public stats");
+      setError("Could not load latest impact metrics. Showing baseline figures instead.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
 
   return (
     <div className="w-full pb-24 pt-20 min-h-screen bg-white">
@@ -32,41 +70,63 @@ const Impact = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        
-        {/* Top Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
-          {stats.map((stat, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="bg-white p-6 rounded-2xl shadow-lg border border-slate-100"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white ${stat.color}`}>
-                  <stat.icon size={24} />
+        {error && (
+          <div className="mb-10 max-w-xl mx-auto">
+            <div className="flex items-center gap-3 p-4 bg-orange-50 border border-orange-100 rounded-2xl text-orange-800 text-sm font-semibold shadow-sm">
+              <AlertCircle className="shrink-0 text-orange-600" size={20} />
+              <div className="flex-1">{error}</div>
+              <button 
+                onClick={fetchStats}
+                className="px-3 py-1 bg-orange-100 hover:bg-orange-200 active:scale-95 transition-all text-xs font-bold rounded-lg text-orange-950 shrink-0"
+              >
+                Retry Load
+              </button>
+            </div>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-44 bg-slate-50 animate-pulse rounded-2xl border border-slate-100"></div>
+            ))}
+          </div>
+        ) : (
+          /* Top Stats Cards */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+            {stats.map((stat, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="bg-white p-6 rounded-2xl shadow-lg border border-slate-100"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white ${stat.color}`}>
+                    <stat.icon size={24} />
+                  </div>
                 </div>
-              </div>
-              <h3 className="text-3xl font-extrabold text-slate-900 mb-1">
-                <AnimatedCounter value={stat.value.toLocaleString() + (stat.value > 100 ? '+' : '')} />
-              </h3>
-              <p className="text-slate-500 font-medium">{stat.label}</p>
-              
-              {/* Progress Bar */}
-              <div className="mt-6">
-                <div className="w-full bg-slate-100 rounded-full h-2">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${(stat.value / stat.max) * 100}%` }}
-                    transition={{ duration: 1, delay: 0.5 }}
-                    className={`h-2 rounded-full ${stat.color}`}
-                  ></motion.div>
+                <h3 className="text-3xl font-extrabold text-slate-900 mb-1">
+                  <AnimatedCounter value={stat.value.toLocaleString() + (stat.value > 100 ? '+' : '')} />
+                </h3>
+                <p className="text-slate-500 font-medium">{stat.label}</p>
+                
+                {/* Progress Bar */}
+                <div className="mt-6">
+                  <div className="w-full bg-slate-100 rounded-full h-2">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(100, (stat.value / stat.max) * 100)}%` }}
+                      transition={{ duration: 1, delay: 0.5 }}
+                      className={`h-2 rounded-full ${stat.color}`}
+                    ></motion.div>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
 
         {/* Breakdown Section */}
         <div className="mb-20">
