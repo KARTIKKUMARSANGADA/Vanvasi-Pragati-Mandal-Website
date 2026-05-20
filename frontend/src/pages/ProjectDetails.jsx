@@ -57,7 +57,7 @@ const ProjectDetails = () => {
       <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-white">
         <h1 className="text-4xl font-bold text-slate-800 mb-4">Project Not Found</h1>
         <p className="text-slate-600 mb-8 text-center max-w-md">The project you are looking for does not exist or has been moved.</p>
-        <Link to="/projects" className="px-8 py-3 bg-primary text-white font-bold rounded-full hover:bg-green-700 transition-all">
+        <Link to="/projects" className="px-8 py-3 bg-primary text-white font-bold rounded-full hover:bg-primary-hover transition-all">
           Back to Projects
         </Link>
       </div>
@@ -274,7 +274,7 @@ const ProjectDetails = () => {
                     key={pid}
                     to={`/projects/${pid}`}
                     onClick={() => window.scrollTo(0, 0)}
-                    className="bg-white rounded-[2rem] overflow-hidden shadow-lg border border-slate-100 group flex flex-col h-full hover:shadow-2xl transition-all"
+                    className="bg-white rounded-3xl overflow-hidden shadow-lg border border-slate-100 group flex flex-col h-full hover:shadow-2xl transition-all"
                   >
                     <div className="relative h-48 overflow-hidden shrink-0">
                       <img src={img} alt={p.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />

@@ -9,7 +9,7 @@ import ApiErrorCard from '../components/common/ApiErrorCard';
 const Impact = () => {
   const [stats, setStats] = useState([
     { label: 'Total Projects', value: 154, max: 200, color: 'bg-blue-500', icon: CheckCircle, key: 'total_projects' },
-    { label: 'People Benefited', value: 52400, max: 60000, color: 'bg-green-500', icon: Users, key: 'people_benefited' },
+    { label: 'People Benefited', value: 52400, max: 60000, color: 'bg-primary', icon: Users, key: 'people_benefited' },
     { label: 'Villages Covered', value: 128, max: 150, color: 'bg-purple-500', icon: MapPin, key: 'villages_covered' },
     { label: 'Years Active', value: 15, max: 20, color: 'bg-orange-500', icon: Heart, key: 'years_active' },
   ]);

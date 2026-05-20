@@ -274,7 +274,7 @@ const Contact = () => {
               </div>
 
               {status === 'success' ? (
-                <div className="w-full py-4 rounded-xl font-bold text-white flex items-center justify-center gap-2 bg-green-600 text-center">
+                <div className="w-full py-4 rounded-xl font-bold text-white flex items-center justify-center gap-2 bg-primary text-center">
                   ✅ Thank you! Your message has been received.
                 </div>
               ) : (

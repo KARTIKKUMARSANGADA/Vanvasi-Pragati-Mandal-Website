@@ -144,7 +144,7 @@ const Home = () => {
                 Serving Since 2010
               </div>
               
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white tracking-tighter leading-[1.1]">
+              <h1 className="text-[clamp(2.25rem,6vw,5rem)] font-black text-white tracking-tighter leading-[1.1]">
                 Empowering <br className="hidden sm:inline" />
                 <span className="text-primary italic">Rural & Tribal</span> <br />
                 Communities
@@ -155,7 +155,7 @@ const Home = () => {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 pt-2">
-                <Link to="/projects" className="px-6 py-3 sm:px-8 sm:py-3.5 bg-primary text-white font-bold rounded-full hover:bg-green-600 transition-all shadow-xl shadow-primary/30 flex items-center justify-center gap-2 text-sm sm:text-base">
+                <Link to="/projects" className="px-6 py-3 sm:px-8 sm:py-3.5 bg-primary text-white font-bold rounded-full hover:bg-primary-hover transition-all shadow-xl shadow-primary/30 flex items-center justify-center gap-2 text-sm sm:text-base">
                   View Our Work <ArrowRight size={18} />
                 </Link>
                 <Link to="/contact" className="px-6 py-3 sm:px-8 sm:py-3.5 bg-transparent text-white font-bold rounded-full border-2 border-white/30 hover:bg-white/10 transition-all flex items-center justify-center text-sm sm:text-base">
@@ -202,7 +202,7 @@ const Home = () => {
                 src={communityimg}
                 alt="Community work" 
                 loading="lazy"
-                className="rounded-2xl shadow-xl object-cover h-[250px] sm:h-[350px] md:h-[400px] w-full"
+                className="rounded-2xl shadow-xl object-cover w-full aspect-video md:aspect-[4/3]"
               />
             </div>
             <div className="w-full md:w-1/2">
@@ -338,7 +338,7 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
             <motion.div 
               whileHover={{ y: -5 }}
-              className="p-6 md:p-8 bg-slate-50 rounded-[2rem] md:rounded-[2.5rem] border border-slate-100 flex flex-col justify-between shadow-sm"
+              className="p-6 md:p-8 bg-slate-50 rounded-3xl border border-slate-100 flex flex-col justify-between shadow-sm"
             >
               <p className="text-sm sm:text-base md:text-lg text-slate-700 italic font-medium leading-relaxed mb-6">
                 "I never thought I could finish school after my father passed away. Vanvasi Pragati Mandal supported my education, and today I am the first college graduate in my village."
@@ -354,7 +354,7 @@ const Home = () => {
 
             <motion.div 
               whileHover={{ y: -5 }}
-              className="p-6 md:p-8 bg-primary/5 rounded-[2rem] md:rounded-[2.5rem] border border-primary/10 flex flex-col justify-between shadow-sm"
+              className="p-6 md:p-8 bg-primary/5 rounded-3xl border border-primary/10 flex flex-col justify-between shadow-sm"
             >
               <p className="text-sm sm:text-base md:text-lg text-slate-700 italic font-medium leading-relaxed mb-6">
                 "The medical camp saved my daughter's life. We couldn't afford the surgery, but the trust organized everything and covered all costs. We are forever grateful."
@@ -381,7 +381,7 @@ const Home = () => {
         </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] md:rounded-[2.5rem] p-6 sm:p-8 md:p-14 overflow-hidden relative group">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 md:p-14 overflow-hidden relative group">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
               <div>
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-4 leading-tight">
@@ -406,7 +406,7 @@ const Home = () => {
                   <button 
                     type="submit"
                     disabled={subscribeStatus === 'loading'}
-                    className="px-6 py-3.5 sm:px-10 sm:py-4.5 bg-primary text-white font-bold rounded-xl sm:rounded-2xl hover:bg-green-700 transition-all shadow-xl shadow-primary/20 text-sm sm:text-base md:text-lg whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="px-6 py-3.5 sm:px-10 sm:py-4.5 bg-primary text-white font-bold rounded-xl sm:rounded-2xl hover:bg-primary-hover transition-all shadow-xl shadow-primary/20 text-sm sm:text-base md:text-lg whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     {subscribeStatus === 'loading' ? 'Subscribing...' : 'Subscribe Now'}
                   </button>
@@ -436,17 +436,17 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24 bg-primary relative overflow-hidden">
+      <section className="py-16 sm:py-20 lg:py-24 bg-primary relative overflow-hidden">
         <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-white opacity-10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-80 h-80 bg-secondary opacity-20 rounded-full blur-3xl"></div>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-4 md:mb-6">Support Our Mission</h2>
-          <p className="text-green-50 text-base sm:text-lg md:text-xl mb-8 md:mb-10 leading-relaxed max-w-2xl mx-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-4 md:mb-6">Support Our Mission</h2>
+          <p className="text-green-50 text-base sm:text-lg lg:text-xl mb-8 md:mb-10 leading-relaxed max-w-3xl mx-auto font-medium">
             Together we can make a difference. Partner with us, volunteer, or contribute to bring positive change to the lives of thousands.
           </p>
           <button 
             onClick={openDonation}
-            className="inline-flex w-full sm:w-auto items-center justify-center px-8 py-3.5 md:py-4 bg-white text-primary font-bold rounded-full hover:bg-green-50 transition-colors shadow-xl text-base md:text-lg"
+            className="inline-flex w-full sm:w-auto items-center justify-center px-8 py-4 bg-white text-primary font-bold rounded-full hover:bg-green-50 hover:scale-105 active:scale-95 transition-all duration-200 shadow-xl shadow-black/10 text-base sm:text-lg"
           >
             Join Us Today
           </button>

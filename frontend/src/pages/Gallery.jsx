@@ -95,7 +95,7 @@ const Gallery = () => {
                 onClick={() => setActiveCategory(cat)}
                 className={`px-8 py-3 rounded-full text-sm font-bold transition-all duration-300 shadow-sm ${
                   activeCategory === cat
-                    ? 'bg-primary text-white shadow-lg shadow-green-500/30 scale-105'
+                    ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-105'
                     : 'bg-white text-slate-600 border border-slate-200 hover:border-primary hover:text-primary'
                 }`}
               >
@@ -108,11 +108,11 @@ const Gallery = () => {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {[...Array(8)].map((_, i) => (
-              <Skeleton key={i} className="aspect-square rounded-[2rem]" />
+              <Skeleton key={i} className="aspect-square rounded-3xl" />
             ))}
           </div>
         ) : filteredImages.length === 0 ? (
-           <div className="text-center py-20 bg-slate-50 rounded-[3rem] border border-dashed border-slate-200">
+           <div className="text-center py-20 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
              <p className="text-slate-500 font-bold text-xl">No photos found in this category.</p>
            </div>
         ) : (

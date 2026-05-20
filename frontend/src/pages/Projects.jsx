@@ -238,7 +238,7 @@ const Projects = () => {
             <p className="text-slate-400 text-sm mb-4">Try checking for typos or searching a different category.</p>
             <button 
               onClick={handleClearAll}
-              className="px-6 py-2.5 bg-primary text-white font-bold rounded-xl shadow-md shadow-green-500/10 hover:bg-green-700 transition-all text-xs"
+              className="px-6 py-2.5 bg-primary text-white font-bold rounded-xl shadow-md shadow-green-500/10 hover:bg-primary-hover transition-all text-xs"
             >
               Clear filters
             </button>

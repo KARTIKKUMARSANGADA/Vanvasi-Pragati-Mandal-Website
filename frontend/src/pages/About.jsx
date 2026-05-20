@@ -122,7 +122,7 @@ const About = () => {
             <div className="w-24 h-1 bg-primary mx-auto rounded-full"></div>
           </div>
           <div className="bg-white rounded-3xl overflow-hidden shadow-xl border border-slate-100 flex flex-col md:flex-row">
-            <div className="w-full md:w-1/2 min-h-[300px]">
+            <div className="w-full md:w-1/2 h-[250px] md:h-auto md:min-h-[400px]">
               <img 
                 src={communityimg} 
                 alt="Community Group" 

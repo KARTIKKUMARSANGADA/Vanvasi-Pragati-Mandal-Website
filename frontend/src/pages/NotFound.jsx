@@ -48,7 +48,7 @@ const NotFound = () => {
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              className="flex items-center justify-center gap-2 px-8 py-3.5 bg-primary text-white font-extrabold rounded-2xl shadow-lg shadow-green-500/20 hover:bg-green-700 transition-all text-sm w-full sm:w-auto"
+              className="flex items-center justify-center gap-2 px-8 py-3.5 bg-primary text-white font-extrabold rounded-2xl shadow-lg shadow-green-500/20 hover:bg-primary-hover transition-all text-sm w-full sm:w-auto"
             >
               <Home size={18} />
               Return Home
