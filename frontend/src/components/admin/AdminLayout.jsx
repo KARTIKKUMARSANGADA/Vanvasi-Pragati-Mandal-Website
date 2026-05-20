@@ -49,10 +49,10 @@ const AdminLayout = ({ children, title }) => {
         <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
             {/* Mobile Header */}
             <div className="md:hidden bg-slate-900 text-white p-4 flex justify-between items-center sticky top-0 z-30 shadow-md">
-                <div className="flex items-center gap-3">
+                <Link to="/" className="flex items-center gap-3 hover:opacity-85 transition-opacity">
                     <img src={LOGO} alt="Trust Logo" className="w-8 h-8 rounded-full object-cover" />
                     <span className="font-bold text-lg tracking-tight">Admin Panel</span>
-                </div>
+                </Link>
                 <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 bg-slate-800 rounded-lg text-slate-300 hover:text-white transition-colors">
                     {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
@@ -66,13 +66,13 @@ const AdminLayout = ({ children, title }) => {
             {/* Sidebar */}
             <div className={`fixed inset-y-0 left-0 w-72 bg-slate-900 text-white p-6 flex flex-col z-50 shadow-2xl transition-transform duration-300 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static md:h-screen md:sticky top-0 shrink-0`}>
                 <div className="flex items-center justify-between mb-10">
-                    <div className="flex items-center gap-3">
+                    <Link to="/" className="flex items-center gap-3 hover:opacity-85 transition-opacity">
                         <img src={LOGO} alt="Trust Logo" className="w-10 h-10 rounded-full object-cover shadow-lg shadow-green-500/20" />
                         <div className="flex flex-col">
                             <span className="font-black text-lg tracking-tight leading-none">VPM</span>
                             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Admin Panel</span>
                         </div>
-                    </div>
+                    </Link>
                     <button onClick={() => setSidebarOpen(false)} className="md:hidden p-1 text-slate-400 hover:text-white transition-colors">
                         <X size={24} />
                     </button>

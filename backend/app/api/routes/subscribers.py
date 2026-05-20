@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 from app.api import deps
@@ -114,13 +114,13 @@ class BroadcastRequest(BaseModel):
 @router.post("/broadcast")
 def broadcast_custom_message(
     request: BroadcastRequest,
+    background_tasks: BackgroundTasks,
     current_admin: dict = Depends(deps.get_current_admin)
 ):
     """
     Broadcast a custom email newsletter message to selected emails, or all active subscribers if list is empty/None.
-    Emails are sent in a background thread so the API returns instantly.
+    Emails are sent in a managed background task so the API returns instantly.
     """
-    import threading
     from app.core.email_handler import send_bulk_custom_email
     
     recipients = []
@@ -136,13 +136,8 @@ def broadcast_custom_message(
     if not recipients:
         return {"message": "No active recipients to email.", "sent_count": 0}
     
-    # Send emails in background thread (non-blocking)
-    thread = threading.Thread(
-        target=send_bulk_custom_email,
-        args=(recipients, request.subject, request.body),
-        daemon=True
-    )
-    thread.start()
+    # Send emails in background task (non-blocking, FastAPI thread-pooled)
+    background_tasks.add_task(send_bulk_custom_email, recipients, request.subject, request.body)
         
     return {
         "message": f"Broadcast queued for {len(recipients)} recipients! Emails are being sent.",

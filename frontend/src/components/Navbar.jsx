@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Heart } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import LOGO from '../assets/LOGO.png'; 
 import { useDonation } from '../context/DonationContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,7 +13,7 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
+      setScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -33,115 +33,108 @@ const Navbar = () => {
   const isTransparent = !scrolled && location.pathname === '/';
   
   return (
-    <nav 
-      className={`fixed top-4 left-1/2 -translate-x-1/2 w-[92%] max-w-7xl z-50 transition-all duration-500 ease-in-out ${
+    <div className={`fixed left-0 w-full z-50 flex justify-center px-4 sm:px-6 transition-all duration-300 ${isTransparent ? 'top-6' : 'top-2'}`}>
+      <nav className={`transition-all duration-300 px-4 sm:px-6 py-2 sm:py-3 w-full max-w-[1200px] flex justify-between items-center rounded-full ${
         isTransparent 
-          ? 'bg-transparent py-5 shadow-none border-none' 
-          : 'bg-white/95 backdrop-blur-md py-3 px-6 shadow-xl border border-slate-100 rounded-[2rem]'
-      }`}
-    >
-      <div className="w-full px-2 sm:px-4">
-        <div className="flex justify-between items-center">
-          {/* Logo Section */}
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center gap-3 group">
-              <div className="relative">
-                <img 
-                  src={LOGO}
-                  alt="Community Logo"
-                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover transition-all duration-300 ${
-                    isTransparent ? 'shadow-md ring-2 ring-white/20' : 'shadow-sm ring-1 ring-slate-100'
-                  } group-hover:scale-105`}
-                />
-              </div>
-              <div className="hidden min-[300px]:flex flex-col">
-                <h1 className={`text-xs min-[380px]:text-sm sm:text-base md:text-lg lg:text-xl font-extrabold leading-tight transition-colors duration-300 ${
-                  isTransparent ? 'text-white' : 'text-slate-900'
-                }`}>
-                  Vanvasi Pragati<br className="md:hidden" />
-                  <span className="hidden md:inline"> </span>Mandal Pipaliya
-                </h1>
-              </div>
-            </Link>
+          ? 'bg-transparent shadow-none border-transparent' 
+          : 'bg-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100'
+      }`}>
+        
+        {/* Logo Section */}
+        <Link to="/" className="flex items-center gap-3 group hover:opacity-90 transition-opacity">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white">
+            <img 
+              src={LOGO}
+              alt="Vanvasi Pragati Mandal Logo"
+              className="w-full h-full object-contain"
+            />
           </div>
+          <div className="hidden min-[300px]:flex flex-col">
+            <h1 className={`text-[15px] sm:text-[16px] md:text-[18px] font-bold leading-tight transition-colors ${
+              isTransparent ? 'text-white' : 'text-[#1e293b]'
+            }`}>
+              Vanvasi Pragati<br className="md:hidden" />
+              <span className="hidden md:inline"> </span>Mandal Pipaliya
+            </h1>
+          </div>
+        </Link>
 
-          {/* Desktop Menu */}
-          <div className="hidden lg:flex items-center space-x-8">
-            <div className="flex items-center space-x-6">
-              {links.map((link) => (
-                <Link
-                  key={link.name}
-                  to={link.path}
-                  className={`relative py-2 text-sm font-semibold transition-all duration-300 ease-in-out hover:text-primary ${
-                    isActive(link.path)
-                      ? 'text-primary'
-                      : isTransparent ? 'text-white/90 hover:text-white' : 'text-slate-600'
-                  }`}
-                >
-                  {link.name}
-                  <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-primary transform origin-left transition-transform duration-300 ${
-                    isActive(link.path) ? 'scale-x-100' : 'scale-x-0'
-                  }`}></span>
-                </Link>
-              ))}
-            </div>
-            
-            <button
-              onClick={openDonation}
-              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 active:translate-y-0 ${
-                isTransparent 
-                  ? 'bg-white text-primary hover:bg-slate-50' 
-                  : 'bg-primary text-white hover:bg-green-700'
-              }`}
-            >
-              Support Us
-            </button>
+        {/* Desktop Menu */}
+        <div className="hidden lg:flex items-center gap-6 xl:gap-8">
+          <div className="flex items-center gap-6">
+            {links.map((link) => (
+              <Link
+                key={link.name}
+                to={link.path}
+                className={`relative text-[14px] font-semibold transition-colors duration-300 py-1 ${
+                  isActive(link.path) 
+                    ? 'text-[#22C55E]' 
+                    : (isTransparent ? 'text-white hover:text-white/80' : 'text-slate-600 hover:text-[#22C55E]')
+                }`}
+              >
+                {link.name}
+                {isActive(link.path) && (
+                  <span className="absolute bottom-0 left-0 w-full h-[2px] bg-[#22C55E] rounded-full"></span>
+                )}
+              </Link>
+            ))}
           </div>
-
-          {/* Mobile Menu Button */}
-          <div className="flex items-center lg:hidden">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className={`focus:outline-none p-2 transition-colors ${
-                isTransparent ? 'text-white' : 'text-slate-600 hover:text-primary'
-              }`}
-              aria-label="Toggle menu"
-            >
-              {isOpen ? <X size={28} /> : <Menu size={28} />}
-            </button>
-          </div>
+          
+          <button
+            onClick={openDonation}
+            className={`px-6 py-2.5 rounded-full transition-colors text-[14px] font-semibold shadow-sm hover:shadow-md ${
+              isTransparent
+                ? 'bg-white text-[#22C55E] hover:bg-gray-100'
+                : 'bg-[#22C55E] text-white hover:bg-[#16a34a]'
+            }`}
+          >
+            Support Us
+          </button>
         </div>
-      </div>
+
+        {/* Mobile Menu Button */}
+        <div className="flex items-center lg:hidden">
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className={`focus:outline-none p-2 transition-colors ${
+              isTransparent ? 'text-white hover:text-white/80' : 'text-slate-600 hover:text-[#22C55E]'
+            }`}
+            aria-label="Toggle menu"
+          >
+            {isOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+      </nav>
 
       {/* Mobile Menu Dropdown */}
       <AnimatePresence>
         {isOpen && (
           <motion.div 
-            initial={{ opacity: 0, height: 0, y: -20 }}
-            animate={{ opacity: 1, height: 'auto', y: 0 }}
-            exit={{ opacity: 0, height: 0, y: -20 }}
-            transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
-            className="lg:hidden absolute top-full left-0 w-full bg-white border-t border-slate-100 shadow-2xl rounded-b-[2rem] overflow-hidden"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+            className="lg:hidden absolute top-[calc(100%+10px)] left-4 right-4 bg-white rounded-2xl border border-gray-100 shadow-xl overflow-hidden max-w-[1200px] mx-auto"
           >
-            <div className="px-4 py-6 flex flex-col space-y-4">
+            <div className="p-4 flex flex-col gap-2">
               {links.map((link) => (
                 <Link
                   key={link.name}
                   to={link.path}
                   onClick={() => setIsOpen(false)}
-                  className={`block px-4 py-3 rounded-xl text-base font-semibold transition-all ${
+                  className={`block px-4 py-3 rounded-xl text-[14px] font-medium transition-colors ${
                     isActive(link.path)
-                      ? 'text-primary bg-green-50'
-                      : 'text-slate-600 hover:text-primary hover:bg-slate-50'
+                      ? 'text-[#22C55E] bg-green-50/50'
+                      : 'text-slate-600 hover:text-[#22C55E] hover:bg-slate-50'
                   }`}
                 >
                   {link.name}
                 </Link>
               ))}
-              <div className="pt-4 border-t border-slate-100">
+              <div className="pt-4 pb-2 mt-2 border-t border-gray-100">
                 <button
                   onClick={() => { setIsOpen(false); openDonation(); }}
-                  className="block w-full text-center px-6 py-4 rounded-xl bg-primary text-white font-bold hover:bg-green-700 shadow-md"
+                  className="w-full text-center px-6 py-3 rounded-xl bg-[#22C55E] text-white hover:bg-[#16a34a] transition-colors text-[14px] font-semibold"
                 >
                   Support Us
                 </button>
@@ -150,7 +143,7 @@ const Navbar = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </nav>
+    </div>
   );
 };
 

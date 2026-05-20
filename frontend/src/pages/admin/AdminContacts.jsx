@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
-import { Trash2, Eye, X, Mail, Phone, Calendar, Send } from 'lucide-react';
+import { Trash2, Eye, EyeOff, X, Mail, Phone, Calendar, Send, AlertTriangle } from 'lucide-react';
 import api from '../../api/axios';
 
 const AdminContacts = () => {
@@ -8,13 +8,41 @@ const AdminContacts = () => {
   const [loading, setLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState(null);
   
+  // Selection state (Decoupled from email, uses UUID/ID)
+  const [selectedUuids, setSelectedUuids] = useState([]);
+  
+  // Live Auto-Refresh polling state
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  
+  // Custom Confirmation Modal state
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: 'Confirm',
+    cancelText: 'Cancel',
+    type: 'danger',
+    onConfirm: null
+  });
+
   // Broadcast state
-  const [selectedEmails, setSelectedEmails] = useState([]);
   const [showBroadcastModal, setShowBroadcastModal] = useState(false);
   const [broadcastSubject, setBroadcastSubject] = useState('');
   const [broadcastBody, setBroadcastBody] = useState('');
   const [broadcastTarget, setBroadcastTarget] = useState('selected'); // 'selected' or 'all'
   const [broadcastSending, setBroadcastSending] = useState(false);
+
+  // Search & Status filters state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'unread' | 'read'
+
+  // Derive unique selected emails dynamically from selected messages for broadcasting
+  const selectedEmails = [...new Set(
+    messages
+      .filter(m => selectedUuids.includes(m.uuid || m.id))
+      .map(m => m.email)
+      .filter(Boolean)
+  )];
 
   const fetchMessages = async () => {
     try {
@@ -33,21 +61,61 @@ const AdminContacts = () => {
     }
   };
 
+  // Auto-refresh polling effect (Polls every 10 seconds in the background)
   useEffect(() => {
     fetchMessages();
-  }, []);
 
-  const handleDelete = async (uuid) => {
-    if (window.confirm("Are you sure you want to delete this message?")) {
-      try {
-        await api.delete(`/contact/${uuid}`);
-        setMessages(messages.filter((msg) => msg.uuid !== uuid));
-        window.dispatchEvent(new Event('refreshUnreadCount'));
-      } catch (error) {
-        console.error('Failed to delete message', error);
-        alert('Failed to delete message');
+    const interval = setInterval(() => {
+      if (autoRefresh) {
+        api.get('/contact/')
+          .then(response => {
+            if (Array.isArray(response.data)) {
+              setMessages(response.data);
+              window.dispatchEvent(new Event('refreshUnreadCount'));
+            }
+          })
+          .catch(err => console.error('Auto-refresh failed:', err));
       }
-    }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [autoRefresh]);
+
+  // Helper to trigger our branded confirmation modal
+  const triggerConfirm = ({ title, message, confirmText, cancelText, type, onConfirm }) => {
+    setConfirmModal({
+      isOpen: true,
+      title: title || 'Are you sure?',
+      message: message || '',
+      confirmText: confirmText || 'Confirm',
+      cancelText: cancelText || 'Cancel',
+      type: type || 'danger',
+      onConfirm: () => {
+        onConfirm();
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+      }
+    });
+  };
+
+  const handleDelete = (uuid) => {
+    triggerConfirm({
+      title: 'Delete Message',
+      message: 'Are you sure you want to permanently delete this contact message? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/contact/${uuid}`);
+          setMessages(prev => prev.filter((msg) => msg.uuid !== uuid));
+          setSelectedUuids(prev => prev.filter(id => id !== uuid));
+          window.dispatchEvent(new Event('refreshUnreadCount'));
+        } catch (error) {
+          console.error('Failed to delete message', error);
+          alert('Failed to delete message');
+        }
+      }
+    });
   };
 
   const handleSelectMessage = async (msg) => {
@@ -64,20 +132,92 @@ const AdminContacts = () => {
     }
   };
 
+  // Derive filtered messages dynamically on each render
+  const filteredMessages = messages.filter(msg => {
+    // 1. Filter by status
+    if (statusFilter === 'unread' && msg.is_read) return false;
+    if (statusFilter === 'read' && !msg.is_read) return false;
+
+    // 2. Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      const name = String(msg.name || '').toLowerCase();
+      const email = String(msg.email || '').toLowerCase();
+      const phone = String(msg.phone || '').toLowerCase();
+      const message = String(msg.message || '').toLowerCase();
+      
+      return name.includes(query) || email.includes(query) || phone.includes(query) || message.includes(query);
+    }
+    
+    return true;
+  });
+
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      const validEmails = messages.filter(m => m.email).map(m => m.email);
-      setSelectedEmails([...new Set(validEmails)]);
+      setSelectedUuids(filteredMessages.map(m => m.uuid || m.id));
     } else {
-      setSelectedEmails([]);
+      setSelectedUuids([]);
     }
   };
 
-  const handleSelectEmail = (email) => {
-    if (!email) return;
-    setSelectedEmails(prev => 
-      prev.includes(email) ? prev.filter(e => e !== email) : [...prev, email]
+  const handleSelectRow = (uuid) => {
+    if (!uuid) return;
+    setSelectedUuids(prev => 
+      prev.includes(uuid) ? prev.filter(id => id !== uuid) : [...prev, uuid]
     );
+  };
+
+  // Bulk Actions API integrations
+  const handleBulkRead = async () => {
+    if (selectedUuids.length === 0) return;
+    try {
+      await api.post('/contact/bulk/read', selectedUuids);
+      setMessages(prev => 
+        prev.map(m => selectedUuids.includes(m.uuid || m.id) ? { ...m, is_read: true } : m)
+      );
+      setSelectedUuids([]);
+      window.dispatchEvent(new Event('refreshUnreadCount'));
+    } catch (err) {
+      console.error("Failed to mark selected messages as read", err);
+      alert("Failed to mark selected messages as read");
+    }
+  };
+
+  const handleBulkUnread = async () => {
+    if (selectedUuids.length === 0) return;
+    try {
+      await api.post('/contact/bulk/unread', selectedUuids);
+      setMessages(prev => 
+        prev.map(m => selectedUuids.includes(m.uuid || m.id) ? { ...m, is_read: false } : m)
+      );
+      setSelectedUuids([]);
+      window.dispatchEvent(new Event('refreshUnreadCount'));
+    } catch (err) {
+      console.error("Failed to mark selected messages as unread", err);
+      alert("Failed to mark selected messages as unread");
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedUuids.length === 0) return;
+    triggerConfirm({
+      title: 'Delete Selected Messages',
+      message: `Are you sure you want to permanently delete the ${selectedUuids.length} selected contact messages? This action cannot be undone.`,
+      confirmText: 'Delete All',
+      cancelText: 'Cancel',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await api.post('/contact/bulk/delete', selectedUuids);
+          setMessages(prev => prev.filter(m => !selectedUuids.includes(m.uuid || m.id)));
+          setSelectedUuids([]);
+          window.dispatchEvent(new Event('refreshUnreadCount'));
+        } catch (err) {
+          console.error("Failed to delete selected messages", err);
+          alert("Failed to delete selected messages");
+        }
+      }
+    });
   };
 
   const handleSendBroadcast = async () => {
@@ -99,7 +239,7 @@ const AdminContacts = () => {
       setShowBroadcastModal(false);
       setBroadcastSubject('');
       setBroadcastBody('');
-      setSelectedEmails([]);
+      setSelectedUuids([]);
     } catch (err) {
       console.error('Failed to send broadcast', err);
       alert('Failed to send broadcast message.');
@@ -115,17 +255,148 @@ const AdminContacts = () => {
 
   return (
     <AdminLayout title="Contact Messages">
-      <div className="flex justify-end mb-6">
-        <button
-          onClick={() => {
-            setBroadcastTarget(selectedEmails.length > 0 ? 'selected' : 'all');
-            setShowBroadcastModal(true);
-          }}
-          className="px-5 py-2.5 bg-secondary text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30 flex items-center gap-2"
-        >
-          <Send size={18} />
-          Broadcast Message
-        </button>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 w-full">
+        {/* Dynamic Bulk Actions Pill */}
+        {selectedUuids.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-3 bg-slate-100/90 p-2 px-4 rounded-2xl border border-slate-200 shadow-sm animate-in fade-in slide-in-from-top-2 duration-200">
+            <span className="text-sm font-bold text-slate-700">
+              {selectedUuids.length} selected
+            </span>
+            <div className="hidden sm:block w-px h-5 bg-slate-200" />
+            <button
+              onClick={handleBulkRead}
+              className="px-3 py-1.5 bg-white text-slate-700 hover:text-emerald-600 font-bold text-xs rounded-xl border border-slate-200 hover:border-emerald-200 hover:bg-emerald-50 transition-all flex items-center gap-1.5 shadow-sm active:scale-95 animate-in fade-in duration-200"
+              title="Mark all selected as read"
+            >
+              <Eye size={14} className="text-slate-500" />
+              Mark Read
+            </button>
+            <button
+              onClick={handleBulkUnread}
+              className="px-3 py-1.5 bg-white text-slate-700 hover:text-blue-600 font-bold text-xs rounded-xl border border-slate-200 hover:border-blue-200 hover:bg-blue-50 transition-all flex items-center gap-1.5 shadow-sm active:scale-95 animate-in fade-in duration-200"
+              title="Mark all selected as unread"
+            >
+              <EyeOff size={14} className="text-slate-500" />
+              Mark Unread
+            </button>
+            <button
+              onClick={handleBulkDelete}
+              className="px-3 py-1.5 bg-red-50 text-red-600 hover:text-white hover:bg-red-600 font-bold text-xs rounded-xl border border-red-200 hover:border-red-600 transition-all flex items-center gap-1.5 shadow-sm active:scale-95 animate-in fade-in duration-200"
+              title="Delete all selected"
+            >
+              <Trash2 size={14} />
+              Delete Selected
+            </button>
+          </div>
+        ) : (
+          <p className="text-slate-500 text-sm hidden md:block">
+            View and manage inquiry messages from your supporters.
+          </p>
+        )}
+
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto md:justify-end">
+          {/* Live Sync Toggle switch */}
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200/80 px-3.5 py-2 rounded-xl shadow-sm select-none">
+            <div className="relative flex h-2 w-2">
+              {autoRefresh && (
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              )}
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${autoRefresh ? 'bg-emerald-500' : 'bg-slate-300'}`}></span>
+            </div>
+            <span className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">
+              Auto Sync
+            </span>
+            <button
+              type="button"
+              onClick={() => setAutoRefresh(!autoRefresh)}
+              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none active:scale-95 ${autoRefresh ? 'bg-emerald-500' : 'bg-slate-200'}`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${autoRefresh ? 'translate-x-4' : 'translate-x-0'}`}
+              />
+            </button>
+          </div>
+
+          <button
+            onClick={() => {
+              setBroadcastTarget(selectedEmails.length > 0 ? 'selected' : 'all');
+              setShowBroadcastModal(true);
+            }}
+            className="px-5 py-2.5 bg-secondary text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30 flex items-center gap-2"
+          >
+            <Send size={18} />
+            Broadcast Message
+          </button>
+        </div>
+      </div>
+
+      {/* Search and Filters panel */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-6 w-full items-center justify-between animate-in fade-in duration-300">
+        {/* Status Filter Tabs */}
+        <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl w-full sm:w-auto border border-slate-200/60 shadow-sm">
+          <button
+            onClick={() => setStatusFilter('all')}
+            className={`px-4 py-2 text-xs font-extrabold rounded-lg transition-all active:scale-95 flex items-center gap-1.5 w-full sm:w-auto justify-center ${statusFilter === 'all' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-950'}`}
+          >
+            All Messages
+            <span className="bg-slate-200/70 text-slate-700 px-1.5 py-0.5 rounded-full text-[10px]">
+              {messages.length}
+            </span>
+          </button>
+          <button
+            onClick={() => setStatusFilter('unread')}
+            className={`px-4 py-2 text-xs font-extrabold rounded-lg transition-all active:scale-95 flex items-center gap-1.5 w-full sm:w-auto justify-center ${statusFilter === 'unread' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-950'}`}
+          >
+            Unread
+            {messages.filter(m => !m.is_read).length > 0 && (
+              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+            )}
+            <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${statusFilter === 'unread' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-200/70 text-slate-700'}`}>
+              {messages.filter(m => !m.is_read).length}
+            </span>
+          </button>
+          <button
+            onClick={() => setStatusFilter('read')}
+            className={`px-4 py-2 text-xs font-extrabold rounded-lg transition-all active:scale-95 flex items-center gap-1.5 w-full sm:w-auto justify-center ${statusFilter === 'read' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-950'}`}
+          >
+            Read
+            <span className="bg-slate-200/70 text-slate-700 px-1.5 py-0.5 rounded-full text-[10px]">
+              {messages.filter(m => m.is_read).length}
+            </span>
+          </button>
+        </div>
+
+        {/* Text Search Input */}
+        <div className="relative w-full sm:max-w-xs flex items-center">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search name, email, content..."
+            className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-8 py-2 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/40 transition-all text-slate-800 shadow-sm"
+          />
+          <svg
+            className="absolute left-3 w-4 h-4 text-slate-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 p-1 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
+            >
+              <X size={12} />
+            </button>
+          )}
+        </div>
       </div>
 
       {loading ? (
@@ -142,7 +413,7 @@ const AdminContacts = () => {
                     <input 
                       type="checkbox" 
                       className="rounded text-primary focus:ring-primary w-4 h-4 cursor-pointer"
-                      checked={messages.length > 0 && selectedEmails.length === new Set(messages.filter(m=>m.email).map(m=>m.email)).size}
+                      checked={filteredMessages.length > 0 && filteredMessages.every(m => selectedUuids.includes(m.uuid || m.id))}
                       onChange={handleSelectAll}
                     />
                   </th>
@@ -153,24 +424,22 @@ const AdminContacts = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
-                {messages.length === 0 ? (
+                {filteredMessages.length === 0 ? (
                   <tr>
-                    <td colSpan="4" className="text-center p-8 text-slate-500">
+                    <td colSpan="5" className="text-center p-8 text-slate-500">
                       No messages found.
                     </td>
                   </tr>
                 ) : (
-                messages.map((msg) => (
+                filteredMessages.map((msg) => (
                     <tr key={msg.id} className={`hover:bg-slate-50 transition-colors ${!msg.is_read ? 'bg-slate-50/50 font-medium' : ''}`}>
                       <td className="p-4 px-6 w-12">
-                        {msg.email && (
-                          <input 
-                            type="checkbox" 
-                            className="rounded text-primary focus:ring-primary w-4 h-4 cursor-pointer"
-                            checked={selectedEmails.includes(msg.email)}
-                            onChange={() => handleSelectEmail(msg.email)}
-                          />
-                        )}
+                        <input 
+                          type="checkbox" 
+                          className="rounded text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+                          checked={selectedUuids.includes(msg.uuid || msg.id)}
+                          onChange={() => handleSelectRow(msg.uuid || msg.id)}
+                        />
                       </td>
                       <td className="p-4 px-6 whitespace-normal break-words max-w-[200px]">
                         <div className="flex items-center gap-2">
@@ -193,14 +462,14 @@ const AdminContacts = () => {
                         <div className="flex justify-end gap-2">
                           <button
                             onClick={() => handleSelectMessage(msg)}
-                            className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                            className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center animate-in fade-in"
                             title="View Message"
                           >
                             <Eye size={20} />
                           </button>
                           <button
                             onClick={() => handleDelete(msg.uuid)}
-                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center animate-in fade-in"
                             title="Delete Message"
                           >
                             <Trash2 size={20} />
@@ -379,6 +648,42 @@ const AdminContacts = () => {
                     <Send size={18} /> Send Broadcast
                   </>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Confirmation Modal */}
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-[150] p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-in duration-200 border border-slate-100 flex flex-col">
+            <div className="p-6 text-center space-y-4">
+              {/* Pulsing Alert icon */}
+              <div className="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-red-50 text-red-500 shadow-inner animate-bounce">
+                <AlertTriangle size={28} />
+              </div>
+              
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold text-slate-900">{confirmModal.title}</h3>
+                <p className="text-sm text-slate-500 leading-relaxed px-2">
+                  {confirmModal.message}
+                </p>
+              </div>
+            </div>
+            
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3 rounded-b-2xl">
+              <button
+                onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                className="flex-1 sm:flex-initial px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-100 hover:text-slate-950 active:scale-95 transition-all text-sm shadow-sm"
+              >
+                {confirmModal.cancelText}
+              </button>
+              <button
+                onClick={confirmModal.onConfirm}
+                className="flex-1 sm:flex-initial px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-500/20 active:scale-95 transition-all text-sm"
+              >
+                {confirmModal.confirmText}
               </button>
             </div>
           </div>
