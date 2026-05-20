@@ -122,7 +122,7 @@ const About = () => {
             <div className="w-24 h-1 bg-primary mx-auto rounded-full"></div>
           </div>
           <div className="bg-white rounded-3xl overflow-hidden shadow-xl border border-slate-100 flex flex-col md:flex-row">
-            <div className="md:w-1/2 min-h-[300px]">
+            <div className="w-full md:w-1/2 min-h-[300px]">
               <img 
                 src={communityimg} 
                 alt="Community Group" 
@@ -130,7 +130,7 @@ const About = () => {
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className="md:w-1/2 p-10 md:p-14 flex flex-col justify-center bg-white">
+            <div className="w-full md:w-1/2 p-6 sm:p-10 md:p-14 flex flex-col justify-center bg-white">
               <h3 className="text-2xl font-extrabold text-slate-900 mb-6">Vanvasi Pragati Mandal Pipaliya</h3>
               <div className="space-y-4 text-slate-600 leading-relaxed font-medium">
                 {about.story.split('\n\n').map((para, idx) => (
@@ -159,7 +159,7 @@ const About = () => {
             <div className="w-24 h-1 bg-primary mx-auto rounded-full"></div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             {about.team.map((member, index) => {
               // Determine portrait avatar fallback
               let avatar = member.image;
@@ -174,10 +174,10 @@ const About = () => {
               return (
                 <div 
                   key={index}
-                  className="bg-white rounded-3xl p-8 shadow-lg border border-slate-100 text-center relative overflow-hidden group hover:shadow-xl transition-all"
+                  className="bg-white rounded-3xl p-6 shadow-md border border-slate-100 text-center relative overflow-hidden group hover:shadow-lg transition-all"
                 >
-                  <div className={`absolute top-0 left-0 w-full h-2 ${index === 0 ? 'bg-primary' : 'bg-secondary'}`}></div>
-                  <div className="w-32 h-32 mx-auto rounded-full bg-slate-200 mb-6 overflow-hidden border-4 border-white shadow-md group-hover:scale-105 transition-transform duration-300">
+                  <div className={`absolute top-0 left-0 w-full h-1.5 ${index === 0 ? 'bg-primary' : 'bg-secondary'}`}></div>
+                  <div className="w-24 h-24 mx-auto rounded-full bg-slate-200 mb-4 overflow-hidden border-4 border-white shadow-md group-hover:scale-105 transition-transform duration-300">
                     <img 
                       src={avatar} 
                       alt={member.name} 
@@ -188,22 +188,22 @@ const About = () => {
                       }}
                     />
                   </div>
-                  <h3 className="text-2xl font-black text-slate-900 mb-1 leading-tight">{member.name}</h3>
-                  <p className={`font-extrabold mb-4 text-sm uppercase tracking-wider ${index === 0 ? 'text-primary' : 'text-secondary'}`}>
+                  <h3 className="text-xl font-extrabold text-slate-900 mb-1 leading-tight">{member.name}</h3>
+                  <p className={`font-bold mb-3 text-xs uppercase tracking-wider ${index === 0 ? 'text-primary' : 'text-secondary'}`}>
                     {member.role}
                   </p>
-                  <p className="text-slate-500 mb-6 text-sm font-medium leading-relaxed min-h-[60px]">
+                  <p className="text-slate-500 mb-5 text-sm font-medium leading-relaxed">
                     {member.bio}
                   </p>
                   <div className="space-y-1.5 flex flex-col items-center text-xs text-slate-400 font-bold border-t pt-4">
                     {member.contact && (
                       <span className="flex items-center gap-1.5">
-                        <Phone size={13} className="text-slate-300" /> {member.contact}
+                        <Phone size={12} className="text-slate-300" /> {member.contact}
                       </span>
                     )}
                     {member.email && (
                       <span className="flex items-center gap-1.5">
-                        <Mail size={13} className="text-slate-300" /> {member.email}
+                        <Mail size={12} className="text-slate-300" /> {member.email}
                       </span>
                     )}
                   </div>

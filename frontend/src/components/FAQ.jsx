@@ -7,9 +7,9 @@ const FAQItem = ({ question, answer, isOpen, onClick }) => {
     <div className="border-b border-slate-100 last:border-0">
       <button
         onClick={onClick}
-        className="w-full py-6 flex items-center justify-between text-left group"
+        className="w-full py-5 sm:py-6 pr-10 sm:pr-0 flex items-center justify-between text-left group"
       >
-        <span className={`text-lg font-bold transition-colors ${isOpen ? 'text-primary' : 'text-slate-900 group-hover:text-primary'}`}>
+        <span className={`text-sm sm:text-base md:text-lg font-bold transition-colors ${isOpen ? 'text-primary' : 'text-slate-900 group-hover:text-primary'}`}>
           {question}
         </span>
         <motion.div
@@ -30,7 +30,7 @@ const FAQItem = ({ question, answer, isOpen, onClick }) => {
             transition={{ duration: 0.3 }}
             className="overflow-hidden"
           >
-            <p className="pb-6 text-slate-600 leading-relaxed">
+            <p className="pb-5 sm:pb-6 text-sm sm:text-base text-slate-600 leading-relaxed">
               {answer}
             </p>
           </motion.div>
@@ -74,7 +74,7 @@ const FAQ = () => {
           <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">Frequently Asked Questions</h2>
         </div>
         
-        <div className="bg-slate-50 rounded-3xl p-8 md:p-12 shadow-sm border border-slate-100">
+        <div className="bg-slate-50 rounded-3xl p-4 sm:p-6 md:p-8 lg:p-12 shadow-sm border border-slate-100">
           {faqs.map((faq, index) => (
             <FAQItem
               key={index}

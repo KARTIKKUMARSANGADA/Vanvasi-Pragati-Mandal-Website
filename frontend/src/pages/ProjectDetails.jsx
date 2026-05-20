@@ -86,7 +86,7 @@ const ProjectDetails = () => {
         {/* Improved Back Button Visibility: Top-Left */}
         <Link
           to="/projects"
-          className="absolute top-8 left-8 z-30 inline-flex items-center gap-2 text-white bg-black/40 backdrop-blur-md px-5 py-2.5 rounded-full hover:bg-black/60 transition-all font-semibold border border-white/30 group shadow-xl"
+          className="absolute top-8 left-8 z-30 hidden md:inline-flex items-center gap-2 text-white bg-black/40 backdrop-blur-md px-5 py-2.5 rounded-full hover:bg-black/60 transition-all font-semibold border border-white/30 group shadow-xl"
         >
           <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
           <span>Back to Projects</span>

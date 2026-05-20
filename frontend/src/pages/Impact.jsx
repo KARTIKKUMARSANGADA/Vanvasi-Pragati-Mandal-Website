@@ -60,7 +60,7 @@ const Impact = () => {
   return (
     <div className="w-full pb-24 min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-slate-50 pt-32 pb-16 border-b border-slate-100">
+      <div className="bg-slate-50 pt-36 sm:pt-40 pb-16 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -92,14 +92,14 @@ const Impact = () => {
         )}
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+          <div className="grid grid-cols-1 min-[380px]:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="h-44 bg-slate-50 animate-pulse rounded-2xl border border-slate-100"></div>
             ))}
           </div>
         ) : (
           /* Top Stats Cards */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+          <div className="grid grid-cols-1 min-[380px]:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
             {stats.map((stat, index) => (
               <motion.div
                 key={index}
@@ -166,7 +166,7 @@ const Impact = () => {
         </div>
 
         {/* Narrative */}
-        <div className="bg-primary rounded-3xl p-10 md:p-16 text-center text-white relative overflow-hidden">
+        <div className="bg-primary rounded-3xl p-6 sm:p-10 md:p-16 text-center text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white opacity-10 rounded-full blur-2xl"></div>
           <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-white opacity-10 rounded-full blur-2xl"></div>
           

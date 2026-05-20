@@ -91,16 +91,16 @@ const ImageGallery = ({ images = [] }) => {
                         {images.length > 1 && (
                             <>
                                 <button 
-                                    className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 text-white hover:text-primary transition-all bg-white/10 p-4 rounded-full z-[110] hover:scale-110"
+                                    className="absolute left-2 sm:left-8 top-1/2 -translate-y-1/2 text-white hover:text-primary transition-all bg-black/40 sm:bg-white/10 p-2 sm:p-4 rounded-full z-[110] hover:scale-110 active:scale-95 pointer-events-auto"
                                     onClick={showPrev}
                                 >
-                                    <ChevronLeft size={32} />
+                                    <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
                                 </button>
                                 <button 
-                                    className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 text-white hover:text-primary transition-all bg-white/10 p-4 rounded-full z-[110] hover:scale-110"
+                                    className="absolute right-2 sm:right-8 top-1/2 -translate-y-1/2 text-white hover:text-primary transition-all bg-black/40 sm:bg-white/10 p-2 sm:p-4 rounded-full z-[110] hover:scale-110 active:scale-95 pointer-events-auto"
                                     onClick={showNext}
                                 >
-                                    <ChevronRight size={32} />
+                                    <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
                                 </button>
                             </>
                         )}

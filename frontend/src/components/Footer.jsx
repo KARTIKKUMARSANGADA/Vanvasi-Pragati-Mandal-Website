@@ -5,11 +5,11 @@ import { FaWhatsapp } from 'react-icons/fa';
 const Footer = () => {
   return (
     <footer className="bg-slate-900 text-slate-300 mt-auto w-full max-w-full overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-5 md:px-8 pt-10 pb-6 md:pt-14 md:pb-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-10 sm:gap-x-8 lg:gap-8 mb-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-5 md:px-8 pt-16 pb-6 md:pt-14 md:pb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-8 lg:gap-8 mb-10">
           
           {/* Brand Section */}
-          <div className="col-span-1 sm:col-span-2 lg:col-span-1">
+          <div className="col-span-2 lg:col-span-1">
             <Link to="/" className="flex items-center gap-3 mb-5 hover:opacity-90 transition-opacity w-fit">
               <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-primary flex items-center justify-center text-white shrink-0 shadow-lg">
                 <Heart size={18} fill="currentColor" />
@@ -44,7 +44,7 @@ const Footer = () => {
           </div>
 
           {/* Contact */}
-          <div>
+          <div className="col-span-2 sm:col-span-1 lg:col-span-1">
             <h3 className="text-white text-[14px] md:text-[16px] font-bold mb-5 uppercase tracking-wider">Contact</h3>
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-[13px] md:text-[14px] leading-[1.6]">

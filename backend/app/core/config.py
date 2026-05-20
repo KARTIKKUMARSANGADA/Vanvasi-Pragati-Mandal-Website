@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: Optional[str] = None
     ADMIN_EMAIL: Optional[str] = None
 
+    # Brevo Email API (Alternative to SMTP)
+    BREVO_API_KEY: Optional[str] = None
+    BREVO_FROM_EMAIL: str = "official.vanvasipragatimandal@gmail.com"
+
     @field_validator("ADMIN_USERNAME", "ADMIN_PASSWORD")
     @classmethod
     def check_not_empty(cls, v: str):

@@ -29,7 +29,7 @@ def _header_html() -> str:
     """Elegant green background header with centered logo and white typography to match the user reference design."""
     return """
     <div style="background-color: #1b4332; padding: 32px 24px; text-align: center;">
-        <img src="cid:logo" alt="Vanvasi Pragati Mandal Logo" width="56" height="56" style="display: block; margin: 0 auto 12px auto; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.3); background-color: #ffffff;" />
+        <img src="https://vanvasi-pragati-mandal-pipaliya.vercel.app/LOGO.png" alt="Vanvasi Pragati Mandal Logo" width="56" height="56" style="display: block; margin: 0 auto 12px auto; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.3); background-color: #ffffff;" />
         <h1 style="color: #ffffff; margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 0.5px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
             Vanvasi Pragati Mandal
         </h1>
@@ -108,7 +108,45 @@ def _get_smtp_connection():
     return server
 
 def _send_single(to: str, subject: str, html_body: str, server=None) -> bool:
-    """Send a single email. If `server` is provided, reuses the connection."""
+    """Send a single email. If BREVO_API_KEY is configured, uses Brevo HTTP API. Otherwise falls back to SMTP."""
+    if settings.BREVO_API_KEY:
+        try:
+            import requests
+            url = "https://api.brevo.com/v3/smtp/email"
+            headers = {
+                "api-key": settings.BREVO_API_KEY,
+                "Content-Type": "application/json",
+                "accept": "application/json"
+            }
+            
+            payload = {
+                "sender": {
+                    "name": "Vanvasi Pragati Mandal",
+                    "email": settings.BREVO_FROM_EMAIL
+                },
+                "to": [
+                    {
+                        "email": to
+                    }
+                ],
+                "subject": subject,
+                "htmlContent": html_body
+            }
+            
+            logger.info(f"Attempting to send email to {to} via Brevo HTTP API...")
+            response = requests.post(url, json=payload, headers=headers, timeout=10)
+            
+            if response.status_code in [200, 201, 202]:
+                logger.info(f"Branded email successfully sent to {to} via Brevo API.")
+                return True
+            else:
+                logger.error(f"Failed to send email to {to} via Brevo API: Status {response.status_code}, Response: {response.text}")
+                return False
+        except Exception as e:
+            logger.error(f"Exception during Brevo API call to {to}: {e}")
+            return False
+
+    # --- SMTP Fallback ---
     smtp_username = settings.SMTP_USERNAME
     smtp_password = settings.SMTP_PASSWORD
     if not smtp_username or not smtp_password:
@@ -147,7 +185,7 @@ def _send_single(to: str, subject: str, html_body: str, server=None) -> bool:
         if close_after:
             server.quit()
 
-        logger.info(f"Branded email successfully sent to {to}")
+        logger.info(f"Branded email successfully sent to {to} (SMTP)")
         return True
     except Exception as e:
         logger.error(f"Failed to send email to {to}: {e}")

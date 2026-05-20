@@ -54,19 +54,19 @@ const Navbar = () => {
                   } group-hover:scale-105`}
                 />
               </div>
-              <div className="flex flex-col">
-                <h1 className={`text-base sm:text-lg md:text-xl font-extrabold leading-tight transition-colors duration-300 ${
+              <div className="hidden min-[300px]:flex flex-col">
+                <h1 className={`text-xs min-[380px]:text-sm sm:text-base md:text-lg lg:text-xl font-extrabold leading-tight transition-colors duration-300 ${
                   isTransparent ? 'text-white' : 'text-slate-900'
                 }`}>
-                  Vanvasi Pragati<br className="hidden sm:block" />
-                  <span className="sm:hidden"> </span>Mandal Pipaliya
+                  Vanvasi Pragati<br className="md:hidden" />
+                  <span className="hidden md:inline"> </span>Mandal Pipaliya
                 </h1>
               </div>
             </Link>
           </div>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden lg:flex items-center space-x-8">
             <div className="flex items-center space-x-6">
               {links.map((link) => (
                 <Link
@@ -99,7 +99,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="flex items-center md:hidden">
+          <div className="flex items-center lg:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
               className={`focus:outline-none p-2 transition-colors ${
@@ -121,7 +121,7 @@ const Navbar = () => {
             animate={{ opacity: 1, height: 'auto', y: 0 }}
             exit={{ opacity: 0, height: 0, y: -20 }}
             transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
-            className="md:hidden absolute top-full left-0 w-full bg-white border-t border-slate-100 shadow-2xl rounded-b-[2rem] overflow-hidden"
+            className="lg:hidden absolute top-full left-0 w-full bg-white border-t border-slate-100 shadow-2xl rounded-b-[2rem] overflow-hidden"
           >
             <div className="px-4 py-6 flex flex-col space-y-4">
               {links.map((link) => (
