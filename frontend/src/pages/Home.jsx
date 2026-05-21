@@ -256,11 +256,11 @@ const Home = () => {
                   {heroSlides[currentBgIdx].description}
                 </p>
                 
-                <div className="flex flex-row items-center gap-2 sm:gap-4 pt-2">
-                  <Link to="/projects" className="px-4 py-2 sm:px-8 sm:py-3.5 bg-primary text-white font-bold rounded-full hover:bg-primary-hover transition-all shadow-xl shadow-primary/30 flex items-center justify-center gap-1.5 sm:gap-2 text-[11px] sm:text-base shrink-0">
+                <div className="flex flex-col min-[320px]:flex-row items-center gap-2 sm:gap-4 pt-2 w-full max-w-xs min-[320px]:max-w-none mx-auto min-[320px]:mx-0">
+                  <Link to="/projects" className="px-4 py-2 sm:px-8 sm:py-3.5 bg-primary text-white font-bold rounded-full hover:bg-primary-hover transition-all shadow-xl shadow-primary/30 flex items-center justify-center gap-1.5 sm:gap-2 text-[11px] sm:text-base w-full min-[320px]:w-auto shrink-0">
                     View Our Work <ArrowRight size={14} className="sm:w-[18px] sm:h-[18px]" />
                   </Link>
-                  <Link to="/contact" className="px-4 py-2 sm:px-8 sm:py-3.5 bg-transparent text-white font-bold rounded-full border-2 border-white/30 hover:bg-white/10 transition-all flex items-center justify-center text-[11px] sm:text-base shrink-0">
+                  <Link to="/contact" className="px-4 py-2 sm:px-8 sm:py-3.5 bg-transparent text-white font-bold rounded-full border-2 border-white/30 hover:bg-white/10 transition-all flex items-center justify-center text-[11px] sm:text-base w-full min-[320px]:w-auto shrink-0">
                     Contact Us
                   </Link>
                 </div>
