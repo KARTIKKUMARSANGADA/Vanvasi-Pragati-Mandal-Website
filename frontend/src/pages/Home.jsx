@@ -225,7 +225,7 @@ const Home = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent z-10"></div>
         </div>
 
-        <div className="max-w-[95%] sm:max-w-[90%] mx-auto relative z-20 w-full flex items-center pt-20 pb-24 sm:pb-28 md:pt-0 md:pb-0">
+        <div className="max-w-[95%] sm:max-w-[90%] mx-auto relative z-20 w-full flex items-center pt-28 pb-24 sm:pb-28 md:pt-36 md:pb-16">
           <div className="w-full max-w-5xl text-left">
             <AnimatePresence mode="wait">
               <motion.div
