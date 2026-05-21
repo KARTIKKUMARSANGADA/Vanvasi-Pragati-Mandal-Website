@@ -222,7 +222,7 @@ const Home = () => {
             />
           </AnimatePresence>
           {/* Specific Dark Gradient Overlay - Left-to-Right for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/65 to-black/30 md:to-transparent z-10"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent z-10"></div>
         </div>
 
         <div className="max-w-[90%] mx-auto relative z-20 w-full flex items-center pt-36 pb-16 md:pt-0 md:pb-0">
@@ -438,7 +438,7 @@ const Home = () => {
       </section>
 
       {/* Success Story Carousel */}
-      <section className="py-16 md:py-24 bg-white relative overflow-hidden">
+      <section className="pt-16 pb-6 md:pt-24 md:pb-8 bg-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h4 className="text-primary font-bold tracking-wider uppercase mb-2">Success Stories</h4>
