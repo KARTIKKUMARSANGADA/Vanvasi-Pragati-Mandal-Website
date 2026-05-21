@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Analytics } from "@vercel/analytics/react";
 
@@ -38,6 +38,28 @@ const PageLoader = () => (
 );
 
 function App() {
+  useEffect(() => {
+    const handleChunkError = (error) => {
+      const errorMsg = error?.message || error?.reason?.message || '';
+      if (
+        errorMsg.includes('Failed to fetch dynamically imported module') ||
+        errorMsg.includes('ChunkLoadError') ||
+        errorMsg.includes('loading chunk')
+      ) {
+        console.warn('Dynamic chunk load failure detected. Forcing page refresh to load latest deployment...', error);
+        window.location.reload();
+      }
+    };
+
+    window.addEventListener('error', handleChunkError, true);
+    window.addEventListener('unhandledrejection', handleChunkError);
+
+    return () => {
+      window.removeEventListener('error', handleChunkError, true);
+      window.removeEventListener('unhandledrejection', handleChunkError);
+    };
+  }, []);
+
   return (
     <DonationProvider>
       <Router>
