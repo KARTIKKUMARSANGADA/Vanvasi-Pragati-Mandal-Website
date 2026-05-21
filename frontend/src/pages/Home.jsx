@@ -473,12 +473,12 @@ const Home = () => {
           <p className="text-green-50 text-base sm:text-lg lg:text-xl mb-8 md:mb-10 leading-relaxed max-w-3xl mx-auto font-medium">
             Together we can make a difference. Partner with us, volunteer, or contribute to bring positive change to the lives of thousands.
           </p>
-          <button 
-            onClick={openDonation}
+          <Link 
+            to="/contact"
             className="inline-flex w-full sm:w-auto items-center justify-center px-8 py-4 bg-white text-primary font-bold rounded-full hover:bg-green-50 hover:scale-105 active:scale-95 transition-all duration-200 shadow-xl shadow-black/10 text-base sm:text-lg"
           >
             Join Us Today
-          </button>
+          </Link>
         </div>
       </section>
     </div>
