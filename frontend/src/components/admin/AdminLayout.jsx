@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Layout, ImageIcon, Briefcase, LogOut, Menu, X, MessageSquare, MapPin, Info } from 'lucide-react';
+import { Layout, ImageIcon, Briefcase, LogOut, Menu, X, MessageSquare, MapPin, Info, Mail, Quote } from 'lucide-react';
 import LOGO from '../../assets/LOGO.png'; 
 import ErrorBoundary from '../common/ErrorBoundary';
 import api from '../../api/axios';
@@ -93,6 +93,12 @@ const AdminLayout = ({ children, title }) => {
                     </Link>
                     <Link onClick={() => setSidebarOpen(false)} to="/admin-vpm-portal/about" className={`flex items-center gap-3 p-3.5 rounded-xl transition-all ${isActive('/admin-vpm-portal/about') ? 'bg-primary/10 text-primary font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>
                         <Info size={20} /> About & Identity
+                    </Link>
+                    <Link onClick={() => setSidebarOpen(false)} to="/admin-vpm-portal/subscribers" className={`flex items-center gap-3 p-3.5 rounded-xl transition-all ${isActive('/admin-vpm-portal/subscribers') ? 'bg-primary/10 text-primary font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>
+                        <Mail size={20} /> Subscribers Hub
+                    </Link>
+                    <Link onClick={() => setSidebarOpen(false)} to="/admin-vpm-portal/testimonials" className={`flex items-center gap-3 p-3.5 rounded-xl transition-all ${isActive('/admin-vpm-portal/testimonials') ? 'bg-primary/10 text-primary font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>
+                        <Quote size={20} /> Testimonials
                     </Link>
                     <Link
                         onClick={() => setSidebarOpen(false)}

@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const LazyImage = ({ src, alt, className, containerClassName = "", threshold = 0.1 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
+  const containerRef = useRef(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -16,17 +17,17 @@ const LazyImage = ({ src, alt, className, containerClassName = "", threshold = 0
       { threshold }
     );
 
-    const target = document.getElementById(`lazy-img-${src}`);
+    const target = containerRef.current;
     if (target) observer.observe(target);
 
     return () => {
       if (target) observer.unobserve(target);
     };
-  }, [src, threshold]);
+  }, [threshold]);
 
   return (
     <div 
-      id={`lazy-img-${src}`}
+      ref={containerRef}
       className={`relative overflow-hidden ${containerClassName}`}
     >
       <AnimatePresence>

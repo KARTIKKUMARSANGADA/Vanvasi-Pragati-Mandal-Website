@@ -45,13 +45,13 @@ const Lightbox = ({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[999] flex items-center justify-center bg-black/90 backdrop-blur-md select-none overflow-hidden"
+                    className="fixed inset-0 z-[3000] flex items-center justify-center bg-black/90 backdrop-blur-md select-none overflow-hidden"
                     onClick={onClose}
                 >
                     {/* Close Button (X) */}
                     <button
                         onClick={onClose}
-                        className="absolute top-6 right-6 z-[1000] p-3.5 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-all duration-300 border border-white/10"
+                        className="absolute top-6 right-6 z-[3010] p-3.5 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-all duration-300 border border-white/10"
                         aria-label="Close Lightbox"
                     >
                         <X size={24} />
@@ -61,7 +61,7 @@ const Lightbox = ({
                     {images.length > 1 && (
                         <button
                             onClick={handlePrev}
-                            className="absolute left-6 z-[1000] p-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-all duration-300 transform -translate-y-1/2 top-1/2 border border-white/10 hover:scale-110 active:scale-95"
+                            className="absolute left-6 z-[3010] p-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-all duration-300 transform -translate-y-1/2 top-1/2 border border-white/10 hover:scale-110 active:scale-95"
                             aria-label="Previous Image"
                         >
                             <ChevronLeft size={32} />
@@ -72,7 +72,7 @@ const Lightbox = ({
                     {images.length > 1 && (
                         <button
                             onClick={handleNext}
-                            className="absolute right-6 z-[1000] p-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-all duration-300 transform -translate-y-1/2 top-1/2 border border-white/10 hover:scale-110 active:scale-95"
+                            className="absolute right-6 z-[3010] p-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-all duration-300 transform -translate-y-1/2 top-1/2 border border-white/10 hover:scale-110 active:scale-95"
                             aria-label="Next Image"
                         >
                             <ChevronRight size={32} />

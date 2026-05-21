@@ -25,6 +25,8 @@ const GalleryManager = lazy(() => import('./pages/admin/GalleryManager'));
 const AdminContacts = lazy(() => import('./pages/admin/AdminContacts'));
 const AdminLocations = lazy(() => import('./pages/admin/AdminLocations'));
 const AdminAbout = lazy(() => import('./pages/admin/AdminAbout'));
+const AdminSubscribers = lazy(() => import('./pages/admin/AdminSubscribers'));
+const AdminTestimonials = lazy(() => import('./pages/admin/AdminTestimonials'));
 const ProtectedRoute = lazy(() => import('./components/admin/ProtectedRoute'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
@@ -67,6 +69,14 @@ function App() {
 
             <Route path="/admin-vpm-portal/about" element={
               <ProtectedRoute><AdminAbout /></ProtectedRoute>
+            } />
+
+            <Route path="/admin-vpm-portal/subscribers" element={
+              <ProtectedRoute><AdminSubscribers /></ProtectedRoute>
+            } />
+
+            <Route path="/admin-vpm-portal/testimonials" element={
+              <ProtectedRoute><AdminTestimonials /></ProtectedRoute>
             } />
 
             {/* Public Layout */}

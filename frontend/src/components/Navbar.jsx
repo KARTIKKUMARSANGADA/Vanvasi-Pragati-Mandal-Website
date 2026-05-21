@@ -45,7 +45,7 @@ const Navbar = () => {
   const isTransparent = !scrolled && location.pathname === '/';
 
   return (
-    <div className={`fixed left-0 w-full z-50 flex justify-center px-4 sm:px-6 transition-all duration-300 ${isTransparent ? 'top-6' : 'top-2'}`}>
+    <div className={`fixed left-0 w-full z-[1050] flex justify-center px-4 sm:px-6 transition-all duration-300 ${isTransparent ? 'top-6' : 'top-2'}`}>
       <nav className={`transition-all duration-300 px-6 sm:px-8 lg:px-10 py-4 sm:py-5 w-full max-w-7xl flex justify-between items-center rounded-full ${isTransparent
           ? 'bg-transparent shadow-none border-transparent'
           : 'bg-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100'

@@ -232,7 +232,7 @@ const Projects = () => {
           </div>
         )}
 
-        {filteredProjects.length === 0 && !loading && (
+        {filteredProjects.length === 0 && !loading && !error && (
           <div className="text-center py-20 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
             <p className="text-xl text-slate-500 font-bold mb-2">No projects match your criteria.</p>
             <p className="text-slate-400 text-sm mb-4">Try checking for typos or searching a different category.</p>

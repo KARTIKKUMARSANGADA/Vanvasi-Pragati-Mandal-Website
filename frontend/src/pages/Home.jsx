@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Users, CheckCircle, MapPin, Calendar } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Users, CheckCircle, MapPin, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../api/axios';
 import AnimatedCounter from '../components/common/AnimatedCounter';
@@ -41,6 +41,22 @@ const Home = () => {
     return () => { isMounted = false; };
   }, []);
 
+  const DEFAULT_TESTIMONIALS = useMemo(() => [
+    {
+      quote: "I never thought I could finish school after my father passed away. Vanvasi Pragati Mandal supported my education, and today I am the first college graduate in my village.",
+      name: "Ramesh Sangada",
+      role: "Student & Scholarship Recipient",
+      image: null
+    },
+    {
+      quote: "The medical camp saved my daughter's life. We couldn't afford the surgery, but the trust organized everything and covered all costs. We are forever grateful.",
+      name: "Meena Ben",
+      role: "Beneficiary Mother",
+      image: null
+    }
+  ], []);
+
+  const [testimonials, setTestimonials] = useState([]);
   const [featuredProjects, setFeaturedProjects] = useState([]);
   const [startIndex, setStartIndex] = useState(0);
   const [loadingProjects, setLoadingProjects] = useState(true);
@@ -92,6 +108,27 @@ const Home = () => {
     fetchProjects();
     return () => { isMounted = false; };
   }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchTestimonials = async () => {
+      try {
+        const { data } = await api.get('/content/testimonials');
+        if (isMounted) {
+          if (Array.isArray(data) && data.length > 0) {
+            setTestimonials(data);
+          } else {
+            setTestimonials(DEFAULT_TESTIMONIALS);
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to fetch dynamic testimonials, using fallbacks:", err);
+        if (isMounted) setTestimonials(DEFAULT_TESTIMONIALS);
+      }
+    };
+    fetchTestimonials();
+    return () => { isMounted = false; };
+  }, [DEFAULT_TESTIMONIALS]);
 
   const shuffleProjects = () => {
     setFeaturedProjects(prev => [...prev].sort(() => Math.random() - 0.5));
@@ -229,42 +266,29 @@ const Home = () => {
       {/* Featured Projects */}
       <section className="py-16 md:py-24 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-12">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-12">
             <div>
               <h4 className="text-primary font-bold tracking-wider uppercase mb-2">Our Impact</h4>
               <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">Featured Projects</h2>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
-              {featuredProjects.length > 3 && (
-                <>
-                  <button 
-                    onClick={shuffleProjects}
-                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-full transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
-                  >
-                    🔄 Shuffle
-                  </button>
-                  <div className="flex items-center gap-2">
-                    <button 
-                      onClick={() => setStartIndex(prev => (prev - 1 + featuredProjects.length) % featuredProjects.length)}
-                      className="w-8 h-8 bg-white hover:bg-slate-50 border border-slate-200 rounded-full flex items-center justify-center text-slate-600 transition-all shadow-sm font-bold active:scale-95"
-                      title="Previous Projects"
-                    >
-                      ←
-                    </button>
-                    <button 
-                      onClick={() => setStartIndex(prev => (prev + 1) % featuredProjects.length)}
-                      className="w-8 h-8 bg-white hover:bg-slate-50 border border-slate-200 rounded-full flex items-center justify-center text-slate-600 transition-all shadow-sm font-bold active:scale-95"
-                      title="Next Projects"
-                    >
-                      →
-                    </button>
-                  </div>
-                </>
-              )}
-              <Link to="/projects" className="inline-flex items-center gap-2 text-secondary font-bold hover:text-blue-800">
-                View All Projects <ArrowRight size={18} />
-              </Link>
-            </div>
+            {featuredProjects.length > 3 && (
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => setStartIndex(prev => (prev - 1 + featuredProjects.length) % featuredProjects.length)}
+                  className="w-10 h-10 bg-white hover:bg-slate-50 border border-slate-200 rounded-full flex items-center justify-center text-slate-600 hover:text-primary transition-all shadow-sm active:scale-90 cursor-pointer"
+                  title="Previous Projects"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button 
+                  onClick={() => setStartIndex(prev => (prev + 1) % featuredProjects.length)}
+                  className="w-10 h-10 bg-white hover:bg-slate-50 border border-slate-200 rounded-full flex items-center justify-center text-slate-600 hover:text-primary transition-all shadow-sm active:scale-90 cursor-pointer"
+                  title="Next Projects"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+            )}
           </div>
           
           {loadingProjects ? (
@@ -319,9 +343,13 @@ const Home = () => {
             </div>
           )}
           
-          <div className="mt-8 text-center sm:hidden">
-            <Link to="/projects" className="inline-flex items-center gap-2 text-secondary font-semibold">
-              View All Projects <ArrowRight size={18} />
+          <div className="mt-12 flex justify-end">
+            <Link 
+              to="/projects" 
+              className="inline-flex items-center gap-2 text-secondary font-bold hover:text-blue-800 transition-all text-base group"
+            >
+              <span>View All Projects</span>
+              <ArrowRight size={18} className="transform group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
         </div>
@@ -336,37 +364,38 @@ const Home = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-            <motion.div 
-              whileHover={{ y: -5 }}
-              className="p-6 md:p-8 bg-slate-50 rounded-3xl border border-slate-100 flex flex-col justify-between shadow-sm"
-            >
-              <p className="text-sm sm:text-base md:text-lg text-slate-700 italic font-medium leading-relaxed mb-6">
-                "I never thought I could finish school after my father passed away. Vanvasi Pragati Mandal supported my education, and today I am the first college graduate in my village."
-              </p>
-              <div className="flex items-center gap-4 mt-auto">
-                <div className="w-12 h-12 bg-slate-200 rounded-full shrink-0"></div>
-                <div>
-                  <h4 className="font-bold text-slate-900 text-base">Ramesh Sangada</h4>
-                  <p className="text-slate-500 text-sm">Student & Scholarship Recipient</p>
+            {testimonials.map((item, idx) => (
+              <motion.div 
+                key={idx}
+                whileHover={{ y: -5 }}
+                className={`p-6 md:p-8 rounded-3xl border flex flex-col justify-between shadow-sm ${
+                  idx % 2 === 0 
+                    ? 'bg-slate-50 border-slate-100' 
+                    : 'bg-primary/5 border-primary/10'
+                }`}
+              >
+                <p className="text-sm sm:text-base md:text-lg text-slate-700 italic font-medium leading-relaxed mb-6">
+                  "{item.quote}"
+                </p>
+                <div className="flex items-center gap-4 mt-auto">
+                  {item.image ? (
+                    <img 
+                      src={item.image} 
+                      alt={item.name} 
+                      className="w-12 h-12 rounded-full object-cover shrink-0 border border-slate-100" 
+                    />
+                  ) : (
+                    <div className="w-12 h-12 bg-slate-200 rounded-full shrink-0 flex items-center justify-center text-slate-500 font-bold text-sm">
+                      {item.name ? item.name.charAt(0) : 'V'}
+                    </div>
+                  )}
+                  <div>
+                    <h4 className="font-bold text-slate-900 text-base">{item.name}</h4>
+                    <p className="text-slate-500 text-sm">{item.role}</p>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-
-            <motion.div 
-              whileHover={{ y: -5 }}
-              className="p-6 md:p-8 bg-primary/5 rounded-3xl border border-primary/10 flex flex-col justify-between shadow-sm"
-            >
-              <p className="text-sm sm:text-base md:text-lg text-slate-700 italic font-medium leading-relaxed mb-6">
-                "The medical camp saved my daughter's life. We couldn't afford the surgery, but the trust organized everything and covered all costs. We are forever grateful."
-              </p>
-              <div className="flex items-center gap-4 mt-auto">
-                <div className="w-12 h-12 bg-slate-200 rounded-full shrink-0"></div>
-                <div>
-                  <h4 className="font-bold text-slate-900 text-base">Meena Ben</h4>
-                  <p className="text-slate-500 text-sm">Beneficiary Mother</p>
-                </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -382,7 +411,7 @@ const Home = () => {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 md:p-14 overflow-hidden relative group">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-[2.2fr_3.8fr] gap-8 md:gap-12 items-center">
               <div>
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-4 leading-tight">
                   Stay Updated with <br className="hidden sm:inline" />Our <span className="text-primary">Impact Stories</span>

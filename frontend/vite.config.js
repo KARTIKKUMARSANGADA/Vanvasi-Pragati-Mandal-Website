@@ -10,7 +10,14 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            return id.toString().split('node_modules/')[1].split('/')[0].toString();
+            const library = id.toString().split('node_modules/')[1].split('/')[0].toString();
+            if (['react', 'react-dom', 'react-router-dom', '@remix-run', 'react-router'].includes(library)) {
+              return 'vendor-core';
+            }
+            if (['framer-motion', 'recharts', 'leaflet', '@supabase', 'react-leaflet'].includes(library)) {
+              return 'vendor-ui-libs';
+            }
+            return 'vendor-helpers';
           }
         }
       }
