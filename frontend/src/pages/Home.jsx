@@ -225,7 +225,7 @@ const Home = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent z-10"></div>
         </div>
 
-        <div className="max-w-[90%] mx-auto relative z-20 w-full flex items-center pt-20 pb-8 md:pt-0 md:pb-0">
+        <div className="max-w-[95%] sm:max-w-[90%] mx-auto relative z-20 w-full flex items-center pt-20 pb-8 md:pt-0 md:pb-0">
           <div className="w-full max-w-5xl text-left">
             <AnimatePresence mode="wait">
               <motion.div
@@ -256,7 +256,7 @@ const Home = () => {
                   {heroSlides[currentBgIdx].description}
                 </p>
                 
-                <div className="flex flex-row flex-wrap items-center gap-2 sm:gap-4 pt-2">
+                <div className="flex flex-row items-center gap-2 sm:gap-4 pt-2">
                   <Link to="/projects" className="px-4 py-2 sm:px-8 sm:py-3.5 bg-primary text-white font-bold rounded-full hover:bg-primary-hover transition-all shadow-xl shadow-primary/30 flex items-center justify-center gap-1.5 sm:gap-2 text-[11px] sm:text-base shrink-0">
                     View Our Work <ArrowRight size={14} className="sm:w-[18px] sm:h-[18px]" />
                   </Link>
