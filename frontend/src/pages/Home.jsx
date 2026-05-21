@@ -202,7 +202,7 @@ const Home = () => {
         description="Empowering rural and tribal communities in Gujarat through education, healthcare, and sustainable development projects." 
       />
       {/* Hero Section */}
-      <section className="relative min-h-[calc(100vh-80px)] md:h-[90vh] lg:h-screen flex items-center overflow-hidden pt-20 md:pt-0">
+      <section className="relative min-h-[calc(100vh-80px)] md:h-[90vh] lg:h-screen flex items-center overflow-hidden pt-12 md:pt-0">
         {/* Background Image Slider with Synced Slides */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           <AnimatePresence initial={false}>
@@ -225,7 +225,7 @@ const Home = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent z-10"></div>
         </div>
 
-        <div className="max-w-[90%] mx-auto relative z-20 w-full flex items-center pt-28 pb-12 md:pt-0 md:pb-0">
+        <div className="max-w-[90%] mx-auto relative z-20 w-full flex items-center pt-20 pb-8 md:pt-0 md:pb-0">
           <div className="w-full max-w-5xl text-left">
             <AnimatePresence mode="wait">
               <motion.div
@@ -234,7 +234,7 @@ const Home = () => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 30 }}
                 transition={{ duration: 0.5, ease: "easeInOut" }}
-                className="space-y-6 md:space-y-8"
+                className="space-y-4 sm:space-y-6 md:space-y-8"
               >
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/20 backdrop-blur-md border border-primary/30 text-white rounded-full text-xs md:text-sm font-bold uppercase tracking-widest w-fit">
                   <span className="relative flex h-2 w-2">
@@ -244,7 +244,7 @@ const Home = () => {
                   {heroSlides[currentBgIdx].badge}
                 </div>
                 
-                <h1 className="text-[clamp(2.25rem,6.2vw,4.85rem)] font-black text-white tracking-tighter leading-[1.1] flex flex-col justify-start">
+                <h1 className="text-[clamp(1.75rem,6.2vw,4.85rem)] font-black text-white tracking-tighter leading-[1.1] flex flex-col justify-start">
                   <span className="block">{heroSlides[currentBgIdx].titleLine1}</span>
                   <span className={`block my-1 ${heroSlides[currentBgIdx].titleLine2Color}`}>
                     {heroSlides[currentBgIdx].titleLine2}
@@ -256,11 +256,11 @@ const Home = () => {
                   {heroSlides[currentBgIdx].description}
                 </p>
                 
-                <div className="flex flex-row flex-wrap items-center gap-3 sm:gap-4 pt-2">
-                  <Link to="/projects" className="px-5 py-2.5 sm:px-8 sm:py-3.5 bg-primary text-white font-bold rounded-full hover:bg-primary-hover transition-all shadow-xl shadow-primary/30 flex items-center justify-center gap-2 text-xs sm:text-base shrink-0">
-                    View Our Work <ArrowRight size={18} />
+                <div className="flex flex-row flex-wrap items-center gap-2 sm:gap-4 pt-2">
+                  <Link to="/projects" className="px-4 py-2 sm:px-8 sm:py-3.5 bg-primary text-white font-bold rounded-full hover:bg-primary-hover transition-all shadow-xl shadow-primary/30 flex items-center justify-center gap-1.5 sm:gap-2 text-[11px] sm:text-base shrink-0">
+                    View Our Work <ArrowRight size={14} className="sm:w-[18px] sm:h-[18px]" />
                   </Link>
-                  <Link to="/contact" className="px-5 py-2.5 sm:px-8 sm:py-3.5 bg-transparent text-white font-bold rounded-full border-2 border-white/30 hover:bg-white/10 transition-all flex items-center justify-center text-xs sm:text-base shrink-0">
+                  <Link to="/contact" className="px-4 py-2 sm:px-8 sm:py-3.5 bg-transparent text-white font-bold rounded-full border-2 border-white/30 hover:bg-white/10 transition-all flex items-center justify-center text-[11px] sm:text-base shrink-0">
                     Contact Us
                   </Link>
                 </div>
