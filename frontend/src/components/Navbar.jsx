@@ -54,11 +54,16 @@ const Navbar = () => {
   const isTransparent = !scrolled && location.pathname === '/';
 
   return (
-    <div className={`fixed left-0 w-full z-[1050] flex justify-center px-4 sm:px-6 transition-all duration-300 ${isTransparent ? 'top-6' : 'top-2'}`}>
-      <nav className={`transition-all duration-300 px-6 sm:px-8 lg:px-6 xl:px-10 py-4 sm:py-5 w-full max-w-7xl flex justify-between items-center rounded-full ${isTransparent
-          ? 'bg-transparent shadow-none border-transparent'
-          : 'bg-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100'
-        }`}>
+    <div className={`fixed left-0 w-full z-[1050] flex justify-center transition-all duration-300 ${
+      isTransparent 
+        ? 'top-0 px-6 sm:px-10 lg:px-16' 
+        : 'top-2 px-4 sm:px-6'
+    }`}>
+      <nav className={`transition-all duration-300 py-4 sm:py-5 w-full flex justify-between items-center ${
+        isTransparent
+          ? 'max-w-none rounded-none bg-transparent shadow-none border-transparent px-0'
+          : 'max-w-7xl rounded-full bg-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100 px-6 sm:px-8 lg:px-6 xl:px-10'
+      }`}>
 
         {/* Logo Section */}
         <Link 
