@@ -77,11 +77,11 @@ const ImageGallery = ({ images = [] }) => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 sm:p-8"
+                        className="fixed inset-0 z-[2000] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 sm:p-8"
                         onClick={closeLightbox}
                     >
                         <button 
-                            className="absolute top-6 right-6 text-white hover:text-primary transition-colors bg-white/10 p-3 rounded-full z-[110]"
+                            className="absolute top-6 right-6 text-white hover:text-primary transition-colors bg-white/10 p-3 rounded-full z-[2010]"
                             onClick={closeLightbox}
                         >
                             <X size={28} />
@@ -91,13 +91,13 @@ const ImageGallery = ({ images = [] }) => {
                         {images.length > 1 && (
                             <>
                                 <button 
-                                    className="absolute left-2 sm:left-8 top-1/2 -translate-y-1/2 text-white hover:text-primary transition-all bg-black/40 sm:bg-white/10 p-2 sm:p-4 rounded-full z-[110] hover:scale-110 active:scale-95 pointer-events-auto"
+                                    className="absolute left-2 sm:left-8 top-1/2 -translate-y-1/2 text-white hover:text-primary transition-all bg-black/40 sm:bg-white/10 p-2 sm:p-4 rounded-full z-[2010] hover:scale-110 active:scale-95 pointer-events-auto"
                                     onClick={showPrev}
                                 >
                                     <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
                                 </button>
                                 <button 
-                                    className="absolute right-2 sm:right-8 top-1/2 -translate-y-1/2 text-white hover:text-primary transition-all bg-black/40 sm:bg-white/10 p-2 sm:p-4 rounded-full z-[110] hover:scale-110 active:scale-95 pointer-events-auto"
+                                    className="absolute right-2 sm:right-8 top-1/2 -translate-y-1/2 text-white hover:text-primary transition-all bg-black/40 sm:bg-white/10 p-2 sm:p-4 rounded-full z-[2010] hover:scale-110 active:scale-95 pointer-events-auto"
                                     onClick={showNext}
                                 >
                                     <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
