@@ -202,7 +202,7 @@ const Home = () => {
         description="Empowering rural and tribal communities in Gujarat through education, healthcare, and sustainable development projects." 
       />
       {/* Hero Section */}
-      <section className="relative min-h-[calc(100vh-80px)] md:h-[90vh] lg:h-screen flex items-center overflow-hidden pt-12 md:pt-0">
+      <section className="relative min-h-[500px] sm:min-h-[550px] md:min-h-[620px] lg:min-h-screen flex items-center overflow-hidden pt-12 md:pt-0">
         {/* Background Image Slider with Synced Slides */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           <AnimatePresence initial={false}>
