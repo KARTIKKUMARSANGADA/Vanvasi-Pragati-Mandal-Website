@@ -55,7 +55,7 @@ const Navbar = () => {
 
   return (
     <div className={`fixed left-0 w-full z-[1050] flex justify-center px-4 sm:px-6 transition-all duration-300 ${isTransparent ? 'top-6' : 'top-2'}`}>
-      <nav className={`transition-all duration-300 px-6 sm:px-8 lg:px-10 py-4 sm:py-5 w-full max-w-7xl flex justify-between items-center rounded-full ${isTransparent
+      <nav className={`transition-all duration-300 px-6 sm:px-8 lg:px-6 xl:px-10 py-4 sm:py-5 w-full max-w-7xl flex justify-between items-center rounded-full ${isTransparent
           ? 'bg-transparent shadow-none border-transparent'
           : 'bg-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100'
         }`}>
@@ -83,14 +83,14 @@ const Navbar = () => {
         </Link>
 
         {/* Desktop Menu */}
-        <div className="hidden lg:flex items-center gap-8 xl:gap-10">
-          <div className="flex items-center gap-6 xl:gap-8">
+        <div className="hidden lg:flex items-center gap-4 xl:gap-8">
+          <div className="flex items-center gap-4 xl:gap-6">
             {links.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
                 onClick={() => handleLinkClick(link.path)}
-                className={`relative text-[15px] xl:text-[16px] font-semibold transition-colors duration-300 py-1 ${isActive(link.path)
+                className={`relative text-[15px] xl:text-[16px] font-semibold transition-colors duration-300 py-1 whitespace-nowrap ${isActive(link.path)
                     ? 'text-primary'
                     : (isTransparent ? 'text-white hover:text-white/80' : 'text-slate-600 hover:text-primary')
                   }`}
