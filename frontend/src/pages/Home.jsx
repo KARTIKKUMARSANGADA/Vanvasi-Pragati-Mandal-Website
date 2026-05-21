@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight, Users, CheckCircle, MapPin, Calendar } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import api from '../api/axios';
 import AnimatedCounter from '../components/common/AnimatedCounter';
 import communityimg from '../assets/communityphoto.png';
@@ -11,6 +11,56 @@ import SEO from '../components/common/SEO';
 
 const Home = () => {
   const { openDonation } = useDonation();
+  
+  // Unified synced slideshow data model
+  const heroSlides = useMemo(() => [
+    {
+      bg: "/hero-bg.png",
+      badge: "Serving Since 2010",
+      titleLine1: "Empowering",
+      titleLine2: "Rural & Tribal",
+      titleLine2Color: "text-primary italic",
+      titleLine3: "Communities",
+      description: "Dedicated to improving healthcare, education, and livelihoods in underserved communities through sustainable initiatives."
+    },
+    {
+      bg: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=1600",
+      badge: "Education First",
+      titleLine1: "Enabling",
+      titleLine2: "Education & Literacy",
+      titleLine2Color: "text-blue-400 italic",
+      titleLine3: "Initiatives",
+      description: "Providing modern school resources, village learning camps, and quality coaching to children across tribal belts."
+    },
+    {
+      bg: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=1600",
+      badge: "Healthcare Camps",
+      titleLine1: "Providing",
+      titleLine2: "Healthcare & Medicine",
+      titleLine2Color: "text-rose-400 italic",
+      titleLine3: "Access",
+      description: "Bringing diagnosis camps, basic medicine supplies, and emergency clinical transport closer to remote hamlets."
+    },
+    {
+      bg: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&q=80&w=1600",
+      badge: "Livelihood Support",
+      titleLine1: "Creating",
+      titleLine2: "Sustainable Livelihoods",
+      titleLine2Color: "text-amber-400 italic",
+      titleLine3: "Opportunities",
+      description: "Empowering local women and youth through skill training, organic farming projects, and micro-entrepreneurship."
+    }
+  ], []);
+
+  const [currentBgIdx, setCurrentBgIdx] = useState(0);
+
+  // Cinematic synced slideshow rotation timer (6 seconds)
+  useEffect(() => {
+    const bgInterval = setInterval(() => {
+      setCurrentBgIdx(prev => (prev + 1) % heroSlides.length);
+    }, 6000);
+    return () => clearInterval(bgInterval);
+  }, [heroSlides.length]);
   const [stats, setStats] = useState([
     { label: 'Projects Completed', value: '150+', icon: CheckCircle, key: 'total_projects' },
     { label: 'People Benefited', value: '50,000+', icon: Users, key: 'people_benefited' },
@@ -153,54 +203,86 @@ const Home = () => {
       />
       {/* Hero Section */}
       <section className="relative min-h-[calc(100vh-80px)] md:h-[90vh] lg:h-screen flex items-center overflow-hidden pt-20 md:pt-0">
-        {/* Background Image - Absolute and at the bottom layer */}
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="/hero-bg.png" 
-            alt="Community Help" 
-            className="w-full h-full object-cover object-center scale-105"
-            loading="eager"
-          />
+        {/* Background Image Slider with Synced Slides */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <AnimatePresence initial={false}>
+            <motion.img 
+              key={currentBgIdx}
+              src={heroSlides[currentBgIdx].bg} 
+              alt="Community Empowerment" 
+              initial={{ x: "100%", opacity: 0 }}
+              animate={{ x: "0%", opacity: 1 }}
+              exit={{ x: "-100%", opacity: 0 }}
+              transition={{ 
+                x: { duration: 1.2, ease: [0.25, 1, 0.5, 1] },
+                opacity: { duration: 0.8 }
+              }}
+              className="absolute inset-0 w-full h-full object-cover object-center"
+              loading="eager"
+            />
+          </AnimatePresence>
           {/* Specific Dark Gradient Overlay - Left-to-Right for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/55 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/65 to-black/30 md:to-transparent z-10"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full flex items-center pt-36 pb-16 md:pt-0 md:pb-0">
-          <div className="w-full max-w-2xl text-left">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              className="space-y-6 md:space-y-8"
-            >
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/20 backdrop-blur-md border border-primary/30 text-white rounded-full text-xs md:text-sm font-bold uppercase tracking-widest w-fit">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                </span>
-                Serving Since 2010
-              </div>
-              
-              <h1 className="text-[clamp(2.25rem,6vw,5rem)] font-black text-white tracking-tighter leading-[1.1]">
-                Empowering <br className="hidden sm:inline" />
-                <span className="text-primary italic">Rural & Tribal</span> <br />
-                Communities
-              </h1>
+        <div className="max-w-[90%] mx-auto relative z-20 w-full flex items-center pt-36 pb-16 md:pt-0 md:pb-0">
+          <div className="w-full max-w-5xl text-left">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentBgIdx}
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 30 }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+                className="space-y-6 md:space-y-8"
+              >
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/20 backdrop-blur-md border border-primary/30 text-white rounded-full text-xs md:text-sm font-bold uppercase tracking-widest w-fit">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                  </span>
+                  {heroSlides[currentBgIdx].badge}
+                </div>
                 
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-slate-200 leading-relaxed font-medium max-w-xl opacity-90">
-                Dedicated to improving healthcare, education, and livelihoods in underserved communities through sustainable initiatives.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 pt-2">
-                <Link to="/projects" className="px-6 py-3 sm:px-8 sm:py-3.5 bg-primary text-white font-bold rounded-full hover:bg-primary-hover transition-all shadow-xl shadow-primary/30 flex items-center justify-center gap-2 text-sm sm:text-base">
-                  View Our Work <ArrowRight size={18} />
-                </Link>
-                <Link to="/contact" className="px-6 py-3 sm:px-8 sm:py-3.5 bg-transparent text-white font-bold rounded-full border-2 border-white/30 hover:bg-white/10 transition-all flex items-center justify-center text-sm sm:text-base">
-                  Contact Us
-                </Link>
-              </div>
-            </motion.div>
+                <h1 className="text-[clamp(2.25rem,6.2vw,4.85rem)] font-black text-white tracking-tighter leading-[1.1] flex flex-col justify-start">
+                  <span className="block">{heroSlides[currentBgIdx].titleLine1}</span>
+                  <span className={`block my-1 ${heroSlides[currentBgIdx].titleLine2Color}`}>
+                    {heroSlides[currentBgIdx].titleLine2}
+                  </span>
+                  <span className="block">{heroSlides[currentBgIdx].titleLine3}</span>
+                </h1>
+                  
+                <p className="text-sm sm:text-base md:text-lg lg:text-xl text-slate-200 leading-relaxed font-medium max-w-2xl opacity-90">
+                  {heroSlides[currentBgIdx].description}
+                </p>
+                
+                <div className="flex flex-col sm:flex-row gap-4 pt-2">
+                  <Link to="/projects" className="px-6 py-3 sm:px-8 sm:py-3.5 bg-primary text-white font-bold rounded-full hover:bg-primary-hover transition-all shadow-xl shadow-primary/30 flex items-center justify-center gap-2 text-sm sm:text-base">
+                    View Our Work <ArrowRight size={18} />
+                  </Link>
+                  <Link to="/contact" className="px-6 py-3 sm:px-8 sm:py-3.5 bg-transparent text-white font-bold rounded-full border-2 border-white/30 hover:bg-white/10 transition-all flex items-center justify-center text-sm sm:text-base">
+                    Contact Us
+                  </Link>
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
+        </div>
+
+        {/* Pagination Points (Dots) for Carousel Control */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 bg-black/25 backdrop-blur-md px-5 py-3 rounded-full border border-white/10">
+          {heroSlides.map((slide, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentBgIdx(index)}
+              className={`h-2.5 rounded-full transition-all duration-300 ${
+                currentBgIdx === index 
+                  ? "w-8 bg-primary" 
+                  : "w-2.5 bg-white/40 hover:bg-white/70"
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
         </div>
       </section>
 

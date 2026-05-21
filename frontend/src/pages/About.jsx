@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Target, Eye, Award, Phone, Mail, Loader2 } from 'lucide-react';
+import { 
+  Target, 
+  Eye, 
+  Award, 
+  Phone, 
+  Mail, 
+  Loader2, 
+  ShieldCheck, 
+  TrendingUp, 
+  Heart, 
+  Compass, 
+  Users, 
+  BookOpen 
+} from 'lucide-react';
 import api from '../api/axios';
 import communityimg from '../assets/communityphoto.png';
 import presidentimg from '../assets/president.jpg';
@@ -9,7 +22,7 @@ import coordinatorimg from '../assets/coordinator.jpg';
 const DEFAULT_ABOUT = {
   mission: "To empower rural and tribal communities through sustainable development initiatives, providing access to quality education, healthcare, and essential infrastructure, thereby ensuring self-reliance and improved standards of living.",
   vision: "A society where every individual, regardless of their background or geographical location, has equal opportunities to thrive, contribute, and live with dignity in a supportive and self-sustaining community.",
-  story: "Established with a profound commitment to uplift the marginalized, Vanvasi Pragati Mandal Pipaliya has been a beacon of hope for tribal and rural populations. We act as a crucial link between government resources, benevolent donors, and the people at the grassroots level.\n\nOur approach is rooted in transparency, accountability, and real impact. Every project we undertake is meticulously planned and executed with community participation to ensure long-term sustainability.",
+  story: "Established with a profound commitment to uplift the marginalized, Vanvasi Pragati Mandal Pipaliya has been a beacon of hope for tribal and rural populations across Gujarat. We act as a crucial link between government resources, benevolent donors, and local community representatives at the grassroots level.\n\nOur approach is rooted in community-driven planning, radical financial accountability, and long-term sustainability. Every project we launch—whether building local clean water systems, conducting primary healthcare camps, or supporting children's education—is co-designed with village leadership to foster self-reliance rather than dependency.",
   team: [
     {
       name: "Sangada Devisingbhai",
@@ -54,6 +67,58 @@ const About = () => {
       });
   }, []);
 
+  const coreValues = [
+    {
+      title: "Community Leadership",
+      gujaratiTitle: "લોક ભાગીદારી",
+      description: "True development starts from within. We do not impose solutions; instead, we partner directly with village panchayats and community leaders to co-design every initiative, ensuring local ownership.",
+      icon: Users,
+      color: "text-emerald-600 bg-emerald-50 border-emerald-100"
+    },
+    {
+      title: "Radical Transparency",
+      gujaratiTitle: "સંપૂર્ણ પારદર્શિતા",
+      description: "Trust is our most valuable asset. We maintain clear and audited financial records, providing complete visibility of resources to our donors, regulatory authorities, and community beneficiaries.",
+      icon: ShieldCheck,
+      color: "text-blue-600 bg-blue-50 border-blue-100"
+    },
+    {
+      title: "Inclusivity & Dignity",
+      gujaratiTitle: "સર્વસમાવેશકતા",
+      description: "We serve without prejudice. Our focus is strictly on empowering the most marginalized rural sections, with dedicated attention to female literacy, child healthcare, and elderly assistance.",
+      icon: Heart,
+      color: "text-rose-600 bg-rose-50 border-rose-100"
+    },
+    {
+      title: "Sustainable Progress",
+      gujaratiTitle: "લાંબાગાળાની અસર",
+      description: "We focus on building capabilities rather than promoting dependency. Our goal is to set up infrastructure and training programs that communities can maintain independently in the long run.",
+      icon: TrendingUp,
+      color: "text-amber-600 bg-amber-50 border-amber-100"
+    }
+  ];
+
+  const workMethodology = [
+    {
+      step: "01",
+      title: "Assess & Listen",
+      description: "We sit down with local villagers and elders to listen to their immediate needs. We map gaps in drinking water, primary learning, or medicine access before making any plans.",
+      icon: Compass
+    },
+    {
+      step: "02",
+      title: "Mobilize & Implement",
+      description: "We co-create direct, cost-efficient budgets and recruit local youth coordinators. Projects are executed using robust materials and community labor to ensure buy-in.",
+      icon: Users
+    },
+    {
+      step: "03",
+      title: "Review & Empower",
+      description: "Once installed, projects undergo regular audits. We hand over operations to a village committee, establishing self-maintenance protocols so the work thrives permanently.",
+      icon: Award
+    }
+  ];
+
   if (loading) {
     return (
       <div className="w-full min-h-screen pt-36 pb-24 flex flex-col items-center justify-center bg-slate-50">
@@ -66,7 +131,7 @@ const About = () => {
   return (
     <div className="w-full pb-24 bg-slate-50/50">
       {/* Page Header */}
-      <div className="bg-slate-50 pt-32 pb-16 border-b border-slate-100">
+      <div className="bg-slate-50 pt-36 sm:pt-40 pb-16 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -75,7 +140,7 @@ const About = () => {
           >
             <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">About Us</h1>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Discover the driving force, vision, and people behind Vanvasi Pragati Mandal Pipaliya.
+              Discover the driving force, vision, and core team behind Vanvasi Pragati Mandal Pipaliya.
             </p>
           </motion.div>
         </div>
@@ -86,7 +151,8 @@ const About = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-24">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.5 }}
             className="bg-white p-8 rounded-3xl shadow-lg shadow-slate-100/50 border border-slate-100"
           >
@@ -101,8 +167,9 @@ const About = () => {
           
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.5, delay: 0.1 }}
             className="bg-white p-8 rounded-3xl shadow-lg shadow-slate-100/50 border border-slate-100"
           >
             <div className="w-14 h-14 bg-blue-50 text-secondary rounded-2xl flex items-center justify-center mb-6">
@@ -122,7 +189,7 @@ const About = () => {
             <div className="w-24 h-1 bg-primary mx-auto rounded-full"></div>
           </div>
           <div className="bg-white rounded-3xl overflow-hidden shadow-xl border border-slate-100 flex flex-col md:flex-row">
-            <div className="w-full md:w-1/2 h-[250px] md:h-auto md:min-h-[400px]">
+            <div className="w-full md:w-1/2 h-[250px] md:h-auto md:min-h-[440px]">
               <img 
                 src={communityimg} 
                 alt="Community Group" 
@@ -138,17 +205,92 @@ const About = () => {
                 ))}
               </div>
               <ul className="space-y-3 mt-8">
-                <li className="flex items-center gap-3 text-slate-700 font-bold">
-                  <Award className="text-primary" size={20} /> Registered Trust
+                <li className="flex items-center gap-3 text-slate-700 font-bold text-sm">
+                  <Award className="text-primary shrink-0" size={20} /> Registered Trust (Charity Comm. Reg.)
                 </li>
-                <li className="flex items-center gap-3 text-slate-700 font-bold">
-                  <Award className="text-primary" size={20} /> Government Approved Partner
+                <li className="flex items-center gap-3 text-slate-700 font-bold text-sm">
+                  <Award className="text-primary shrink-0" size={20} /> Grassroots Partner in Tribal Gujarat
                 </li>
-                <li className="flex items-center gap-3 text-slate-700 font-bold">
-                  <Award className="text-primary" size={20} /> Tax Exemptions Available (80G)
+                <li className="flex items-center gap-3 text-slate-700 font-bold text-sm">
+                  <Award className="text-primary shrink-0" size={20} /> Tax Exemption Eligible (Section 80G Approval)
                 </li>
               </ul>
             </div>
+          </div>
+        </div>
+
+        {/* Our Core Values Section (New) */}
+        <div className="mb-24">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-extrabold text-slate-900 mb-4 tracking-tight">Our Core Values</h2>
+            <p className="text-slate-500 max-w-xl mx-auto font-medium text-sm">
+              These guiding principles form the moral backbone of every project, decision, and campaign we run.
+            </p>
+            <div className="w-24 h-1 bg-primary mx-auto rounded-full mt-4"></div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {coreValues.map((value, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.4, delay: idx * 0.08 }}
+                className="bg-white p-6 rounded-3xl border border-slate-100 shadow-lg shadow-slate-100/30 flex flex-col items-start hover:-translate-y-1 hover:shadow-xl transition-all duration-300 group"
+              >
+                <div className={`p-4 rounded-2xl border mb-5 transition-transform duration-300 group-hover:scale-110 ${value.color}`}>
+                  <value.icon size={24} />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-3 flex flex-col">
+                  <span className="leading-tight">{value.title}</span>
+                  <span className="text-sm font-semibold text-slate-400 mt-1">({value.gujaratiTitle})</span>
+                </h3>
+                <p className="text-slate-500 text-xs leading-relaxed font-medium flex-grow">
+                  {value.description}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+
+        {/* Our Approach / Work Methodology Section (New) */}
+        <div className="mb-24 bg-primary rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden shadow-xl">
+          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-44 h-44 bg-white opacity-10 rounded-full blur-2xl"></div>
+          <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-44 h-44 bg-white opacity-10 rounded-full blur-2xl"></div>
+
+          <div className="text-center mb-10 relative z-10">
+            <h2 className="text-3xl font-extrabold mb-4 tracking-tight">Our Operational Approach</h2>
+            <p className="text-green-50 max-w-xl mx-auto font-medium text-sm">
+              We employ a continuous, audit-backed process to ensure every rupee translates into long-term self-sufficiency.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+            {workMethodology.map((item, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: idx * 0.1 }}
+                className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 flex flex-col items-start hover:bg-white/15 transition-colors duration-300"
+              >
+                <div className="flex justify-between items-center w-full mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-white font-bold">
+                    <item.icon size={22} />
+                  </div>
+                  <span className="text-4xl font-black text-white/20 select-none">
+                    {item.step}
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold mb-3">{item.title}</h3>
+                <p className="text-green-50 text-xs leading-relaxed font-medium">
+                  {item.description}
+                </p>
+              </motion.div>
+            ))}
           </div>
         </div>
 
@@ -174,7 +316,7 @@ const About = () => {
               return (
                 <div 
                   key={index}
-                  className="bg-white rounded-3xl p-6 shadow-md border border-slate-100 text-center relative overflow-hidden group hover:shadow-lg transition-all"
+                  className="bg-white rounded-3xl p-6 shadow-md border border-slate-100 text-center relative overflow-hidden group hover:shadow-lg transition-all duration-300"
                 >
                   <div className={`absolute top-0 left-0 w-full h-1.5 ${index === 0 ? 'bg-primary' : 'bg-secondary'}`}></div>
                   <div className="w-24 h-24 mx-auto rounded-full bg-slate-200 mb-4 overflow-hidden border-4 border-white shadow-md group-hover:scale-105 transition-transform duration-300">

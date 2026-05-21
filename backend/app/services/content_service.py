@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_ABOUT = {
     "mission": "To empower rural and tribal communities through sustainable development initiatives, providing access to quality education, healthcare, and essential infrastructure, thereby ensuring self-reliance and improved standards of living.",
     "vision": "A society where every individual, regardless of their background or geographical location, has equal opportunities to thrive, contribute, and live with dignity in a supportive and self-sustaining community.",
-    "story": "Established with a profound commitment to uplift the marginalized, Vanvasi Pragati Mandal Pipaliya has been a beacon of hope for tribal and rural populations. We act as a crucial link between government resources, benevolent donors, and the people at the grassroots level.\n\nOur approach is rooted in transparency, accountability, and real impact. Every project we undertake is meticulously planned and executed with community participation to ensure long-term sustainability.",
+    "story": "Established with a profound commitment to uplift the marginalized, Vanvasi Pragati Mandal Pipaliya has been a beacon of hope for tribal and rural populations across Gujarat. We act as a crucial link between government resources, benevolent donors, and local community representatives at the grassroots level.\n\nOur approach is rooted in community-driven planning, radical financial accountability, and long-term sustainability. Every project we launch—whether building local clean water systems, conducting primary healthcare camps, or supporting children's education—is co-designed with village leadership to foster self-reliance rather than dependency.",
     "team": [
         {
             "name": "Sangada Devisingbhai",
