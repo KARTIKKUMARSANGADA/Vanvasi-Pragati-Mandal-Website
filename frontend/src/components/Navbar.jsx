@@ -42,6 +42,15 @@ const Navbar = () => {
 
   const isActive = (path) => location.pathname === path;
 
+  const handleLinkClick = (path) => {
+    if (location.pathname === path) {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   const isTransparent = !scrolled && location.pathname === '/';
 
   return (
@@ -52,7 +61,11 @@ const Navbar = () => {
         }`}>
 
         {/* Logo Section */}
-        <Link to="/" className="flex items-center gap-3 group hover:opacity-90 transition-opacity">
+        <Link 
+          to="/" 
+          onClick={() => handleLinkClick('/')}
+          className="flex items-center gap-3 group hover:opacity-90 transition-opacity"
+        >
           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white">
             <img
               src={LOGO}
@@ -76,6 +89,7 @@ const Navbar = () => {
               <Link
                 key={link.name}
                 to={link.path}
+                onClick={() => handleLinkClick(link.path)}
                 className={`relative text-[15px] xl:text-[16px] font-semibold transition-colors duration-300 py-1 ${isActive(link.path)
                     ? 'text-primary'
                     : (isTransparent ? 'text-white hover:text-white/80' : 'text-slate-600 hover:text-primary')
@@ -129,7 +143,10 @@ const Navbar = () => {
                 <Link
                   key={link.name}
                   to={link.path}
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    setIsOpen(false);
+                    handleLinkClick(link.path);
+                  }}
                   className={`block px-4 py-3 rounded-xl text-[15px] font-semibold transition-colors ${isActive(link.path)
                       ? 'text-primary bg-green-50/50'
                       : 'text-slate-600 hover:text-primary hover:bg-slate-50'
