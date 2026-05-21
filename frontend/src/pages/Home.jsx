@@ -225,7 +225,7 @@ const Home = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent z-10"></div>
         </div>
 
-        <div className="max-w-[95%] sm:max-w-[90%] mx-auto relative z-20 w-full flex items-center pt-20 pb-8 md:pt-0 md:pb-0">
+        <div className="max-w-[95%] sm:max-w-[90%] mx-auto relative z-20 w-full flex items-center pt-20 pb-24 sm:pb-28 md:pt-0 md:pb-0">
           <div className="w-full max-w-5xl text-left">
             <AnimatePresence mode="wait">
               <motion.div
@@ -270,15 +270,15 @@ const Home = () => {
         </div>
 
         {/* Pagination Points (Dots) for Carousel Control */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 bg-black/25 backdrop-blur-md px-5 py-3 rounded-full border border-white/10">
+        <div className="absolute bottom-5 sm:bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 sm:gap-3 bg-black/25 backdrop-blur-md px-4 py-2 sm:px-5 sm:py-3 rounded-full border border-white/10">
           {heroSlides.map((slide, index) => (
             <button
               key={index}
               onClick={() => setCurrentBgIdx(index)}
-              className={`h-2.5 rounded-full transition-all duration-300 ${
+              className={`h-2 sm:h-2.5 rounded-full transition-all duration-300 ${
                 currentBgIdx === index 
-                  ? "w-8 bg-primary" 
-                  : "w-2.5 bg-white/40 hover:bg-white/70"
+                  ? "w-6 sm:w-8 bg-primary" 
+                  : "w-2 sm:w-2.5 bg-white/40 hover:bg-white/70"
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />
