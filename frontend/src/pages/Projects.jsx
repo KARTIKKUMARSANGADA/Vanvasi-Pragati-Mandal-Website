@@ -97,7 +97,7 @@ const Projects = () => {
   return (
     <div className="w-full pb-24">
       {/* Page Header */}
-      <div className="bg-slate-50 pt-32 pb-16 border-b border-slate-100">
+      <div className="bg-slate-50 pt-28 pb-10 sm:pt-32 sm:pb-16 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -112,7 +112,7 @@ const Projects = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 sm:pt-12 sm:pb-20">
         {/* Search and Category Filter */}
         <div className="space-y-8 mb-16">
           {/* Search Bar */}

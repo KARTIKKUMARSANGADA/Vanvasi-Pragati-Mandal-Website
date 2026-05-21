@@ -256,11 +256,11 @@ const Home = () => {
                   {heroSlides[currentBgIdx].description}
                 </p>
                 
-                <div className="flex flex-col sm:flex-row gap-4 pt-2">
-                  <Link to="/projects" className="px-6 py-3 sm:px-8 sm:py-3.5 bg-primary text-white font-bold rounded-full hover:bg-primary-hover transition-all shadow-xl shadow-primary/30 flex items-center justify-center gap-2 text-sm sm:text-base">
+                <div className="flex flex-row flex-wrap items-center gap-3 sm:gap-4 pt-2">
+                  <Link to="/projects" className="px-5 py-2.5 sm:px-8 sm:py-3.5 bg-primary text-white font-bold rounded-full hover:bg-primary-hover transition-all shadow-xl shadow-primary/30 flex items-center justify-center gap-2 text-xs sm:text-base shrink-0">
                     View Our Work <ArrowRight size={18} />
                   </Link>
-                  <Link to="/contact" className="px-6 py-3 sm:px-8 sm:py-3.5 bg-transparent text-white font-bold rounded-full border-2 border-white/30 hover:bg-white/10 transition-all flex items-center justify-center text-sm sm:text-base">
+                  <Link to="/contact" className="px-5 py-2.5 sm:px-8 sm:py-3.5 bg-transparent text-white font-bold rounded-full border-2 border-white/30 hover:bg-white/10 transition-all flex items-center justify-center text-xs sm:text-base shrink-0">
                     Contact Us
                   </Link>
                 </div>

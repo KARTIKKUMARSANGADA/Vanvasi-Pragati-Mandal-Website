@@ -60,7 +60,7 @@ const Impact = () => {
   return (
     <div className="w-full pb-24 min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-slate-50 pt-36 sm:pt-40 pb-16 border-b border-slate-100">
+      <div className="bg-slate-50 pt-28 pb-10 sm:pt-36 sm:pb-16 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -75,7 +75,7 @@ const Impact = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 sm:pt-12 sm:pb-20">
         {error && (
           <div className="mb-10 max-w-xl mx-auto">
             <div className="flex items-center gap-3 p-4 bg-orange-50 border border-orange-100 rounded-2xl text-orange-800 text-sm font-semibold shadow-sm">

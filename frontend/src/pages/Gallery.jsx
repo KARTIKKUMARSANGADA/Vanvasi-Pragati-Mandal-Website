@@ -70,7 +70,7 @@ const Gallery = () => {
       />
 
       {/* Header */}
-      <div className="bg-slate-50 pt-36 pb-20 border-b border-slate-100 relative overflow-hidden">
+      <div className="bg-slate-50 pt-28 pb-10 sm:pt-36 sm:pb-16 border-b border-slate-100 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -85,7 +85,7 @@ const Gallery = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-16 sm:pt-12 sm:pb-20">
         {/* Category Filters */}
         {!loading && categories.length > 2 && (
           <div className="flex flex-wrap justify-center gap-3 mb-16">

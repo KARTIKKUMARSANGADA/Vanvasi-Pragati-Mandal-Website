@@ -131,7 +131,7 @@ const About = () => {
   return (
     <div className="w-full pb-24 bg-slate-50/50">
       {/* Page Header */}
-      <div className="bg-slate-50 pt-36 sm:pt-40 pb-16 border-b border-slate-100">
+      <div className="bg-slate-50 pt-28 pb-10 sm:pt-36 sm:pb-16 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -146,7 +146,7 @@ const About = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 sm:pt-12 sm:pb-20">
         {/* Mission & Vision */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-24">
           <motion.div 
@@ -255,14 +255,21 @@ const About = () => {
         </div>
 
 
-        {/* Our Approach / Work Methodology Section (New) */}
-        <div className="mb-24 bg-primary rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden shadow-xl">
-          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-44 h-44 bg-white opacity-10 rounded-full blur-2xl"></div>
-          <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-44 h-44 bg-white opacity-10 rounded-full blur-2xl"></div>
+        {/* Our Approach / Work Methodology Section (Redesigned) */}
+        <div className="mb-24 bg-gradient-to-br from-primary via-emerald-800 to-teal-950 rounded-[2rem] p-8 sm:p-12 md:p-16 text-white relative overflow-hidden shadow-2xl border border-emerald-500/10">
+          {/* Enhanced Glassmorphic Blobs */}
+          <div className="absolute -top-16 -right-16 w-64 h-64 bg-emerald-400 opacity-20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-teal-400 opacity-15 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/3 w-32 h-32 bg-lime-300 opacity-10 rounded-full blur-2xl"></div>
 
-          <div className="text-center mb-10 relative z-10">
-            <h2 className="text-3xl font-extrabold mb-4 tracking-tight">Our Operational Approach</h2>
-            <p className="text-green-50 max-w-xl mx-auto font-medium text-sm">
+          <div className="text-center mb-14 relative z-10">
+            <span className="px-4 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs font-bold uppercase tracking-widest text-emerald-300 mb-4 inline-block">
+              How We Work
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black mb-4 tracking-tight leading-tight bg-gradient-to-r from-white via-emerald-100 to-white bg-clip-text text-transparent">
+              Our Operational Approach
+            </h2>
+            <p className="text-emerald-100/90 max-w-xl mx-auto font-medium text-sm sm:text-base leading-relaxed">
               We employ a continuous, audit-backed process to ensure every rupee translates into long-term self-sufficiency.
             </p>
           </div>
@@ -271,22 +278,24 @@ const About = () => {
             {workMethodology.map((item, idx) => (
               <motion.div
                 key={idx}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: idx * 0.1 }}
-                className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 flex flex-col items-start hover:bg-white/15 transition-colors duration-300"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, delay: idx * 0.12, ease: [0.215, 0.61, 0.355, 1] }}
+                className="group bg-white/[0.05] hover:bg-white/[0.1] backdrop-blur-md rounded-3xl p-8 border border-white/10 hover:border-white/20 flex flex-col items-start hover:-translate-y-2 transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-emerald-950/30"
               >
-                <div className="flex justify-between items-center w-full mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-white font-bold">
-                    <item.icon size={22} />
+                <div className="flex justify-between items-center w-full mb-8">
+                  <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center text-emerald-300 group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white group-hover:rotate-6 transition-all duration-300 shadow-md">
+                    <item.icon size={26} className="transition-transform duration-300" />
                   </div>
-                  <span className="text-4xl font-black text-white/20 select-none">
+                  <span className="text-5xl font-black bg-gradient-to-b from-white/30 to-white/0 bg-clip-text text-transparent select-none font-mono tracking-tighter">
                     {item.step}
                   </span>
                 </div>
-                <h3 className="text-lg font-bold mb-3">{item.title}</h3>
-                <p className="text-green-50 text-xs leading-relaxed font-medium">
+                <h3 className="text-xl font-bold mb-3 text-white group-hover:text-emerald-200 transition-colors">
+                  {item.title}
+                </h3>
+                <p className="text-emerald-100/75 text-xs sm:text-sm leading-relaxed font-medium group-hover:text-white transition-colors">
                   {item.description}
                 </p>
               </motion.div>
