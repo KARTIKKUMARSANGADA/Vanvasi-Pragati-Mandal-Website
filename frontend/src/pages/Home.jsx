@@ -225,7 +225,7 @@ const Home = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent z-10"></div>
         </div>
 
-        <div className="max-w-[90%] mx-auto relative z-20 w-full flex items-center pt-36 pb-16 md:pt-0 md:pb-0">
+        <div className="max-w-[90%] mx-auto relative z-20 w-full flex items-center pt-28 pb-12 md:pt-0 md:pb-0">
           <div className="w-full max-w-5xl text-left">
             <AnimatePresence mode="wait">
               <motion.div
@@ -336,9 +336,10 @@ const Home = () => {
               </p>
               <Link 
                 to="/about" 
-                className="inline-flex items-center justify-between w-full text-secondary font-semibold hover:text-blue-800 transition-colors group/link"
+                className="inline-flex items-center gap-2 text-secondary font-bold hover:text-blue-800 transition-all text-base group/link"
               >
-                Read More About Us <ArrowRight size={18} />
+                <span>Read More About Us</span>
+                <ArrowRight size={18} className="transform group-hover/link:translate-x-1 transition-transform" />
               </Link>
             </div>
           </div>
