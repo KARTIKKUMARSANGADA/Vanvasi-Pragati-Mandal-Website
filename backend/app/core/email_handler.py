@@ -89,7 +89,7 @@ def _wrap_body(inner_html: str, footer_note: str = "") -> str:
     return f"""
     <html>
     <body style="background-color: #f1f5f9; padding: 40px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; margin: 0; -webkit-font-smoothing: antialiased;">
-        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);">
+        <div style="width: 100%; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);">
             {_header_html()}
             {inner_html}
             {footer}
@@ -316,6 +316,12 @@ def send_custom_email(recipient_email: str, subject: str, content: str, server=N
     Sends a custom email body to a subscriber or custom recipient.
     Accepts an optional `server` for batch sending with a reused SMTP connection.
     """
+    content_stripped = content.strip()
+    # Check if the content is already a fully-styled HTML template from the frontend
+    if content_stripped.startswith("<div") or content_stripped.startswith("<html") or "font-family:" in content_stripped:
+        return _send_single(recipient_email, subject, content, server=server)
+        
+    # Otherwise, it's a plain-text message (e.g. from Admin Contacts), so wrap it beautifully
     inner = f"""
     <div style="padding: 36px 40px; background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
         <div style="display: inline-block; background-color: #e0f2fe; color: #0369a1; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 20px; margin-bottom: 18px; text-transform: uppercase; letter-spacing: 0.8px;">📢 Announcement</div>

@@ -155,12 +155,12 @@ const AdminSubscribers = () => {
 
         // Build fully-styled professional HTML body
         const styledBody = `
-            <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #f8fafc; border-radius: 24px;">
+            <div style="font-family: 'Helvetica Neue', Arial, sans-serif; width: 100%; max-width: 600px; margin: 0 auto; padding: 40px 20px; box-sizing: border-box; background-color: #f8fafc; border-radius: 24px;">
                 <div style="text-align: center; margin-bottom: 30px;">
                     <h2 style="color: #22c55e; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Vanvasi Pragati Mandal</h2>
                     <p style="color: #64748b; font-style: italic; margin: 5px 0 0 0; font-size: 14px;">Empowering Rural & Tribal Communities</p>
                 </div>
-                <div style="background-color: #ffffff; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.02); border: 1px border-slate-100;">
+                <div style="background-color: #ffffff; padding: 40px 24px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; box-sizing: border-box; width: 100%;">
                     <h3 style="color: #1e293b; font-size: 20px; font-weight: 700; margin-top: 0; margin-bottom: 20px; line-height: 1.4;">${subject}</h3>
                     <div style="color: #334155; font-size: 16px; line-height: 1.8; margin-bottom: 30px; white-space: pre-line;">${bodyContent}</div>
                     
