@@ -68,7 +68,7 @@ const ProjectDetails = () => {
 
   return (
     <div className="w-full bg-slate-50 min-h-screen pb-24">
-      
+
       {/* Restored Original Hero Section - Fixed with Flexbox to prevent overlap */}
       <div className="relative min-h-[85vh] w-full flex flex-col justify-end pb-24 overflow-hidden pt-28">
         {/* Immersive Hero Image */}
@@ -83,13 +83,13 @@ const ProjectDetails = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
         </div>
 
-        {/* Improved Back Button Visibility: Top-Left */}
+        {/* Back Button Floating Pill - Fixed z-index to hover above transparent Navbar wrapper click bounds */}
         <Link
           to="/projects"
-          className="absolute top-8 left-8 z-30 hidden md:inline-flex items-center gap-2 text-white bg-black/40 backdrop-blur-md px-5 py-2.5 rounded-full hover:bg-black/60 transition-all font-semibold border border-white/30 group shadow-xl"
+          className="absolute top-6 left-4 md:top-8 md:left-8 z-[1100] inline-flex items-center gap-2 text-slate-800 bg-white/90 hover:bg-slate-50 backdrop-blur-md px-4 py-2 md:px-5 md:py-2.5 rounded-full transition-all font-black border border-slate-200/60 shadow-md group text-[10px] uppercase tracking-widest hover:scale-[1.02] active:scale-95"
         >
-          <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-          <span>Back to Projects</span>
+          <ArrowLeft size={12} className="group-hover:-translate-x-0.5 transition-transform text-slate-600" />
+          <span>Back to Case Studies</span>
         </Link>
 
         {/* Content Section: Restored to original position but using relative flex layout */}
@@ -124,7 +124,7 @@ const ProjectDetails = () => {
 
       {/* Restored Original Layout Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-30">
-        
+
         {/* Restored Breadcrumb Navigation Bar */}
         <div className="bg-white/90 backdrop-blur-md px-6 py-4 rounded-3xl border border-slate-100/50 shadow-lg flex flex-wrap items-center gap-2 text-sm text-slate-500 font-bold mb-8">
           <Link to="/" className="hover:text-primary transition-colors">Home</Link>

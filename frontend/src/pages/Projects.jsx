@@ -22,8 +22,8 @@ const Projects = () => {
       setError(null);
       setLoading(true);
       const res = await api.get('/projects/');
-      const projectsData = Array.isArray(res.data) 
-        ? res.data 
+      const projectsData = Array.isArray(res.data)
+        ? res.data
         : (res.data?.data || []);
       setProjects(projectsData);
     } catch (err) {
@@ -40,7 +40,7 @@ const Projects = () => {
 
   // Dynamically extract unique categories from projects - Memoized
   const categories = useMemo(() => {
-    return ['All', ...new Set(projects.flatMap(p => 
+    return ['All', ...new Set(projects.flatMap(p =>
       String(p.category || '').split(',').map(c => c.trim())
     ).filter(Boolean))];
   }, [projects]);
@@ -50,11 +50,11 @@ const Projects = () => {
     return projects.filter(p => {
       const cats = String(p.category || '').split(',').map(c => c.trim());
       const matchesCategory = activeCategory === 'All' || cats.includes(activeCategory);
-      const matchesSearch = 
+      const matchesSearch =
         String(p.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         String(p.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         String(p.location || '').toLowerCase().includes(searchQuery.toLowerCase());
-      
+
       return matchesCategory && matchesSearch;
     });
   }, [activeCategory, projects, searchQuery]);
@@ -126,7 +126,7 @@ const Projects = () => {
                 className="w-full px-6 py-4 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none text-slate-700 font-medium"
               />
               <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
               </div>
             </div>
           </div>
@@ -136,11 +136,10 @@ const Projects = () => {
               <button
                 key={cat}
                 onClick={() => handleCategoryChange(cat)}
-                className={`px-8 py-3 rounded-full font-bold text-sm transition-all shadow-sm whitespace-nowrap ${
-                  activeCategory === cat 
-                    ? 'bg-primary text-white shadow-primary/20' 
-                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
-                }`}
+                className={`px-8 py-3 rounded-full font-bold text-sm transition-all shadow-sm whitespace-nowrap ${activeCategory === cat
+                  ? 'bg-primary text-white shadow-primary/20'
+                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                  }`}
               >
                 {cat}
               </button>
@@ -180,38 +179,38 @@ const Projects = () => {
                           </span>
                         ))}
                       </div>
-                      <LazyImage 
-                        src={mainImageUrl} 
-                        alt={project.title} 
+                      <LazyImage
+                        src={mainImageUrl}
+                        alt={project.title}
                         containerClassName="w-full h-full"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
                       />
                     </div>
-                  
-                  <div className="p-6 flex-grow flex flex-col">
-                    <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-primary transition-colors">
-                      {String(project.title || 'Untitled Project')}
-                    </h3>
-                    
-                    <div className="flex items-center gap-4 text-xs font-medium text-slate-500 mb-4">
-                      <span className="flex items-center gap-1"><Calendar size={14} /> {String(project.date || 'N/A')}</span>
-                      <span className="flex items-center gap-1"><MapPin size={14} /> {String(project.location || 'N/A')}</span>
+
+                    <div className="p-6 flex-grow flex flex-col">
+                      <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-primary transition-colors">
+                        {String(project.title || 'Untitled Project')}
+                      </h3>
+
+                      <div className="flex items-center gap-4 text-xs font-medium text-slate-500 mb-4">
+                        <span className="flex items-center gap-1"><Calendar size={14} /> {String(project.date || 'N/A')}</span>
+                        <span className="flex items-center gap-1"><MapPin size={14} /> {String(project.location || 'N/A')}</span>
+                      </div>
+
+                      <p className="text-slate-600 mb-6 text-sm flex-grow line-clamp-3">
+                        {String(project.description || '')}
+                      </p>
+
+                      <div className="pt-4 border-t border-slate-100 mt-auto">
+                        <Link
+                          to={projectId ? `/projects/${projectId}` : "#"}
+                          className="inline-flex items-center justify-between w-full text-secondary font-semibold hover:text-blue-800 transition-colors group/link"
+                        >
+                          <span>View Project Details</span>
+                          <ArrowRight size={18} className="transform group-hover/link:translate-x-1 transition-transform" />
+                        </Link>
+                      </div>
                     </div>
-                    
-                    <p className="text-slate-600 mb-6 text-sm flex-grow line-clamp-3">
-                      {String(project.description || '')}
-                    </p>
-                    
-                    <div className="pt-4 border-t border-slate-100 mt-auto">
-                      <Link 
-                        to={projectId ? `/projects/${projectId}` : "#"} 
-                        className="inline-flex items-center justify-between w-full text-secondary font-semibold hover:text-blue-800 transition-colors group/link"
-                      >
-                        <span>View Project Details</span>
-                        <ArrowRight size={18} className="transform group-hover/link:translate-x-1 transition-transform" />
-                      </Link>
-                    </div>
-                  </div>
                   </motion.div>
                 );
               })}
@@ -233,14 +232,17 @@ const Projects = () => {
         )}
 
         {filteredProjects.length === 0 && !loading && !error && (
-          <div className="text-center py-20 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-            <p className="text-xl text-slate-500 font-bold mb-2">No projects match your criteria.</p>
-            <p className="text-slate-400 text-sm mb-4">Try checking for typos or searching a different category.</p>
-            <button 
+          <div className="text-center py-20 bg-slate-50 rounded-3xl border border-dashed border-slate-300/80 max-w-xl mx-auto shadow-sm">
+            <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-400">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /><path d="M8 11h6" /></svg>
+            </div>
+            <p className="text-xl text-slate-800 font-extrabold mb-2">No projects match your criteria.</p>
+            <p className="text-slate-500 text-sm mb-6 max-w-sm mx-auto font-medium">Try checking for spelling errors or search in another category.</p>
+            <button
               onClick={handleClearAll}
-              className="px-6 py-2.5 bg-primary text-white font-bold rounded-xl shadow-md shadow-green-500/10 hover:bg-primary-hover transition-all text-xs"
+              className="px-8 py-3 bg-primary text-white font-extrabold rounded-full shadow-lg shadow-green-500/20 hover:bg-primary-hover transition-all text-xs uppercase tracking-wider"
             >
-              Clear filters
+              Reset Filters
             </button>
           </div>
         )}

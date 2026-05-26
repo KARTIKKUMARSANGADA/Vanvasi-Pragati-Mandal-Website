@@ -19,7 +19,7 @@ const AdminSubscribers = () => {
     const [subject, setSubject] = useState('');
     const [bodyContent, setBodyContent] = useState('');
     const [ctaText, setCtaText] = useState('Read More');
-    const [ctaLink, setCtaLink] = useState('https://vanvasi.org');
+    const [ctaLink, setCtaLink] = useState('https://vanvasi-pragati-mandal-pipaliya.vercel.app');
     const [sending, setSending] = useState(false);
     
     // Project bulletin state

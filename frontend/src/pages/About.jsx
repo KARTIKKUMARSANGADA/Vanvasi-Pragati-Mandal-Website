@@ -73,28 +73,32 @@ const About = () => {
       gujaratiTitle: "લોક ભાગીદારી",
       description: "True development starts from within. We do not impose solutions; instead, we partner directly with village panchayats and community leaders to co-design every initiative, ensuring local ownership.",
       icon: Users,
-      color: "text-emerald-600 bg-emerald-50 border-emerald-100"
+      color: "text-emerald-600 bg-emerald-50 border-emerald-100",
+      hoverClass: "hover:border-emerald-500/30 hover:shadow-[0_25px_50px_-12px_rgba(16,185,129,0.12)]"
     },
     {
       title: "Radical Transparency",
       gujaratiTitle: "સંપૂર્ણ પારદર્શિતા",
       description: "Trust is our most valuable asset. We maintain clear and audited financial records, providing complete visibility of resources to our donors, regulatory authorities, and community beneficiaries.",
       icon: ShieldCheck,
-      color: "text-blue-600 bg-blue-50 border-blue-100"
+      color: "text-blue-600 bg-blue-50 border-blue-100",
+      hoverClass: "hover:border-blue-500/30 hover:shadow-[0_25px_50px_-12px_rgba(59,130,246,0.12)]"
     },
     {
       title: "Inclusivity & Dignity",
       gujaratiTitle: "સર્વસમાવેશકતા",
       description: "We serve without prejudice. Our focus is strictly on empowering the most marginalized rural sections, with dedicated attention to female literacy, child healthcare, and elderly assistance.",
       icon: Heart,
-      color: "text-rose-600 bg-rose-50 border-rose-100"
+      color: "text-rose-600 bg-rose-50 border-rose-100",
+      hoverClass: "hover:border-rose-500/30 hover:shadow-[0_25px_50px_-12px_rgba(244,63,94,0.12)]"
     },
     {
       title: "Sustainable Progress",
       gujaratiTitle: "લાંબાગાળાની અસર",
       description: "We focus on building capabilities rather than promoting dependency. Our goal is to set up infrastructure and training programs that communities can maintain independently in the long run.",
       icon: TrendingUp,
-      color: "text-amber-600 bg-amber-50 border-amber-100"
+      color: "text-amber-600 bg-amber-50 border-amber-100",
+      hoverClass: "hover:border-amber-500/30 hover:shadow-[0_25px_50px_-12px_rgba(245,158,11,0.12)]"
     }
   ];
 
@@ -229,7 +233,7 @@ const About = () => {
             <div className="w-24 h-1 bg-primary mx-auto rounded-full mt-4"></div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {coreValues.map((value, idx) => (
               <motion.div
                 key={idx}
@@ -237,16 +241,17 @@ const About = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.4, delay: idx * 0.08 }}
-                className="bg-white p-6 rounded-3xl border border-slate-100 shadow-lg shadow-slate-100/30 flex flex-col items-start hover:-translate-y-1 hover:shadow-xl transition-all duration-300 group"
+                whileHover={{ y: -8, scale: 1.015 }}
+                className={`bg-white p-8 rounded-[2rem] border border-slate-100 shadow-[0_12px_35px_-5px_rgba(0,0,0,0.02)] flex flex-col items-start transition-all duration-300 ease-out group ${value.hoverClass}`}
               >
-                <div className={`p-4 rounded-2xl border mb-5 transition-transform duration-300 group-hover:scale-110 ${value.color}`}>
-                  <value.icon size={24} />
+                <div className={`p-4.5 rounded-2xl border mb-6 transition-all duration-300 group-hover:scale-110 shadow-sm ${value.color}`}>
+                  <value.icon size={26} />
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-3 flex flex-col">
-                  <span className="leading-tight">{value.title}</span>
-                  <span className="text-sm font-semibold text-slate-400 mt-1">({value.gujaratiTitle})</span>
+                <h3 className="text-xl font-bold text-slate-900 mb-3.5 flex flex-col">
+                  <span className="leading-snug">{value.title}</span>
+                  <span className="text-[11px] font-black text-slate-400 mt-1 uppercase tracking-wider">({value.gujaratiTitle})</span>
                 </h3>
-                <p className="text-slate-500 text-xs leading-relaxed font-medium flex-grow">
+                <p className="text-slate-500 text-xs sm:text-[13px] leading-relaxed font-medium flex-grow">
                   {value.description}
                 </p>
               </motion.div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -6,17 +6,52 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { supabase } from '../supabase';
 
-// Fix for default marker icons in Leaflet + React/Vite
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
+// Custom green SVG map pin matching the site's primary brand colour
+const greenPin = L.divIcon({
+  className: '',
+  html: `
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
+      <path d="M14 0C6.268 0 0 6.268 0 14c0 9.333 14 22 14 22S28 23.333 28 14C28 6.268 21.732 0 14 0z"
+        fill="#15803d" />
+      <circle cx="14" cy="14" r="5" fill="white" />
+    </svg>
+  `,
+  iconSize: [28, 36],
+  iconAnchor: [14, 36],
+  popupAnchor: [0, -36],
 });
+
+// Auto-close popup after 3 seconds when marker is clicked
+const AutoCloseMarker = ({ loc }) => {
+  const markerRef = useRef(null);
+  const timerRef = useRef(null);
+
+  const eventHandlers = {
+    click() {
+      const marker = markerRef.current;
+      if (!marker) return;
+      marker.openPopup();
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => {
+        marker.closePopup();
+      }, 3000);
+    },
+  };
+
+  useEffect(() => () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }, []);
+
+  return (
+    <Marker ref={markerRef} position={[loc.lat, loc.lng]} icon={greenPin} eventHandlers={eventHandlers}>
+      <Popup className="custom-leaflet-popup">
+        <div className="px-3 py-2 font-sans">
+          <h3 className="font-bold text-slate-900 text-sm leading-tight whitespace-nowrap">{loc.name}</h3>
+        </div>
+      </Popup>
+    </Marker>
+  );
+};
 
 const ImpactMap = () => {
   const [locations, setLocations] = useState([]);
@@ -128,92 +163,48 @@ const ImpactMap = () => {
           ) : null}
 
           <MapContainer
-            center={[22.8333, 74.1500]}
-            zoom={9}
+            center={[22.93, 74.10]}
+            zoom={10}
             style={{ height: '100%', width: '100%' }}
             scrollWheelZoom={false}
           >
+            {/* CartoDB Positron — clean, minimal, modern tile style */}
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+              url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+              subdomains="abcd"
+              maxZoom={20}
             />
             {filteredLocations.map(loc => (
-              <Marker key={loc.id} position={[loc.lat, loc.lng]}>
-                <Popup className="custom-leaflet-popup">
-                  <div className="w-64 bg-white overflow-hidden rounded-2xl flex flex-col font-sans">
-                    {/* Header Image if available */}
-                    {loc.image_url ? (
-                      <div className="h-32 w-full relative overflow-hidden bg-slate-100 shrink-0">
-                        <img src={loc.image_url} alt={loc.name} className="w-full h-full object-cover" />
-                        <span className="absolute top-2 left-2 px-2.5 py-1 bg-primary/90 backdrop-blur-sm text-white text-[9px] font-black uppercase tracking-wider rounded-md">
-                          {loc.category}
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="p-4 pb-0 shrink-0">
-                        <span className="inline-block px-2.5 py-1 bg-green-50 text-primary text-[9px] font-black uppercase tracking-wider rounded-md">
-                          {loc.category}
-                        </span>
-                      </div>
-                    )}
-                    
-                    <div className="p-4 flex flex-col grow">
-                      <h3 className="font-extrabold text-slate-900 text-sm mb-1 leading-tight line-clamp-1">{loc.name}</h3>
-                      <p className="text-slate-500 text-[11px] leading-relaxed line-clamp-3 grow mb-3">{loc.description}</p>
-                      
-                      {loc.projectUuid ? (
-                        <Link 
-                          to={`/projects/${loc.projectUuid}`} 
-                          className="mt-auto inline-flex items-center gap-1 text-[11px] font-black text-secondary hover:text-blue-800 transition-colors uppercase tracking-wider border-t pt-2.5"
-                        >
-                          Explore Project &rarr;
-                        </Link>
-                      ) : (
-                        <div className="mt-auto text-[10px] text-slate-400 font-bold uppercase tracking-wider border-t pt-2.5">
-                          Impact Footprint
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </Popup>
-              </Marker>
+              <AutoCloseMarker key={loc.id} loc={loc} />
             ))}
           </MapContainer>
 
-          {/* Overlay Info Card */}
-          <div className="absolute bottom-8 left-8 z-[1000] hidden md:block">
-            <div className="bg-white/90 backdrop-blur-md p-6 rounded-3xl shadow-xl border border-white/20 max-w-xs">
-              <h4 className="font-bold text-slate-900 mb-2">Did you know?</h4>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                We currently have projects active in 120+ villages across the Dahod district.
+          {/* Compact Overlay Info Badge */}
+          <div className="absolute bottom-4 left-4 z-[1000] hidden md:block">
+            <div className="bg-white/90 backdrop-blur-md px-3 py-2 rounded-xl shadow-md border border-slate-100/60 max-w-[200px]">
+              <p className="text-[10px] font-black text-slate-700 uppercase tracking-wider mb-0.5">Did you know?</p>
+              <p className="text-[11px] text-slate-500 leading-snug">
+                120+ villages across Dahod district.
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Styled Inline Extra Styles for Leaflet custom popup */}
+      {/* Minimal Leaflet popup styling — title only */}
       <style>{`
         .custom-leaflet-popup .leaflet-popup-content-wrapper {
           padding: 0 !important;
-          overflow: hidden;
-          border-radius: 1.5rem !important;
-          box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1) !important;
+          border-radius: 0.75rem !important;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
         }
         .custom-leaflet-popup .leaflet-popup-content {
           margin: 0 !important;
-          width: 256px !important;
+          width: auto !important;
         }
         .custom-leaflet-popup .leaflet-popup-close-button {
-          padding: 8px !important;
-          color: #64748b !important;
-          top: 4px !important;
-          right: 4px !important;
-          font-size: 16px !important;
-          z-index: 100;
-        }
-        .custom-leaflet-popup .leaflet-popup-close-button:hover {
-          color: #1e293b !important;
+          display: none !important;
         }
       `}</style>
     </section>
