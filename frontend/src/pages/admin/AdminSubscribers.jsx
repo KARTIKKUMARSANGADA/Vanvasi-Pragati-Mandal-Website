@@ -94,7 +94,8 @@ const AdminSubscribers = () => {
 
     const handleExportCSV = () => {
         if (subscribers.length === 0) {
-            alert("No subscribers to export.");
+            setError("No subscribers to export.");
+            setTimeout(() => setError(null), 5000);
             return;
         }
         

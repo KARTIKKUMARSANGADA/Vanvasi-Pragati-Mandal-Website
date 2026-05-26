@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import AdminLayout from '../../components/admin/AdminLayout';
-import { Trash2, Eye, EyeOff, X, Mail, Phone, Calendar, Send, AlertTriangle, Download } from 'lucide-react';
+import { Trash2, Eye, EyeOff, X, Mail, Phone, Calendar, Send, AlertTriangle, Download, CheckCircle2 } from 'lucide-react';
 import api from '../../api/axios';
 import { supabase } from '../../supabase';
 
@@ -32,6 +33,13 @@ const AdminContacts = () => {
   const [broadcastBody, setBroadcastBody] = useState('');
   const [broadcastTarget, setBroadcastTarget] = useState('selected'); // 'selected' or 'all'
   const [broadcastSending, setBroadcastSending] = useState(false);
+
+  // Toast state
+  const [toast, setToast] = useState(null);
+  const showToast = (msg, type = 'success') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 4000);
+  };
 
   // Search & Status filters state
   const [searchQuery, setSearchQuery] = useState('');
@@ -98,7 +106,7 @@ const AdminContacts = () => {
 
   const handleExportCSV = () => {
     if (messages.length === 0) {
-      alert("No messages to export.");
+      showToast("No messages to export.", "error");
       return;
     }
     
@@ -159,9 +167,10 @@ const AdminContacts = () => {
           setMessages(prev => prev.filter((msg) => msg.uuid !== uuid));
           setSelectedUuids(prev => prev.filter(id => id !== uuid));
           window.dispatchEvent(new Event('refreshUnreadCount'));
+          showToast('Message deleted successfully');
         } catch (error) {
           console.error('Failed to delete message', error);
-          alert('Failed to delete message');
+          showToast('Failed to delete message', 'error');
         }
       }
     });
@@ -224,11 +233,12 @@ const AdminContacts = () => {
       setMessages(prev => 
         prev.map(m => selectedUuids.includes(m.uuid || m.id) ? { ...m, is_read: true } : m)
       );
+      showToast(`${selectedUuids.length} messages marked as read`);
       setSelectedUuids([]);
       window.dispatchEvent(new Event('refreshUnreadCount'));
     } catch (err) {
       console.error("Failed to mark selected messages as read", err);
-      alert("Failed to mark selected messages as read");
+      showToast("Failed to mark selected messages as read", "error");
     }
   };
 
@@ -239,11 +249,12 @@ const AdminContacts = () => {
       setMessages(prev => 
         prev.map(m => selectedUuids.includes(m.uuid || m.id) ? { ...m, is_read: false } : m)
       );
+      showToast(`${selectedUuids.length} messages marked as unread`);
       setSelectedUuids([]);
       window.dispatchEvent(new Event('refreshUnreadCount'));
     } catch (err) {
       console.error("Failed to mark selected messages as unread", err);
-      alert("Failed to mark selected messages as unread");
+      showToast("Failed to mark selected messages as unread", "error");
     }
   };
 
@@ -258,12 +269,14 @@ const AdminContacts = () => {
       onConfirm: async () => {
         try {
           await api.post('/contact/bulk/delete', selectedUuids);
+          const deletedCount = selectedUuids.length;
           setMessages(prev => prev.filter(m => !selectedUuids.includes(m.uuid || m.id)));
+          showToast(`${deletedCount} messages deleted successfully`);
           setSelectedUuids([]);
           window.dispatchEvent(new Event('refreshUnreadCount'));
         } catch (err) {
           console.error("Failed to delete selected messages", err);
-          alert("Failed to delete selected messages");
+          showToast("Failed to delete selected messages", "error");
         }
       }
     });
@@ -271,7 +284,7 @@ const AdminContacts = () => {
 
   const handleSendBroadcast = async () => {
     if (!broadcastSubject || !broadcastBody) {
-      alert("Please enter both subject and message.");
+      showToast("Please enter both subject and message.", "error");
       return;
     }
 
@@ -284,14 +297,14 @@ const AdminContacts = () => {
       };
 
       const res = await api.post('/subscribers/broadcast', payload);
-      alert(res.data.message || 'Broadcast sent successfully!');
+      showToast(res.data.message || 'Broadcast sent successfully!');
       setShowBroadcastModal(false);
       setBroadcastSubject('');
       setBroadcastBody('');
       setSelectedUuids([]);
     } catch (err) {
       console.error('Failed to send broadcast', err);
-      alert('Failed to send broadcast message.');
+      showToast('Failed to send broadcast message.', 'error');
     } finally {
       setBroadcastSending(false);
     }
@@ -304,6 +317,21 @@ const AdminContacts = () => {
 
   return (
     <AdminLayout title="Contact Messages">
+      {/* Custom Toast */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, y: -20, x: '-50%' }}
+            className={`fixed top-8 left-1/2 -translate-x-1/2 z-[10000] px-6 py-3 rounded-full shadow-xl flex items-center gap-2 font-bold ${toast.type === 'error' ? 'bg-red-500 text-white' : 'bg-slate-900 text-white'}`}
+          >
+            {toast.type === 'success' && <CheckCircle2 size={18} className="text-emerald-400" />}
+            {toast.msg}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 w-full">
         {/* Dynamic Bulk Actions Pill */}
         {selectedUuids.length > 0 ? (

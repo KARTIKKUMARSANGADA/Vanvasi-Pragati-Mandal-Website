@@ -328,27 +328,39 @@ def send_custom_email(recipient_email: str, subject: str, content: str, server=N
 
 def send_bulk_custom_email(recipients: list, subject: str, content: str) -> dict:
     """
-    Sends a custom email to multiple recipients using a SINGLE SMTP connection.
-    Returns {"success_count": N, "total": M}.
+    Sends a custom email to multiple recipients in a managed way.
+    If BREVO_API_KEY is defined, it loops sequentially making Brevo HTTP requests.
+    Otherwise, it logs in once and reuses the SMTP connection across all recipients.
     """
-    smtp_username = settings.SMTP_USERNAME
-    smtp_password = settings.SMTP_PASSWORD
-    if not smtp_username or not smtp_password:
-        logger.warning("SMTP credentials not set. Bulk email skipped.")
-        return {"success_count": 0, "total": len(recipients)}
-
+    is_smtp = not bool(settings.BREVO_API_KEY)
     success_count = 0
-    try:
-        server = _get_smtp_connection()
+
+    if is_smtp:
+        smtp_username = settings.SMTP_USERNAME
+        smtp_password = settings.SMTP_PASSWORD
+        if not smtp_username or not smtp_password:
+            logger.warning("SMTP credentials not set. Bulk email skipped.")
+            return {"success_count": 0, "total": len(recipients)}
+
+        try:
+            server = _get_smtp_connection()
+            for email in recipients:
+                try:
+                    if send_custom_email(email, subject, content, server=server):
+                        success_count += 1
+                except Exception as e:
+                    logger.error(f"Failed to send to {email} in bulk (SMTP): {e}")
+            server.quit()
+        except Exception as e:
+            logger.error(f"SMTP connection error during bulk send: {e}")
+    else:
+        # Brevo API path: no SMTP connection required
         for email in recipients:
             try:
-                if send_custom_email(email, subject, content, server=server):
+                if send_custom_email(email, subject, content):
                     success_count += 1
             except Exception as e:
-                logger.error(f"Failed to send to {email} in bulk: {e}")
-        server.quit()
-    except Exception as e:
-        logger.error(f"SMTP connection error during bulk send: {e}")
+                logger.error(f"Failed to send to {email} in bulk (Brevo): {e}")
 
     return {"success_count": success_count, "total": len(recipients)}
 
