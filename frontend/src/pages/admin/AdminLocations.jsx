@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Plus, Trash2, Save, X, Navigation } from 'lucide-react';
+import { MapPin, Plus, Trash2, Save, X, Navigation, AlertTriangle } from 'lucide-react';
 import { supabase } from '../../supabase';
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
@@ -51,6 +51,29 @@ const AdminLocations = () => {
     lat: '',
     lng: ''
   });
+
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: '',
+    cancelText: '',
+    onConfirm: () => {}
+  });
+
+  const triggerConfirm = ({ title, message, confirmText, cancelText, onConfirm }) => {
+    setConfirmModal({
+      isOpen: true,
+      title: title || 'Are you sure?',
+      message: message || '',
+      confirmText: confirmText || 'Confirm',
+      cancelText: cancelText || 'Cancel',
+      onConfirm: () => {
+        onConfirm();
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+      }
+    });
+  };
 
   useEffect(() => {
     fetchLocations();
@@ -123,11 +146,17 @@ const AdminLocations = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Delete this location from the map?')) {
-      await supabase.from('impact_locations').delete().eq('id', id);
-      fetchLocations();
-    }
+  const handleDelete = (id) => {
+    triggerConfirm({
+      title: "Delete Location",
+      message: "Are you sure you want to delete this location from the map?",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      onConfirm: async () => {
+        await supabase.from('impact_locations').delete().eq('id', id);
+        fetchLocations();
+      }
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -290,6 +319,42 @@ const AdminLocations = () => {
           </div>
         )}
       </div>
+
+      {/* Custom Confirmation Modal */}
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-[150] p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-in duration-200 border border-slate-100 flex flex-col">
+            <div className="p-6 text-center space-y-4">
+              {/* Pulsing Alert icon */}
+              <div className="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-red-50 text-red-500 shadow-inner animate-bounce">
+                <AlertTriangle size={28} />
+              </div>
+              
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold text-slate-900">{confirmModal.title}</h3>
+                <p className="text-sm text-slate-500 leading-relaxed px-2">
+                  {confirmModal.message}
+                </p>
+              </div>
+            </div>
+            
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3 rounded-b-2xl">
+              <button
+                onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                className="flex-1 sm:flex-initial px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-100 hover:text-slate-950 active:scale-95 transition-all text-sm shadow-sm"
+              >
+                {confirmModal.cancelText}
+              </button>
+              <button
+                onClick={confirmModal.onConfirm}
+                className="flex-1 sm:flex-initial px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-500/20 active:scale-95 transition-all text-sm"
+              >
+                {confirmModal.confirmText}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 };

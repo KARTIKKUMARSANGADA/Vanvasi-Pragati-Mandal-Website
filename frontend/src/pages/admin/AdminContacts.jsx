@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
-import { Trash2, Eye, EyeOff, X, Mail, Phone, Calendar, Send, AlertTriangle } from 'lucide-react';
+import { Trash2, Eye, EyeOff, X, Mail, Phone, Calendar, Send, AlertTriangle, Download } from 'lucide-react';
 import api from '../../api/axios';
+import { supabase } from '../../supabase';
 
 const AdminContacts = () => {
   const [messages, setMessages] = useState([]);
@@ -36,6 +37,10 @@ const AdminContacts = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'unread' | 'read'
 
+  const [skip, setSkip] = useState(0);
+  const [limit, setLimit] = useState(25);
+  const [hasMore, setHasMore] = useState(true);
+
   // Derive unique selected emails dynamically from selected messages for broadcasting
   const selectedEmails = [...new Set(
     messages
@@ -44,12 +49,17 @@ const AdminContacts = () => {
       .filter(Boolean)
   )];
 
-  const fetchMessages = async () => {
+  const fetchMessages = async (currentSkip = skip) => {
     try {
-      const response = await api.get('/contact/');
+      const response = await api.get(`/contact/?skip=${currentSkip}&limit=${limit}`);
       console.log('GET /contact/ response:', response.data);
       if (Array.isArray(response.data)) {
         setMessages(response.data);
+        if (response.data.length < limit) {
+          setHasMore(false);
+        } else {
+          setHasMore(true);
+        }
       } else {
         console.error('Expected array for messages but got:', response.data);
         setMessages([]);
@@ -61,25 +71,64 @@ const AdminContacts = () => {
     }
   };
 
-  // Auto-refresh polling effect (Polls every 10 seconds in the background)
+  // Live WebSocket Change Data Capture (CDC) Sync
   useEffect(() => {
-    fetchMessages();
+    fetchMessages(skip);
 
-    const interval = setInterval(() => {
-      if (autoRefresh) {
-        api.get('/contact/')
-          .then(response => {
-            if (Array.isArray(response.data)) {
-              setMessages(response.data);
-              window.dispatchEvent(new Event('refreshUnreadCount'));
-            }
-          })
-          .catch(err => console.error('Auto-refresh failed:', err));
-      }
-    }, 10000);
+    if (!autoRefresh) return;
 
-    return () => clearInterval(interval);
-  }, [autoRefresh]);
+    // Listen to changes on contact_messages table and refresh instantly
+    const channel = supabase
+      .channel('live-contacts-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'contact_messages' }, () => {
+        fetchMessages(skip);
+        window.dispatchEvent(new Event('refreshUnreadCount'));
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [autoRefresh, skip, limit]);
+
+  const handlePageChange = (newSkip) => {
+    setSkip(newSkip);
+    fetchMessages(newSkip);
+  };
+
+  const handleExportCSV = () => {
+    if (messages.length === 0) {
+      alert("No messages to export.");
+      return;
+    }
+    
+    // Header columns
+    const headers = ["Name", "Email", "Phone", "Message", "Read Status", "Date Received"];
+    
+    // Compile rows
+    const csvRows = [
+      headers.join(","), // Header row
+      ...messages.map(msg => [
+        `"${String(msg.name || '').replace(/"/g, '""')}"`,
+        `"${String(msg.email || '').replace(/"/g, '""')}"`,
+        `"${String(msg.phone || '').replace(/"/g, '""')}"`,
+        `"${String(msg.message || '').replace(/"/g, '""')}"`,
+        msg.is_read ? "Read" : "Unread",
+        `"${new Date(msg.created_at).toLocaleString()}"`
+      ].join(","))
+    ];
+    
+    const csvContent = "data:text/csv;charset=utf-8," + csvRows.join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `VPM_Contact_Messages_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+
 
   // Helper to trigger our branded confirmation modal
   const triggerConfirm = ({ title, message, confirmText, cancelText, type, onConfirm }) => {
@@ -316,6 +365,15 @@ const AdminContacts = () => {
               />
             </button>
           </div>
+          
+          <button
+            onClick={handleExportCSV}
+            className="px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-xl transition-all shadow-sm flex items-center gap-2"
+            title="Export messages to CSV spreadsheet"
+          >
+            <Download size={18} />
+            Export CSV
+          </button>
 
           <button
             onClick={() => {
@@ -481,6 +539,29 @@ const AdminContacts = () => {
                 )}
               </tbody>
             </table>
+          </div>
+          
+          {/* Pagination Controls */}
+          <div className="p-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <span className="text-sm font-bold text-slate-500">
+              Showing {messages.length > 0 ? skip + 1 : 0} to {skip + messages.length} messages
+            </span>
+            <div className="flex gap-2">
+              <button
+                disabled={skip === 0}
+                onClick={() => handlePageChange(skip - limit)}
+                className="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 disabled:opacity-50 transition-all text-xs"
+              >
+                Previous
+              </button>
+              <button
+                disabled={!hasMore}
+                onClick={() => handlePageChange(skip + limit)}
+                className="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 disabled:opacity-50 transition-all text-xs"
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
       )}

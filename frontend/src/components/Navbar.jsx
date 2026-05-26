@@ -147,9 +147,9 @@ const Navbar = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
-            className="lg:hidden absolute top-[calc(100%+10px)] left-4 right-4 bg-white rounded-2xl border border-gray-100 shadow-xl overflow-hidden max-w-7xl mx-auto"
+            className="lg:hidden absolute top-[calc(100%+10px)] left-4 right-4 bg-white/95 backdrop-blur-md rounded-2xl border border-gray-100/50 shadow-2xl overflow-hidden max-w-7xl mx-auto"
           >
-            <div className="p-4 flex flex-col gap-2">
+            <div className="p-5 flex flex-col gap-2">
               {links.map((link) => (
                 <Link
                   key={link.name}

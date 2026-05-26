@@ -6,11 +6,18 @@ import uuid
 
 supabase = get_supabase()
 
-def get_gallery(skip: int = 0, limit: int = 100):
-    response = supabase.table("gallery").select("*").order("created_at", desc=True).range(skip, skip + limit - 1).execute()
+def get_gallery(skip: int = 0, limit: int = 100, category: str = None):
+    query = supabase.table("gallery").select("*").order("created_at", desc=True)
+    if category and category != "All":
+        query = query.eq("category", category)
+    response = query.range(skip, skip + limit - 1).execute()
     return response.data
 
-async def upload_images(images: List[UploadFile]):
+async def upload_images(images: List[UploadFile], category: str = None):
+    category_clean = category.strip() if category else None
+    if category_clean == "":
+        category_clean = None
+
     for image in images:
         # Compress image
         try:
@@ -29,7 +36,8 @@ async def upload_images(images: List[UploadFile]):
         
         supabase.table("gallery").insert({
             "uuid": str(uuid.uuid4()),
-            "image_url": image_url
+            "image_url": image_url,
+            "category": category_clean
         }).execute()
 
     try:
@@ -39,6 +47,7 @@ async def upload_images(images: List[UploadFile]):
         pass
 
     return True
+
 
 def delete_image(image_uuid: str):
     response = supabase.table("gallery").delete().eq("uuid", image_uuid).execute()

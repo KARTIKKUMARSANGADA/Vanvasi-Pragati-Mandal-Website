@@ -19,7 +19,7 @@ const DonationModal = ({ isOpen, onClose }) => {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl overflow-hidden"
+            className="relative w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl overflow-y-auto max-h-[90vh]"
           >
             {/* Header */}
             <div className="bg-primary p-8 text-white text-center relative">

@@ -99,13 +99,16 @@ def sanitize_project_update_data(
 from functools import lru_cache
 
 @lru_cache(maxsize=128)
-def get_projects(skip: int = 0, limit: int = 100):
+def get_projects(skip: int = 0, limit: int = 100, category: Optional[str] = None):
     # Explicitly select columns and ensure uuid is treated as a string
-    response = supabase.table("projects") \
+    query = supabase.table("projects") \
         .select('id, uuid, title, category, description, full_description, location, date, impact_points, lat, lng, created_at, images:project_images(*)') \
-        .order("created_at", desc=True) \
-        .range(skip, skip + limit - 1) \
-        .execute()
+        .order("created_at", desc=True)
+        
+    if category:
+        query = query.eq("category", category)
+        
+    response = query.range(skip, skip + limit - 1).execute()
     
     if response.data:
         for p in response.data:

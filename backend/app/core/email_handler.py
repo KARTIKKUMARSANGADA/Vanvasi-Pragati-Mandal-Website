@@ -277,9 +277,10 @@ def send_contact_confirmation(name: str, recipient_email: str):
     return _send_single(recipient_email, "Thank You for Reaching Out - Vanvasi Pragati Mandal", html)
 
 
-def send_project_notification(subscriber_email: str, title: str, description: str, category: str, location: str):
+def send_project_notification(subscriber_email: str, title: str, description: str, category: str, location: str, server=None):
     """
     Sends a newsletter notification to a subscriber about a newly completed NGO project.
+    Accepts an optional `server` for batch sending with a reused SMTP connection.
     """
     inner = f"""
     <div style="padding: 36px 40px; background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
@@ -307,7 +308,7 @@ def send_project_notification(subscriber_email: str, title: str, description: st
     </div>
     """
     html = _wrap_body(inner, "You received this email because you subscribed to our impact updates.")
-    return _send_single(subscriber_email, f"New Project: {title}", html)
+    return _send_single(subscriber_email, f"New Project: {title}", html, server=server)
 
 
 def send_custom_email(recipient_email: str, subject: str, content: str, server=None):
@@ -350,3 +351,55 @@ def send_bulk_custom_email(recipients: list, subject: str, content: str) -> dict
         logger.error(f"SMTP connection error during bulk send: {e}")
 
     return {"success_count": success_count, "total": len(recipients)}
+
+
+def send_bulk_project_notification(recipients: list, project_details: dict) -> dict:
+    """
+    Sends a project notification email to multiple recipients in a managed way.
+    If BREVO_API_KEY is defined, it loops sequentially making HTTP requests.
+    Otherwise, it logs in once and reuses the SMTP connection across all recipients.
+    """
+    smtp_username = settings.SMTP_USERNAME
+    smtp_password = settings.SMTP_PASSWORD
+    is_smtp = not bool(settings.BREVO_API_KEY)
+
+    success_count = 0
+    if is_smtp:
+        if not smtp_username or not smtp_password:
+            logger.warning("SMTP credentials not set. Bulk project notification skipped.")
+            return {"success_count": 0, "total": len(recipients)}
+        
+        try:
+            server = _get_smtp_connection()
+            for email in recipients:
+                try:
+                    if send_project_notification(
+                        subscriber_email=email,
+                        title=project_details.get("title", ""),
+                        description=project_details.get("description", ""),
+                        category=project_details.get("category", ""),
+                        location=project_details.get("location", ""),
+                        server=server
+                    ):
+                        success_count += 1
+                except Exception as e:
+                    logger.error(f"Failed to send SMTP project notification to {email} in bulk: {e}")
+            server.quit()
+        except Exception as e:
+            logger.error(f"SMTP connection error during bulk project notification: {e}")
+    else:
+        for email in recipients:
+            try:
+                if send_project_notification(
+                    subscriber_email=email,
+                    title=project_details.get("title", ""),
+                    description=project_details.get("description", ""),
+                    category=project_details.get("category", ""),
+                    location=project_details.get("location", "")
+                ):
+                    success_count += 1
+            except Exception as e:
+                logger.error(f"Failed to send Brevo project notification to {email}: {e}")
+
+    return {"success_count": success_count, "total": len(recipients)}
+

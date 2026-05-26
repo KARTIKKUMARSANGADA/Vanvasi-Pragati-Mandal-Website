@@ -5,11 +5,12 @@ import { compressImage } from '../../utils/imageCompressor';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { 
     Upload, Trash2, Image as ImageIcon, Search, Filter, 
-    X, Eye, Calendar, UploadCloud, CheckCircle2
+    X, Eye, Calendar, UploadCloud, CheckCircle2, AlertTriangle
 } from 'lucide-react';
 
 const UploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
     const [files, setFiles] = useState([]);
+    const [category, setCategory] = useState('');
     const [uploading, setUploading] = useState(false);
     const [dragActive, setDragActive] = useState(false);
     const inputRef = useRef(null);
@@ -65,6 +66,9 @@ const UploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
         
         const data = new FormData();
         files.forEach(file => data.append('images', file));
+        if (category) {
+            data.append('category', category);
+        }
 
         try {
             await api.post('/gallery/', data, {
@@ -73,6 +77,7 @@ const UploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
             onUploadSuccess();
             onClose();
             setFiles([]);
+            setCategory('');
         } catch (err) {
             console.error('Upload failed', err);
             alert('Failed to upload images');
@@ -95,7 +100,25 @@ const UploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
                         </button>
                     </div>
                     
-                    <div className="p-6">
+                    <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+                        {/* Category Dropdown */}
+                        <div>
+                            <label className="block text-sm font-bold text-slate-700 mb-2">Category (Optional)</label>
+                            <select 
+                                value={category} 
+                                onChange={(e) => setCategory(e.target.value)} 
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-secondary focus:outline-none font-medium text-slate-700 transition-all bg-white"
+                            >
+                                <option value="">No Category (General)</option>
+                                <option value="Education">Education</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="Livelihood">Livelihood</option>
+                                <option value="Women Empowerment">Women Empowerment</option>
+                                <option value="Tribal Welfare">Tribal Welfare</option>
+                                <option value="Sports">Sports</option>
+                            </select>
+                        </div>
+
                         <div 
                             className={`border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center text-center cursor-pointer transition-colors ${dragActive ? 'border-primary bg-green-50' : 'border-slate-200 hover:bg-slate-50'}`}
                             onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}
@@ -110,7 +133,7 @@ const UploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
                         </div>
 
                         {files.length > 0 && (
-                            <div className="mt-6">
+                            <div>
                                 <h4 className="text-sm font-bold text-slate-700 mb-3">Selected Files ({files.length})</h4>
                                 <div className="max-h-48 overflow-y-auto space-y-2 pr-2">
                                     {files.map((file, idx) => (
@@ -176,6 +199,30 @@ const GalleryManager = () => {
     const [lightboxImage, setLightboxImage] = useState(null);
     const [toast, setToast] = useState(null);
 
+    // Custom Confirmation Modal state
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        confirmText: '',
+        cancelText: '',
+        onConfirm: () => {}
+    });
+
+    const triggerConfirm = ({ title, message, confirmText, cancelText, onConfirm }) => {
+        setConfirmModal({
+            isOpen: true,
+            title: title || 'Are you sure?',
+            message: message || '',
+            confirmText: confirmText || 'Confirm',
+            cancelText: cancelText || 'Cancel',
+            onConfirm: () => {
+                onConfirm();
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+            }
+        });
+    };
+
     // Multi-select and checkbox mode
     const [isSelectMode, setIsSelectMode] = useState(false);
     const [selectedUuids, setSelectedUuids] = useState([]);
@@ -212,16 +259,22 @@ const GalleryManager = () => {
         setTimeout(() => setToast(null), 3000);
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this image?')) {
-            try {
-                await api.delete(`/gallery/${id}`);
-                setImages(images.filter(img => img.id !== id));
-                showToast('Image deleted successfully');
-            } catch (err) {
-                showToast('Failed to delete image', 'error');
+    const handleDelete = (id) => {
+        triggerConfirm({
+            title: "Delete Image",
+            message: "Are you sure you want to delete this image? This action is permanent.",
+            confirmText: "Delete",
+            cancelText: "Cancel",
+            onConfirm: async () => {
+                try {
+                    await api.delete(`/gallery/${id}`);
+                    setImages(images.filter(img => img.id !== id));
+                    showToast('Image deleted successfully');
+                } catch (err) {
+                    showToast('Failed to delete image', 'error');
+                }
             }
-        }
+        });
     };
 
     const toggleSelectImage = (uuid) => {
@@ -238,21 +291,27 @@ const GalleryManager = () => {
         setSelectedUuids([]);
     };
 
-    const handleBulkDelete = async () => {
+    const handleBulkDelete = () => {
         if (selectedUuids.length === 0) return;
-        if (window.confirm(`Are you sure you want to delete the ${selectedUuids.length} selected images?`)) {
-            try {
-                await Promise.all(selectedUuids.map(id => api.delete(`/gallery/${id}`)));
-                setImages(prev => prev.filter(img => !selectedUuids.includes(img.uuid || img.id)));
-                setSelectedUuids([]);
-                setIsSelectMode(false);
-                showToast('Selected images deleted successfully');
-            } catch (err) {
-                console.error("Bulk delete failed", err);
-                showToast('Failed to delete some images', 'error');
-                fetchImages();
+        triggerConfirm({
+            title: "Delete Multiple Images",
+            message: `Are you sure you want to delete the ${selectedUuids.length} selected images? This action is permanent.`,
+            confirmText: "Delete Selected",
+            cancelText: "Cancel",
+            onConfirm: async () => {
+                try {
+                    await Promise.all(selectedUuids.map(id => api.delete(`/gallery/${id}`)));
+                    setImages(prev => prev.filter(img => !selectedUuids.includes(img.uuid || img.id)));
+                    setSelectedUuids([]);
+                    setIsSelectMode(false);
+                    showToast('Selected images deleted successfully');
+                } catch (err) {
+                    console.error("Bulk delete failed", err);
+                    showToast('Failed to delete some images', 'error');
+                    fetchImages();
+                }
             }
-        }
+        });
     };
 
     const handleUploadSuccess = () => {
@@ -503,6 +562,42 @@ const GalleryManager = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* Custom Confirmation Modal */}
+            {confirmModal.isOpen && (
+                <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-[150] p-4 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-in duration-200 border border-slate-100 flex flex-col">
+                        <div className="p-6 text-center space-y-4">
+                            {/* Pulsing Alert icon */}
+                            <div className="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-red-50 text-red-500 shadow-inner animate-bounce">
+                                <AlertTriangle size={28} />
+                            </div>
+                            
+                            <div className="space-y-2">
+                                <h3 className="text-xl font-bold text-slate-900">{confirmModal.title}</h3>
+                                <p className="text-sm text-slate-500 leading-relaxed px-2">
+                                    {confirmModal.message}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3 rounded-b-2xl">
+                            <button
+                                onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                                className="flex-1 sm:flex-initial px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-100 hover:text-slate-950 active:scale-95 transition-all text-sm shadow-sm"
+                            >
+                                {confirmModal.cancelText}
+                            </button>
+                            <button
+                                onClick={confirmModal.onConfirm}
+                                className="flex-1 sm:flex-initial px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-500/20 active:scale-95 transition-all text-sm"
+                            >
+                                {confirmModal.confirmText}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AdminLayout>
     );
 };

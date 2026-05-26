@@ -4,6 +4,7 @@ import api from '../../api/axios';
 import { Plus, Image as ImageIcon, Briefcase, ArrowRight, Mail, Calendar, TrendingUp, Clock } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { supabase } from '../../supabase';
 
 const Dashboard = () => {
     const [stats, setStats] = useState({ projects: 0, images: 0, messages: 0 });
@@ -41,9 +42,18 @@ const Dashboard = () => {
 
     useEffect(() => {
         fetchDashboardData();
-        // Polling stats and activities every 30s to keep admin dashboard fresh
-        const interval = setInterval(fetchDashboardData, 30000);
-        return () => clearInterval(interval);
+
+        // Subscribe to real-time database changes to refresh dashboard instantly
+        const channel = supabase
+            .channel('dashboard-sync')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'contact_messages' }, fetchDashboardData)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'activity_logs' }, fetchDashboardData)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, fetchDashboardData)
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, []);
 
     const formatDate = (dateString) => {

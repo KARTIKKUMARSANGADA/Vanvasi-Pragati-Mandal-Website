@@ -42,13 +42,16 @@ def subscribe(request: SubscribeRequest):
 
 @router.get("/")
 def get_subscribers(
+    skip: int = 0,
+    limit: int = 100,
     current_admin: dict = Depends(deps.get_current_admin)
 ):
     """
-    Get all active subscribers (Admin only)
+    Get paginated active subscribers (Admin only)
     """
-    response = supabase.table("subscribers").select("*").eq("is_active", True).execute()
+    response = supabase.table("subscribers").select("*").eq("is_active", True).order("created_at", desc=True).range(skip, skip + limit - 1).execute()
     return response.data
+
 
 @router.delete("/{email}")
 def unsubscribe(
@@ -65,26 +68,31 @@ def unsubscribe(
 class NotifyRequest(BaseModel):
     project_uuid: str
 
+def handle_subscriber_notifications(recipients: list, project_details: dict):
+    from app.core.email_handler import send_bulk_project_notification
+    send_bulk_project_notification(recipients, project_details)
+
 @router.post("/notify")
 def notify_subscribers(
     request: NotifyRequest,
+    background_tasks: BackgroundTasks,
     current_admin: dict = Depends(deps.get_current_admin)
 ):
     """
-    Send an email newsletter about a newly completed project to all active subscribers.
+    Send an email newsletter about a newly completed project to all active subscribers in the background.
     """
-    from app.core.email_handler import send_project_notification
-    
     # 1. Fetch project details
     proj_response = supabase.table("projects").select("*").eq("uuid", request.project_uuid).execute()
     if not proj_response.data:
         raise HTTPException(status_code=404, detail="Project not found")
         
     project = proj_response.data[0]
-    title = project.get("title", "New Project")
-    description = project.get("description", "A new community project has been successfully completed.")
-    category = project.get("category", "General")
-    location = project.get("location", "Dahod, Gujarat")
+    project_details = {
+        "title": project.get("title", "New Project"),
+        "description": project.get("description", "A new community project has been successfully completed."),
+        "category": project.get("category", "General"),
+        "location": project.get("location", "Dahod, Gujarat")
+    }
     
     # 2. Fetch all active subscribers
     subs_response = supabase.table("subscribers").select("*").eq("is_active", True).execute()
@@ -93,17 +101,14 @@ def notify_subscribers(
     if not subscribers:
         return {"message": "No active subscribers to notify.", "sent_count": 0}
         
-    success_count = 0
-    for sub in subscribers:
-        email = sub.get("email")
-        if email:
-            if send_project_notification(email, title, description, category, location):
-                success_count += 1
-                
+    recipients = [sub.get("email") for sub in subscribers if sub.get("email")]
+    
+    # 3. Offload to background tasks
+    background_tasks.add_task(handle_subscriber_notifications, recipients, project_details)
+    
     return {
-        "message": f"Successfully notified {success_count} of {len(subscribers)} subscribers!",
-        "total_subscribers": len(subscribers),
-        "sent_count": success_count
+        "message": f"Newsletter broadcast scheduled in the background for {len(recipients)} active subscribers.",
+        "total_subscribers": len(recipients)
     }
 
 class BroadcastRequest(BaseModel):

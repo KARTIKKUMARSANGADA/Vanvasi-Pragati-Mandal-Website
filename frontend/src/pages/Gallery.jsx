@@ -10,34 +10,36 @@ const Gallery = () => {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [activeCategory, setActiveCategory] = useState('All');
+  const [categories, setCategories] = useState(['All']);
   const [skip, setSkip] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const LIMIT = 12;
 
-  const fetchGallery = async (reset = false) => {
+  const fetchGallery = async (reset = false, cat = activeCategory) => {
     try {
       if (reset) {
         setLoading(true);
-        setSkip(0);
       } else {
         setLoadingMore(true);
       }
       
       const currentSkip = reset ? 0 : skip;
-      const { data } = await api.get(`/gallery/?skip=${currentSkip}&limit=${LIMIT}`);
+      const categoryParam = cat && cat !== 'All' ? `&category=${encodeURIComponent(cat)}` : '';
+      const { data } = await api.get(`/gallery/?skip=${currentSkip}&limit=${LIMIT}${categoryParam}`);
       
       if (Array.isArray(data)) {
         if (reset) {
           setImages(data);
+          setSkip(data.length);
         } else {
           setImages(prev => [...prev, ...data]);
+          setSkip(currentSkip + data.length);
         }
         
         if (data.length < LIMIT) {
           setHasMore(false);
         } else {
           setHasMore(true);
-          setSkip(currentSkip + LIMIT);
         }
       }
     } catch (err) {
@@ -49,18 +51,30 @@ const Gallery = () => {
   };
 
   useEffect(() => {
-    fetchGallery(true);
+    const initGallery = async () => {
+      // Fetch dynamic active categories from statistics service
+      try {
+        const { data } = await api.get('/stats/public');
+        if (data && Array.isArray(data.categories)) {
+          const cats = ['All', ...data.categories.map(c => c.name).filter(Boolean)];
+          setCategories(cats);
+        } else {
+          setCategories(['All', 'Education', 'Healthcare', 'Livelihood', 'Women Empowerment', 'Tribal Welfare']);
+        }
+      } catch (err) {
+        setCategories(['All', 'Education', 'Healthcare', 'Livelihood', 'Women Empowerment', 'Tribal Welfare']);
+      }
+      await fetchGallery(true, 'All');
+    };
+    initGallery();
   }, []);
 
-  const categories = useMemo(() => {
-    const cats = ['All', ...new Set(images.map(img => img.category).filter(Boolean))];
-    return cats;
-  }, [images]);
-
-  const filteredImages = useMemo(() => {
-    if (activeCategory === 'All') return images;
-    return images.filter(img => img.category === activeCategory);
-  }, [images, activeCategory]);
+  const handleCategoryChange = async (cat) => {
+    setActiveCategory(cat);
+    setSkip(0);
+    setHasMore(true);
+    await fetchGallery(true, cat);
+  };
 
   return (
     <div className="w-full pb-24 min-h-screen bg-white">
@@ -87,12 +101,12 @@ const Gallery = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-16 sm:pt-12 sm:pb-20">
         {/* Category Filters */}
-        {!loading && categories.length > 2 && (
+        {!loading && categories.length > 1 && (
           <div className="flex flex-wrap justify-center gap-3 mb-16">
             {categories.map((cat) => (
               <button
                 key={cat}
-                onClick={() => setActiveCategory(cat)}
+                onClick={() => handleCategoryChange(cat)}
                 className={`px-8 py-3 rounded-full text-sm font-bold transition-all duration-300 shadow-sm ${
                   activeCategory === cat
                     ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-105'
@@ -111,18 +125,18 @@ const Gallery = () => {
               <Skeleton key={i} className="aspect-square rounded-3xl" />
             ))}
           </div>
-        ) : filteredImages.length === 0 ? (
+        ) : images.length === 0 ? (
            <div className="text-center py-20 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
              <p className="text-slate-500 font-bold text-xl">No photos found in this category.</p>
            </div>
         ) : (
           <>
-            <ImageGallery images={filteredImages} />
+            <ImageGallery images={images} />
             
             {hasMore && (
               <div className="flex justify-center mt-16">
                 <button
-                  onClick={() => fetchGallery(false)}
+                  onClick={() => fetchGallery(false, activeCategory)}
                   disabled={loadingMore}
                   className="px-10 py-4 bg-white border-2 border-slate-200 text-slate-700 font-bold rounded-full hover:border-primary hover:text-primary disabled:opacity-50 transition-all flex items-center gap-2 group shadow-sm active:scale-95 cursor-pointer"
                 >

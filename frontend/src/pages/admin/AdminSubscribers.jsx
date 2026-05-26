@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, Trash2, Send, CheckCircle2, AlertCircle, Loader2, Sparkles, BookOpen, Users, Layout } from 'lucide-react';
+import { Mail, Trash2, Send, CheckCircle2, AlertCircle, Loader2, Sparkles, BookOpen, Users, Layout, Download, AlertTriangle } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../api/axios';
 
@@ -10,6 +10,10 @@ const AdminSubscribers = () => {
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState(null);
     const [activeTab, setActiveTab] = useState('directory'); // 'directory' | 'broadcast' | 'project-bulletin'
+
+    const [skip, setSkip] = useState(0);
+    const [limit, setLimit] = useState(25);
+    const [hasMore, setHasMore] = useState(true);
 
     // Form states
     const [subject, setSubject] = useState('');
@@ -22,16 +26,53 @@ const AdminSubscribers = () => {
     const [selectedProjectUuid, setSelectedProjectUuid] = useState('');
     const [bulletinSending, setBulletinSending] = useState(false);
 
+    // Custom Confirmation Modal state
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        confirmText: '',
+        cancelText: '',
+        onConfirm: () => {}
+    });
+
+    const triggerConfirm = ({ title, message, confirmText, cancelText, onConfirm }) => {
+        setConfirmModal({
+            isOpen: true,
+            title: title || 'Are you sure?',
+            message: message || '',
+            confirmText: confirmText || 'Confirm',
+            cancelText: cancelText || 'Cancel',
+            onConfirm: () => {
+                onConfirm();
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+            }
+        });
+    };
+
+    const fetchSubscribers = async (currentSkip = skip) => {
+        try {
+            const subsRes = await api.get(`/subscribers/?skip=${currentSkip}&limit=${limit}`);
+            const data = subsRes.data || [];
+            setSubscribers(data);
+            if (data.length < limit) {
+                setHasMore(false);
+            } else {
+                setHasMore(true);
+            }
+        } catch (err) {
+            console.error("Failed to load subscriber list:", err);
+            setError("Could not load subscriber listings.");
+        }
+    };
+
     const fetchData = async () => {
         setLoading(true);
         setError(null);
         try {
-            const [subsRes, projRes] = await Promise.all([
-                api.get('/subscribers/'),
-                api.get('/projects/')
-            ]);
-            setSubscribers(subsRes.data || []);
+            const projRes = await api.get('/projects/');
             setProjects(projRes.data || []);
+            await fetchSubscribers(skip);
         } catch (err) {
             console.error("Failed to load subscriber center data:", err);
             setError("Could not load subscriber listings or active projects.");
@@ -44,19 +85,61 @@ const AdminSubscribers = () => {
         fetchData();
     }, []);
 
-    const handleUnsubscribe = async (email) => {
-        if (!window.confirm(`Are you sure you want to remove ${email} from active subscribers?`)) return;
-        
-        try {
-            setError(null);
-            await api.delete(`/subscribers/${email}`);
-            setSubscribers(prev => prev.filter(sub => sub.email !== email));
-            showSuccess(`Successfully unsubscribed ${email}`);
-        } catch (err) {
-            console.error("Failed to unsubscribe:", err);
-            setError("Could not unsubscribe user. Please try again.");
-        }
+    const handlePageChange = async (newSkip) => {
+        setSkip(newSkip);
+        setLoading(true);
+        await fetchSubscribers(newSkip);
+        setLoading(false);
     };
+
+    const handleExportCSV = () => {
+        if (subscribers.length === 0) {
+            alert("No subscribers to export.");
+            return;
+        }
+        
+        // Header columns
+        const headers = ["Email", "Joined Date"];
+        
+        // Compile rows
+        const csvRows = [
+            headers.join(","), // Header row
+            ...subscribers.map(sub => [
+                `"${String(sub.email || '').replace(/"/g, '""')}"`,
+                `"${new Date(sub.created_at).toLocaleString()}"`
+            ].join(","))
+        ];
+        
+        const csvContent = "data:text/csv;charset=utf-8," + csvRows.join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `VPM_Active_Subscribers_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleUnsubscribe = (email) => {
+        triggerConfirm({
+            title: "Remove Subscriber",
+            message: `Are you sure you want to remove ${email} from active subscribers?`,
+            confirmText: "Unsubscribe",
+            cancelText: "Cancel",
+            onConfirm: async () => {
+                try {
+                    setError(null);
+                    await api.delete(`/subscribers/${email}`);
+                    await fetchSubscribers(skip);
+                    showSuccess(`Successfully unsubscribed ${email}`);
+                } catch (err) {
+                    console.error("Failed to unsubscribe:", err);
+                    setError("Could not unsubscribe user. Please try again.");
+                }
+            }
+        });
+    };
+
 
     const handleSendBroadcast = async (e) => {
         e.preventDefault();
@@ -237,6 +320,14 @@ const AdminSubscribers = () => {
                                         <h3 className="font-extrabold text-lg text-slate-900">Active Contacts</h3>
                                         <p className="text-sm text-slate-500 font-medium">Verify or clean subscription registry</p>
                                     </div>
+                                    <button
+                                        onClick={handleExportCSV}
+                                        className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-xl transition-all shadow-sm flex items-center gap-2 text-xs"
+                                        title="Export subscriber directory to CSV"
+                                    >
+                                        <Download size={14} />
+                                        Export Directory
+                                    </button>
                                 </div>
                                 
                                 {subscribers.length === 0 ? (
@@ -282,6 +373,29 @@ const AdminSubscribers = () => {
                                                 ))}
                                             </tbody>
                                         </table>
+                                        
+                                        {/* Pagination Controls */}
+                                        <div className="p-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+                                            <span className="text-sm font-bold text-slate-500">
+                                                Showing {subscribers.length > 0 ? skip + 1 : 0} to {skip + subscribers.length} subscribers
+                                            </span>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    disabled={skip === 0}
+                                                    onClick={() => handlePageChange(skip - limit)}
+                                                    className="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 disabled:opacity-50 transition-all text-xs cursor-pointer active:scale-95"
+                                                >
+                                                    Previous
+                                                </button>
+                                                <button
+                                                    disabled={!hasMore}
+                                                    onClick={() => handlePageChange(skip + limit)}
+                                                    className="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 disabled:opacity-50 transition-all text-xs cursor-pointer active:scale-95"
+                                                >
+                                                    Next
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -476,6 +590,42 @@ const AdminSubscribers = () => {
                     </div>
                 )}
             </div>
+
+            {/* Custom Confirmation Modal */}
+            {confirmModal.isOpen && (
+                <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-[150] p-4 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-in duration-200 border border-slate-100 flex flex-col">
+                        <div className="p-6 text-center space-y-4">
+                            {/* Pulsing Alert icon */}
+                            <div className="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-red-50 text-red-500 shadow-inner animate-bounce">
+                                <AlertTriangle size={28} />
+                            </div>
+                            
+                            <div className="space-y-2">
+                                <h3 className="text-xl font-bold text-slate-900">{confirmModal.title}</h3>
+                                <p className="text-sm text-slate-500 leading-relaxed px-2">
+                                    {confirmModal.message}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3 rounded-b-2xl">
+                            <button
+                                onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                                className="flex-1 sm:flex-initial px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-100 hover:text-slate-950 active:scale-95 transition-all text-sm shadow-sm"
+                            >
+                                {confirmModal.cancelText}
+                            </button>
+                            <button
+                                onClick={confirmModal.onConfirm}
+                                className="flex-1 sm:flex-initial px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-500/20 active:scale-95 transition-all text-sm"
+                            >
+                                {confirmModal.confirmText}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AdminLayout>
     );
 };

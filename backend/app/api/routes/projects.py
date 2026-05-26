@@ -12,10 +12,7 @@ def read_projects(
     limit: int = 100,
     category: Optional[str] = Query(None)
 ):
-    projects = project_service.get_projects(skip=skip, limit=limit)
-    if category:
-        projects = [p for p in projects if p.get("category") == category]
-    
+    projects = project_service.get_projects(skip=skip, limit=limit, category=category)
     return projects
 
 @router.get("/{uuid}", response_model=project_schemas.Project)

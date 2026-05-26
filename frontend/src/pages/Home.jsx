@@ -202,7 +202,7 @@ const Home = () => {
         description="Empowering rural and tribal communities in Gujarat through education, healthcare, and sustainable development projects." 
       />
       {/* Hero Section */}
-      <section className="relative min-h-[500px] sm:min-h-[550px] md:min-h-[620px] lg:min-h-screen flex items-center overflow-hidden pt-12 md:pt-0">
+      <section className="max-w-12xl mx-auto relative min-h-[500px] sm:min-h-[550px] md:min-h-[620px] lg:min-h-screen flex items-center overflow-hidden pt-12 md:pt-0">
         {/* Background Image Slider with Synced Slides */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           <AnimatePresence initial={false}>
@@ -217,7 +217,7 @@ const Home = () => {
                 x: { duration: 1.2, ease: [0.25, 1, 0.5, 1] },
                 opacity: { duration: 0.8 }
               }}
-              className="absolute inset-0 w-full h-full object-cover object-center"
+              className="absolute inset-0 mx-auto max-w-8xl w-full h-full object-cover object-center"
               loading="eager"
             />
           </AnimatePresence>
@@ -230,6 +230,7 @@ const Home = () => {
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentBgIdx}
+                
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 30 }}
