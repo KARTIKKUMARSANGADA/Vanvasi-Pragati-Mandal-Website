@@ -155,25 +155,61 @@ const AdminSubscribers = () => {
 
         // Build fully-styled professional HTML body
         const styledBody = `
-            <div style="font-family: 'Helvetica Neue', Arial, sans-serif; width: 100%; max-width: 600px; margin: 0 auto; padding: 40px 20px; box-sizing: border-box; background-color: #f8fafc; border-radius: 24px;">
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <h2 style="color: #22c55e; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Vanvasi Pragati Mandal</h2>
-                    <p style="color: #64748b; font-style: italic; margin: 5px 0 0 0; font-size: 14px;">Empowering Rural & Tribal Communities</p>
-                </div>
-                <div style="background-color: #ffffff; padding: 40px 24px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; box-sizing: border-box; width: 100%;">
-                    <h3 style="color: #1e293b; font-size: 20px; font-weight: 700; margin-top: 0; margin-bottom: 20px; line-height: 1.4;">${subject}</h3>
-                    <div style="color: #334155; font-size: 16px; line-height: 1.8; margin-bottom: 30px; white-space: pre-line;">${bodyContent}</div>
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f1f5f9; padding: 40px 20px; width: 100%; box-sizing: border-box; margin: 0;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05); width: 100%; box-sizing: border-box;">
+                    <!-- Branded Header -->
+                    <div style="background-color: #1b4332; padding: 32px 24px; text-align: center;">
+                        <img src="https://vanvasi-pragati-mandal-pipaliya.vercel.app/LOGO.png" alt="Vanvasi Pragati Mandal Logo" width="56" height="56" style="display: block; margin: 0 auto 12px auto; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.3); background-color: #ffffff;" />
+                        <h1 style="color: #ffffff; margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 0.5px;">
+                            Vanvasi Pragati Mandal
+                        </h1>
+                        <p style="color: #a7f3d0; margin: 4px 0 0 0; font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;">
+                            Pipaliya &bull; Dahod &bull; Gujarat
+                        </p>
+                    </div>
                     
-                    ${ctaText && ctaLink ? `
-                    <div style="text-align: center; margin-top: 35px;">
-                        <a href="${ctaLink}" style="background-color: #22c55e; color: #ffffff; padding: 14px 32px; font-size: 16px; font-weight: 700; text-decoration: none; border-radius: 50px; display: inline-block; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2); transition: all 0.3s ease;">
-                            ${ctaText}
-                        </a>
-                    </div>` : ''}
-                </div>
-                <div style="text-align: center; margin-top: 30px; color: #94a3b8; font-size: 12px; line-height: 1.6;">
-                    <p style="margin: 0;">You are receiving this update because you subscribed to Vanvasi Pragati Mandal Pipaliya.</p>
-                    <p style="margin: 5px 0 0 0;">© ${new Date().getFullYear()} Vanvasi Pragati Mandal. All rights reserved.</p>
+                    <!-- Content area -->
+                    <div style="padding: 36px 40px; background-color: #ffffff; box-sizing: border-box;">
+                        <div style="display: inline-block; background-color: #e0f2fe; color: #0369a1; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 20px; margin-bottom: 18px; text-transform: uppercase; letter-spacing: 0.8px;">📢 Announcement</div>
+                        <h3 style="color: #1e293b; font-size: 20px; font-weight: 700; margin-top: 0; margin-bottom: 20px; line-height: 1.4;">${subject}</h3>
+                        <div style="color: #334155; font-size: 16px; line-height: 1.8; margin-bottom: 30px; white-space: pre-line;">${bodyContent}</div>
+                        
+                        ${ctaText && ctaLink ? `
+                        <div style="text-align: center; margin-top: 35px;">
+                            <a href="${ctaLink}" style="background-color: #15803d; color: #ffffff; padding: 14px 32px; font-size: 16px; font-weight: 700; text-decoration: none; border-radius: 8px; display: inline-block; box-shadow: 0 4px 12px rgba(21, 128, 61, 0.2); transition: all 0.3s ease;">
+                                ${ctaText}
+                            </a>
+                        </div>` : ''}
+                    </div>
+
+                    <!-- Footer matching _footer_html -->
+                    <div style="background-color: #ffffff; padding: 16px 20px; text-align: center; border-top: 1px solid #f1f5f9;">
+                        <div style="font-size: 12px; color: #475569; margin-bottom: 8px; font-weight: 500; font-family: sans-serif;">
+                            <span style="display: inline-block; margin: 2px 6px;">📞 +91 81402 55951</span>
+                            <span style="color: #cbd5e1; margin: 0 8px; display: inline-block;">|</span>
+                            <span style="display: inline-block; margin: 2px 6px;">✉️ official.vanvasipragatimandal@gmail.com</span>
+                        </div>
+                        <div style="margin-bottom: 8px; text-align: center;">
+                            <a href="https://facebook.com" style="display: inline-block; margin: 0 4px; text-decoration: none; vertical-align: middle;">
+                                <img src="https://cdn-icons-png.flaticon.com/512/124/124010.png" width="16" height="16" alt="Facebook" style="display: block; border-radius: 50%;" />
+                            </a>
+                            <a href="https://twitter.com" style="display: inline-block; margin: 0 4px; text-decoration: none; vertical-align: middle;">
+                                <img src="https://cdn-icons-png.flaticon.com/512/3256/3256013.png" width="16" height="16" alt="Twitter" style="display: block; border-radius: 50%;" />
+                            </a>
+                            <a href="https://instagram.com" style="display: inline-block; margin: 0 4px; text-decoration: none; vertical-align: middle;">
+                                <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" width="16" height="16" alt="Instagram" style="display: block; border-radius: 50%;" />
+                            </a>
+                            <a href="https://linkedin.com" style="display: inline-block; margin: 0 4px; text-decoration: none; vertical-align: middle;">
+                                <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" width="16" height="16" alt="LinkedIn" style="display: block; border-radius: 50%;" />
+                            </a>
+                            <a href="https://wa.me/918140255951" style="display: inline-block; margin: 0 4px; text-decoration: none; vertical-align: middle;">
+                                <img src="https://cdn-icons-png.flaticon.com/512/3536/3536445.png" width="16" height="16" alt="WhatsApp" style="display: block; border-radius: 50%;" />
+                            </a>
+                        </div>
+                        <p style="margin: 0; color: #94a3b8; font-size: 10px; font-weight: 500; letter-spacing: 0.3px;">
+                            &copy; ${new Date().getFullYear()} Vanvasi Pragati Mandal. All rights reserved.
+                        </p>
+                    </div>
                 </div>
             </div>
         `;
@@ -485,35 +521,60 @@ const AdminSubscribers = () => {
                                 {/* Campaign Preview */}
                                 <div className="bg-slate-100 p-8 rounded-3xl border border-slate-200/50 flex flex-col justify-start space-y-4">
                                     <div className="text-xs font-bold uppercase text-slate-500 tracking-wider">Live E-Mail Preview</div>
-                                    
-                                    <div className="bg-white p-8 rounded-2xl shadow-lg border border-slate-100 max-w-full overflow-hidden flex-grow space-y-6">
-                                        <div className="text-center pb-6 border-b border-slate-100">
-                                            <h2 className="text-primary text-2xl font-black tracking-tight leading-none">Vanvasi Pragati Mandal</h2>
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 block">Empowering Rural & Tribal Communities</span>
-                                        </div>
-
-                                        <div className="space-y-4">
-                                            <h3 className="text-slate-900 font-extrabold text-lg leading-tight">
-                                                {subject || "VPM Project Spotlight: High-Impact Infrastructure Projects"}
-                                            </h3>
-                                            <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap">
-                                                {bodyContent || "Write your email copy in the editor to see the generated live design update dynamically."}
+                                                               <div className="w-full max-w-full overflow-hidden flex-grow flex flex-col bg-white rounded-2xl shadow-lg border border-slate-100">
+                                        {/* Branded Header */}
+                                        <div className="p-8 text-center" style={{ backgroundColor: '#1b4332' }}>
+                                            <img 
+                                                src="https://vanvasi-pragati-mandal-pipaliya.vercel.app/LOGO.png" 
+                                                alt="Vanvasi Pragati Mandal Logo" 
+                                                className="w-14 h-14 mx-auto mb-3 rounded-full object-cover border-2 border-white/30 bg-white" 
+                                            />
+                                            <h1 className="text-white text-xl font-bold tracking-wide">
+                                                Vanvasi Pragati Mandal
+                                            </h1>
+                                            <p className="text-emerald-200 text-[10px] font-bold tracking-widest uppercase mt-1">
+                                                Pipaliya &bull; Dahod &bull; Gujarat
                                             </p>
                                         </div>
-
-                                        {ctaText && (
-                                            <div className="text-center pt-4">
-                                                <button
-                                                    type="button"
-                                                    className="px-8 py-3 bg-primary text-white text-sm font-extrabold rounded-full shadow-md shadow-green-500/10 cursor-default"
-                                                >
-                                                    {ctaText}
-                                                </button>
-                                            </div>
-                                        )}
                                         
-                                        <div className="pt-6 border-t border-slate-100 text-center text-[10px] text-slate-400 font-medium">
-                                            You are receiving this update because you subscribed to Vanvasi Pragati Mandal.
+                                        {/* Content body */}
+                                        <div className="p-8 space-y-6">
+                                            <div className="inline-block bg-sky-100 text-sky-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                                                📢 Announcement
+                                            </div>
+                                            
+                                            <div className="space-y-4">
+                                                <h3 className="text-slate-950 font-extrabold text-lg leading-tight">
+                                                    {subject || "VPM Project Spotlight: High-Impact Infrastructure Projects"}
+                                                </h3>
+                                                <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">
+                                                    {bodyContent || "Write your email copy in the editor to see the generated live design update dynamically."}
+                                                </p>
+                                            </div>
+
+                                            {ctaText && (
+                                                <div className="text-center pt-4">
+                                                    <button
+                                                        type="button"
+                                                        className="px-8 py-3 text-white text-sm font-extrabold rounded-md shadow-md cursor-default"
+                                                        style={{ backgroundColor: '#15803d' }}
+                                                    >
+                                                        {ctaText}
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Branded Footer */}
+                                        <div className="border-t border-slate-100 p-6 text-center bg-white space-y-3">
+                                            <div className="text-[10px] text-slate-500 font-bold flex flex-wrap justify-center gap-x-3 gap-y-1">
+                                                <span>📞 +91 81402 55951</span>
+                                                <span className="text-slate-200">|</span>
+                                                <span>✉️ official.vanvasipragatimandal@gmail.com</span>
+                                            </div>
+                                            <div className="pt-2 border-t border-slate-100 text-[9px] text-slate-400 font-medium">
+                                                &copy; {new Date().getFullYear()} Vanvasi Pragati Mandal. All rights reserved.
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
