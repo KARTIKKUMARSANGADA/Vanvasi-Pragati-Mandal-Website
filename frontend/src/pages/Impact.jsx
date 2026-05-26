@@ -1,25 +1,45 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Users, MapPin, CheckCircle, Home, BookOpen, Activity, AlertCircle } from 'lucide-react';
+import { Heart, Users, MapPin, CheckCircle, Home, BookOpen, Activity, AlertCircle, Layers, Star, Leaf, Shield, Zap } from 'lucide-react';
 import AnimatedCounter from '../components/common/AnimatedCounter';
 import ImpactMap from '../components/ImpactMap';
 import api from '../api/axios';
 import ApiErrorCard from '../components/common/ApiErrorCard';
 
+// Maps category name keywords → icon + description for auto-enrichment
+const CATEGORY_META = [
+  { keywords: ['education', 'school', 'literacy', 'learning', 'scholarship'], icon: BookOpen, desc: 'Schools built, scholarships, and learning supplies.' },
+  { keywords: ['health', 'medical', 'healthcare', 'camp', 'medicine', 'hospital'], icon: Activity, desc: 'Medical camps, surgeries, and health awareness.' },
+  { keywords: ['infrastructure', 'road', 'water', 'construction', 'building', 'facility'], icon: Home, desc: 'Water pumps, roads, and community infrastructure.' },
+  { keywords: ['government', 'pmay', 'relief', 'scheme', 'pension', 'housing', 'welfare'], icon: Shield, desc: 'Govt. scheme facilitation, housing, and pensions.' },
+  { keywords: ['livelihood', 'skill', 'employment', 'women', 'empowerment', 'farming', 'microfinance'], icon: Leaf, desc: 'Skill training, women empowerment, and livelihoods.' },
+  { keywords: ['tribal', 'vanvasi', 'community', 'social', 'culture'], icon: Users, desc: 'Tribal community programs and cultural initiatives.' },
+  { keywords: ['environment', 'tree', 'plant', 'green', 'eco', 'nature'], icon: Zap, desc: 'Environmental protection and plantation drives.' },
+];
+
+const DEFAULT_CATEGORY_META = { icon: Star, desc: 'Community development and welfare programs.' };
+
+function enrichCategory(apiCategory) {
+  const nameLower = (apiCategory.name || '').toLowerCase();
+  const meta = CATEGORY_META.find(m => m.keywords.some(kw => nameLower.includes(kw))) || DEFAULT_CATEGORY_META;
+  return {
+    name: apiCategory.name,
+    count: apiCategory.count,
+    icon: meta.icon,
+    desc: meta.desc,
+  };
+}
+
 const Impact = () => {
   const [stats, setStats] = useState([
-    { label: 'Total Projects', value: 154, max: 200, color: 'bg-blue-500', icon: CheckCircle, key: 'total_projects' },
-    { label: 'People Benefited', value: 52400, max: 60000, color: 'bg-primary', icon: Users, key: 'people_benefited' },
-    { label: 'Villages Covered', value: 128, max: 150, color: 'bg-purple-500', icon: MapPin, key: 'villages_covered' },
-    { label: 'Years Active', value: 15, max: 20, color: 'bg-orange-500', icon: Heart, key: 'years_active' },
+    { label: 'Total Projects', value: 0, max: 200, color: 'bg-blue-500', icon: CheckCircle, key: 'total_projects' },
+    { label: 'People Benefited', value: 0, max: 60000, color: 'bg-primary', icon: Users, key: 'people_benefited' },
+    { label: 'Villages Covered', value: 0, max: 150, color: 'bg-purple-500', icon: MapPin, key: 'villages_covered' },
+    { label: 'Years Active', value: 0, max: 20, color: 'bg-orange-500', icon: Heart, key: 'years_active' },
   ]);
 
-  const [categories, setCategories] = useState([
-    { name: 'Education Initiatives', count: 45, icon: BookOpen, desc: 'Schools built, scholarships, and supplies.' },
-    { name: 'Healthcare Programs', count: 52, icon: Activity, desc: 'Medical camps, surgeries, and awareness.' },
-    { name: 'Infrastructure', count: 30, icon: Home, desc: 'Water pumps, roads, and community halls.' },
-    { name: 'Government Relief', count: 27, icon: CheckCircle, desc: 'PMAY housing, widow pensions, etc.' },
-  ]);
+  // categories is now always fully dynamic — no hardcoded counts
+  const [categories, setCategories] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,19 +50,15 @@ const Impact = () => {
       const res = await api.get('/stats/public');
       const data = res.data;
       if (data) {
+        // Update top-level stat cards from DB
         setStats(prev => prev.map(stat => ({
           ...stat,
-          value: data[stat.key] || stat.value
+          value: data[stat.key] ?? stat.value,
         })));
 
+        // Build category list purely from DB — no hardcoded fallbacks mixed in
         if (Array.isArray(data.categories) && data.categories.length > 0) {
-          setCategories(prev => prev.map(cat => {
-            const matched = data.categories.find(c => c.name.toLowerCase().includes(cat.name.split(' ')[0].toLowerCase()));
-            return {
-              ...cat,
-              count: matched ? matched.count : cat.count
-            };
-          }));
+          setCategories(data.categories.map(enrichCategory));
         }
       }
     } catch (err) {
@@ -137,27 +153,40 @@ const Impact = () => {
         {/* Breakdown Section */}
         <div className="mb-20">
           <h2 className="text-3xl font-bold text-slate-900 mb-10 text-center">Projects by Category</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {categories.map((cat, index) => (
-              <motion.div 
-                key={index}
-                initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-                className="flex items-center gap-6 p-6 bg-slate-50 rounded-2xl border border-slate-100"
-              >
-                <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center text-primary shrink-0">
-                  <cat.icon size={32} />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-1">{cat.name}</h3>
-                  <p className="text-slate-600 text-sm mb-2">{cat.desc}</p>
-                  <div className="text-lg font-extrabold text-secondary">{cat.count} Projects</div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-28 bg-slate-100 animate-pulse rounded-2xl border border-slate-100" />
+              ))}
+            </div>
+          ) : categories.length === 0 ? (
+            <div className="text-center py-14 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+              <p className="text-slate-500 font-semibold">No project categories available yet.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {categories.map((cat, index) => (
+                <motion.div 
+                  key={cat.name}
+                  initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.07 }}
+                  className="flex items-center gap-6 p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
+                >
+                  <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center text-primary shrink-0">
+                    <cat.icon size={32} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-1">{cat.name}</h3>
+                    <p className="text-slate-600 text-sm mb-2">{cat.desc}</p>
+                    <div className="text-lg font-extrabold text-secondary">{cat.count} Project{cat.count !== 1 ? 's' : ''}</div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Impact Map Section */}

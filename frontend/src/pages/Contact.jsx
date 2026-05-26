@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
-import { Phone, Mail, MapPin, Send, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Phone, Mail, MapPin, Send, AlertCircle, CheckCircle2, X } from 'lucide-react';
 import api from '../api/axios';
 
 const Contact = () => {
@@ -14,6 +14,20 @@ const Contact = () => {
   const [captcha, setCaptcha] = useState({ num1: 0, num2: 0 });
   const [captchaAnswer, setCaptchaAnswer] = useState('');
   const [status, setStatus] = useState(null);
+  const [toast, setToast] = useState({ show: false, type: 'success', message: '' });
+
+  const showToast = useCallback((type, message) => {
+    setToast({ show: true, type, message });
+  }, []); 
+
+  useEffect(() => {
+    if (toast.show) {
+      const timer = setTimeout(() => {
+        setToast(prev => ({ ...prev, show: false }));
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast.show]);
 
   const generateCaptcha = useCallback(() => {
     const num1 = Math.floor(Math.random() * 9) + 1;
@@ -44,13 +58,14 @@ const Contact = () => {
     if (honeypot) {
       console.warn("Spam submission blocked.");
       setStatus('success'); // Tricking bot to believe it was successful
+      showToast('success', "Your message has been sent successfully. We will get back to you shortly.");
       setFormData({ name: '', email: '', phone: '', message: '' });
       return;
     }
 
     // Mathematical CAPTCHA verification
     if (parseInt(captchaAnswer, 10) !== captcha.num1 + captcha.num2) {
-      alert("Incorrect answer for the math question. Please try again.");
+      showToast('error', "Incorrect answer for the math question. Please try again.");
       return;
     }
 
@@ -63,28 +78,30 @@ const Contact = () => {
     };
 
     if (!sanitizedData.name || !sanitizedData.email || !sanitizedData.phone || !sanitizedData.message) {
-      alert("Please fill out all fields.");
+      showToast('error', "Please fill out all fields.");
       return;
     }
 
     try {
       await api.post('/contact/', sanitizedData);
       setStatus('success');
+      showToast('success', "Your message has been sent successfully. We will get back to you shortly.");
       setFormData({ name: '', email: '', phone: '', message: '' });
       setCaptchaAnswer('');
       generateCaptcha();
       
-      // Clear success message after 3 seconds
+      // Clear success message after 5 seconds
       setTimeout(() => {
         setStatus(null);
-      }, 3000);
+      }, 5000);
     } catch (error) {
       console.error("Failed to send message", error);
       setStatus('error');
       if (error.response?.status === 422) {
-        alert(`Validation Error: ${JSON.stringify(error.response.data.detail)}`);
+        const validationDetail = error.response.data.detail?.[0]?.msg || "Invalid format entered.";
+        showToast('error', `Validation Error: ${validationDetail}`);
       } else {
-        alert("Failed to send message. Please check your connection and try again.");
+        showToast('error', "Failed to send message. Please check your connection and try again.");
       }
     }
   };
@@ -290,6 +307,63 @@ const Contact = () => {
 
         </div>
       </div>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toast.show && (
+          <motion.div
+            initial={{ opacity: 0, y: -50, x: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, x: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95, transition: { duration: 0.2 } }}
+            className={`fixed top-6 right-6 z-[9999] max-w-sm w-full bg-white rounded-2xl shadow-2xl border p-4 flex gap-3.5 backdrop-blur-md overflow-hidden ${
+              toast.type === 'success' 
+                ? 'border-green-100 shadow-green-500/5' 
+                : 'border-red-100 shadow-red-500/5'
+            }`}
+          >
+            {/* Status indicator bar (Left border accent) */}
+            <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${
+              toast.type === 'success' ? 'bg-primary' : 'bg-red-500'
+            }`} />
+
+            {/* Icon */}
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+              toast.type === 'success' ? 'bg-green-50 text-primary' : 'bg-red-50 text-red-500'
+            }`}>
+              {toast.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+            </div>
+
+            {/* Message Body */}
+            <div className="flex-1 min-w-0 pr-2">
+              <h4 className="text-sm font-bold text-slate-900 mb-0.5">
+                {toast.type === 'success' ? 'Message Sent!' : 'Action Failed'}
+              </h4>
+              <p className="text-xs font-semibold text-slate-500 leading-relaxed">
+                {toast.message}
+              </p>
+            </div>
+
+            {/* Dismiss Button */}
+            <button
+              type="button"
+              onClick={() => setToast(prev => ({ ...prev, show: false }))}
+              className="text-slate-400 hover:text-slate-600 transition-colors shrink-0 p-1 hover:bg-slate-50 rounded-lg h-fit"
+            >
+              <X size={16} />
+            </button>
+
+            {/* Auto-Dismiss Progress Bar */}
+            <motion.div 
+              initial={{ width: '100%' }}
+              animate={{ width: '0%' }}
+              transition={{ duration: 5, ease: 'linear' }}
+              className={`absolute bottom-0 left-0 h-1 ${
+                toast.type === 'success' ? 'bg-primary/40' : 'bg-red-500/40'
+              }`}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
