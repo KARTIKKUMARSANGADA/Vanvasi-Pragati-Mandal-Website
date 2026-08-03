@@ -1,0 +1,24 @@
+name: Keep Backend Alive
+
+on:
+  schedule:
+    # Run every 10 minutes (Render free tier spins down after 15 mins of inactivity)
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  ping-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Health Endpoint
+        run: |
+          # Replace this URL with your actual deployed Render URL if you prefer to hardcode it,
+          # or set it as a GitHub Secret named BACKEND_URL.
+          BACKEND_URL="${{ secrets.BACKEND_URL }}"
+          if [ -z "$BACKEND_URL" ]; then
+            # Fallback placeholder - user can change this to their actual Render backend URL
+            BACKEND_URL="https://vpm-backend.onrender.com"
+          fi
+          
+          echo "Pinging $BACKEND_URL/health..."
+          curl -f -s "$BACKEND_URL/health" || echo "Ping failed, but request sent."
