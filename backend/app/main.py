@@ -60,7 +60,20 @@ def root():
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "service": "vanvasi-api"}
+    db_status = "unknown"
+    try:
+        from app.db.supabase import supabase
+        # Simple select to keep Supabase active and verify connection
+        supabase.table("projects").select("id").limit(1).execute()
+        db_status = "connected"
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+        
+    return {
+        "status": "ok",
+        "service": "vanvasi-api",
+        "database": db_status
+    }
 
 if __name__ == "__main__":
     import uvicorn
