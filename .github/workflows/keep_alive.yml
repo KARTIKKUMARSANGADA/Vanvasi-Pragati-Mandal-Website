@@ -17,7 +17,7 @@ jobs:
           BACKEND_URL="${{ secrets.BACKEND_URL }}"
           if [ -z "$BACKEND_URL" ]; then
             # Fallback placeholder - user can change this to their actual Render backend URL
-            BACKEND_URL="https://vpm-backend.onrender.com"
+            BACKEND_URL="https://vanvasi-pragati-mandal-website.onrender.com"
           fi
           
           echo "Pinging $BACKEND_URL/health..."
